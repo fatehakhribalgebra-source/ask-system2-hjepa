@@ -1,0 +1,1231 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\sklearn\base.py:525: InconsistentVersionWarning: Trying to unpickle estimator StandardScaler from version 1.7.2 when using version 1.9.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+[2026-11-18 12:41:57,676][absl][INFO] - MUJOCO_GL=glfw, attempting to import specified OpenGL backend.
+[2026-11-18 12:41:57,707][absl][INFO] - MuJoCo library version is: 3.14.0
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:251 - 🌍🌍🌍 World swm/OGBAntMaze-v0 initialized 🌍🌍🌍
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:253 - 🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:254 - Box(-1.0, 1.0, (1, 8), float32)
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:256 - 👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:257 - Box(0, 255, (1, 64, 64, 3), uint8)
+2026-11-18 12:41:58.976 +08:00 | INFO     | stable_worldmodel.world:__init__:260 - ⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️
+agent:
+    color: Box(0.0, 1.0, (3,), float64)
+floor:
+    color: Box(0.0, 1.0, (2, 3), float64)
+    pixel_encoding: Discrete(2)
+light:
+    intensity: Box(0.0, 1.0, (1,), float64)
+wall:
+    color: Box(0.0, 1.0, (3,), float64)
+2026-11-18 12:41:58.984 +08:00 | WARNING  | stable_worldmodel.world:evaluate_from_dataset:1036 - Data type <class 'numpy.str_'> for column env_name not supported, yet skipping conversion
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\gymnasium\utils\passive_env_checker.py:334: UserWarning: WARN: No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps.
+  logger.warn(
+policy call number: 1
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.7189 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7416 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9896 seconds.
+policy call number: 2
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.9881 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.9314 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7816 seconds.
+policy call number: 3
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.3956 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6464 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7765 seconds.
+policy call number: 4
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.3618 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6814 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6772 seconds.
+policy call number: 5
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.2742 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6336 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6628 seconds.
+policy call number: 6
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.2588 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5876 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5633 seconds.
+policy call number: 7
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.2752 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5811 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6773 seconds.
+policy call number: 8
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1852 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6253 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.0304 seconds.
+policy call number: 9
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.4610 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8706 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1154 seconds.
+policy call number: 10
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3479 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5700 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6576 seconds.
+policy call number: 11
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1423 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7740 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7238 seconds.
+policy call number: 12
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0944 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5711 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5591 seconds.
+policy call number: 13
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0757 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6279 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7127 seconds.
+policy call number: 14
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1834 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8449 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6963 seconds.
+policy call number: 15
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8718 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7612 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7127 seconds.
+policy call number: 16
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0324 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6918 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7708 seconds.
+policy call number: 17
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0434 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8263 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.8984 seconds.
+policy call number: 18
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.2194 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6886 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.8315 seconds.
+policy call number: 19
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8821 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7273 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7198 seconds.
+policy call number: 20
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8772 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6907 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6916 seconds.
+policy call number: 21
+level 3 planning horizon: 3
+GradientSolver.solve completed in 2.2684 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6764 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5008 seconds.
+policy call number: 22
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6427 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7119 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5005 seconds.
+policy call number: 23
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6115 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8818 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5400 seconds.
+policy call number: 24
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5898 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6431 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6307 seconds.
+policy call number: 25
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7226 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8782 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7308 seconds.
+policy call number: 26
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7174 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7705 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6977 seconds.
+policy call number: 27
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7942 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6843 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6625 seconds.
+policy call number: 28
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.9533 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6357 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6168 seconds.
+policy call number: 29
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8736 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6023 seconds.
+policy call number: 30
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6859 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6278 seconds.
+policy call number: 31
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5803 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5172 seconds.
+policy call number: 32
+level 1 planning horizon: 4
+GradientSolver.solve completed in 0.9378 seconds.
+policy call number: 33
+level 1 planning horizon: 3
+GradientSolver.solve completed in 1.0640 seconds.
+policy call number: 34
+2026-11-18 12:43:23.369 +08:00 | INFO     | stable_worldmodel.world:__init__:251 - 🌍🌍🌍 World swm/OGBAntMaze-v0 initialized 🌍🌍🌍
+2026-11-18 12:43:23.370 +08:00 | INFO     | stable_worldmodel.world:__init__:253 - 🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️
+2026-11-18 12:43:23.370 +08:00 | INFO     | stable_worldmodel.world:__init__:254 - Box(-1.0, 1.0, (1, 8), float32)
+2026-11-18 12:43:23.370 +08:00 | INFO     | stable_worldmodel.world:__init__:256 - 👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️
+2026-11-18 12:43:23.370 +08:00 | INFO     | stable_worldmodel.world:__init__:257 - Box(0, 255, (1, 64, 64, 3), uint8)
+2026-11-18 12:43:23.370 +08:00 | INFO     | stable_worldmodel.world:__init__:260 - ⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7143 seconds.
+policy call number: 35
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.9823 seconds.
+policy call number: 36
+level 1 planning horizon: 1
+GradientSolver.solve completed in 1.1107 seconds.
+tasks 0-1: success_rate 100.0
+agent:
+    color: Box(0.0, 1.0, (3,), float64)
+floor:
+    color: Box(0.0, 1.0, (2, 3), float64)
+    pixel_encoding: Discrete(2)
+light:
+    intensity: Box(0.0, 1.0, (1,), float64)
+wall:
+    color: Box(0.0, 1.0, (3,), float64)
+2026-11-18 12:43:23.377 +08:00 | WARNING  | stable_worldmodel.world:evaluate_from_dataset:1036 - Data type <class 'numpy.str_'> for column env_name not supported, yet skipping conversion
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\gymnasium\utils\passive_env_checker.py:334: UserWarning: WARN: No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps.
+  logger.warn(
+policy call number: 1
+level 3 planning horizon: 5
+GradientSolver.solve completed in 2.0341 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7147 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1337 seconds.
+policy call number: 2
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.9091 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8373 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1498 seconds.
+policy call number: 3
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8749 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6365 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4978 seconds.
+policy call number: 4
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.7332 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6773 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7149 seconds.
+policy call number: 5
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.2769 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6171 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9056 seconds.
+policy call number: 6
+level 3 planning horizon: 5
+GradientSolver.solve completed in 2.0874 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6849 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5186 seconds.
+policy call number: 7
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.6085 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7779 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9583 seconds.
+policy call number: 8
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5756 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7076 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6747 seconds.
+policy call number: 9
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0971 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6932 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7629 seconds.
+policy call number: 10
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1277 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6416 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.8815 seconds.
+policy call number: 11
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3784 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7156 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3670 seconds.
+policy call number: 12
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3041 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7081 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5873 seconds.
+policy call number: 13
+level 3 planning horizon: 4
+GradientSolver.solve completed in 2.7757 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7896 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4947 seconds.
+policy call number: 14
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5482 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6970 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.9138 seconds.
+policy call number: 15
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0265 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6987 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6369 seconds.
+policy call number: 16
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.3613 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7097 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2630 seconds.
+policy call number: 17
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.5124 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5981 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4930 seconds.
+policy call number: 18
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8233 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6000 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5169 seconds.
+policy call number: 19
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8288 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7605 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8783 seconds.
+policy call number: 20
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0429 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7223 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6890 seconds.
+policy call number: 21
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.3557 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6827 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3364 seconds.
+policy call number: 22
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.9864 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6349 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6012 seconds.
+policy call number: 23
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6543 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5938 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8335 seconds.
+policy call number: 24
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7919 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7889 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7243 seconds.
+policy call number: 25
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5832 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6356 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5413 seconds.
+policy call number: 26
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6100 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.9218 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 2.0332 seconds.
+policy call number: 27
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.8064 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7198 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7537 seconds.
+policy call number: 28
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.9336 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.9303 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7871 seconds.
+policy call number: 29
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6879 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7898 seconds.
+policy call number: 30
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5844 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2890 seconds.
+policy call number: 31
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7055 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2190 seconds.
+policy call number: 32
+level 1 planning horizon: 4
+GradientSolver.solve completed in 2.8183 seconds.
+policy call number: 33
+level 1 planning horizon: 3
+GradientSolver.solve completed in 2.3404 seconds.
+policy call number: 34
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:251 - 🌍🌍🌍 World swm/OGBAntMaze-v0 initialized 🌍🌍🌍
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:253 - 🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:254 - Box(-1.0, 1.0, (1, 8), float32)
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:256 - 👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:257 - Box(0, 255, (1, 64, 64, 3), uint8)
+2026-11-18 12:45:19.280 +08:00 | INFO     | stable_worldmodel.world:__init__:260 - ⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️
+level 1 planning horizon: 2
+GradientSolver.solve completed in 2.0752 seconds.
+policy call number: 35
+level 1 planning horizon: 1
+GradientSolver.solve completed in 1.0494 seconds.
+policy call number: 36
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.8881 seconds.
+tasks 1-2: success_rate 0.0
+agent:
+    color: Box(0.0, 1.0, (3,), float64)
+floor:
+    color: Box(0.0, 1.0, (2, 3), float64)
+    pixel_encoding: Discrete(2)
+light:
+    intensity: Box(0.0, 1.0, (1,), float64)
+wall:
+    color: Box(0.0, 1.0, (3,), float64)
+2026-11-18 12:45:19.287 +08:00 | WARNING  | stable_worldmodel.world:evaluate_from_dataset:1036 - Data type <class 'numpy.str_'> for column env_name not supported, yet skipping conversion
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\gymnasium\utils\passive_env_checker.py:334: UserWarning: WARN: No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps.
+  logger.warn(
+policy call number: 1
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8473 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6462 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.0057 seconds.
+policy call number: 2
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.4524 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7951 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6261 seconds.
+policy call number: 3
+level 3 planning horizon: 5
+GradientSolver.solve completed in 2.8804 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.9228 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2296 seconds.
+policy call number: 4
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.6455 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6901 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8136 seconds.
+policy call number: 5
+level 3 planning horizon: 5
+GradientSolver.solve completed in 4.1881 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6655 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3019 seconds.
+policy call number: 6
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.7229 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7341 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1397 seconds.
+policy call number: 7
+level 3 planning horizon: 5
+GradientSolver.solve completed in 2.2208 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6648 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2816 seconds.
+policy call number: 8
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5798 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6268 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2038 seconds.
+policy call number: 9
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.9412 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6516 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1346 seconds.
+policy call number: 10
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3266 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8123 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6027 seconds.
+policy call number: 11
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5042 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6374 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3050 seconds.
+policy call number: 12
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.9531 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7782 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5737 seconds.
+policy call number: 13
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0184 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5788 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4748 seconds.
+policy call number: 14
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5954 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6551 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7373 seconds.
+policy call number: 15
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0508 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6509 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4898 seconds.
+policy call number: 16
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.1035 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7789 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5080 seconds.
+policy call number: 17
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0942 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7095 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7162 seconds.
+policy call number: 18
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.1002 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7147 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8917 seconds.
+policy call number: 19
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.5301 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6209 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3896 seconds.
+policy call number: 20
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.3075 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7374 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6417 seconds.
+policy call number: 21
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.7994 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6143 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.0464 seconds.
+policy call number: 22
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6813 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8791 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 2.0065 seconds.
+policy call number: 23
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6827 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7648 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3754 seconds.
+policy call number: 24
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6413 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6924 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7505 seconds.
+policy call number: 25
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6811 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6895 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6311 seconds.
+policy call number: 26
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5746 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5769 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7567 seconds.
+policy call number: 27
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7695 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7784 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7888 seconds.
+policy call number: 28
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6419 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7732 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3033 seconds.
+policy call number: 29
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7625 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5664 seconds.
+policy call number: 30
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8133 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5325 seconds.
+policy call number: 31
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7739 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5508 seconds.
+policy call number: 32
+level 1 planning horizon: 4
+GradientSolver.solve completed in 3.3498 seconds.
+policy call number: 33
+level 1 planning horizon: 3
+GradientSolver.solve completed in 2.5775 seconds.
+policy call number: 34
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:251 - 🌍🌍🌍 World swm/OGBAntMaze-v0 initialized 🌍🌍🌍
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:253 - 🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:254 - Box(-1.0, 1.0, (1, 8), float32)
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:256 - 👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:257 - Box(0, 255, (1, 64, 64, 3), uint8)
+2026-11-18 12:47:18.025 +08:00 | INFO     | stable_worldmodel.world:__init__:260 - ⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8150 seconds.
+policy call number: 35
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.8626 seconds.
+policy call number: 36
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.8547 seconds.
+tasks 2-3: success_rate 0.0
+agent:
+    color: Box(0.0, 1.0, (3,), float64)
+floor:
+    color: Box(0.0, 1.0, (2, 3), float64)
+    pixel_encoding: Discrete(2)
+light:
+    intensity: Box(0.0, 1.0, (1,), float64)
+wall:
+    color: Box(0.0, 1.0, (3,), float64)
+2026-11-18 12:47:18.032 +08:00 | WARNING  | stable_worldmodel.world:evaluate_from_dataset:1036 - Data type <class 'numpy.str_'> for column env_name not supported, yet skipping conversion
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\gymnasium\utils\passive_env_checker.py:334: UserWarning: WARN: No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps.
+  logger.warn(
+policy call number: 1
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8516 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5799 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3754 seconds.
+policy call number: 2
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.5676 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5793 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3864 seconds.
+policy call number: 3
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.6624 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7291 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6386 seconds.
+policy call number: 4
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.6250 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6711 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6770 seconds.
+policy call number: 5
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.9548 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6335 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8731 seconds.
+policy call number: 6
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.9182 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7582 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9759 seconds.
+policy call number: 7
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.5885 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7258 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7277 seconds.
+policy call number: 8
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1084 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7074 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3965 seconds.
+policy call number: 9
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.2168 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7108 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7667 seconds.
+policy call number: 10
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.2234 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8265 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7171 seconds.
+policy call number: 11
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.2127 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7444 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.9592 seconds.
+policy call number: 12
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.2210 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6443 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4293 seconds.
+policy call number: 13
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0746 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6067 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9550 seconds.
+policy call number: 14
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0491 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5910 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2803 seconds.
+policy call number: 15
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.1494 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8162 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6709 seconds.
+policy call number: 16
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.9263 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7589 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.8066 seconds.
+policy call number: 17
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.0201 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7112 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5476 seconds.
+policy call number: 18
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8164 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6949 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2995 seconds.
+policy call number: 19
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.1577 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6925 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.0022 seconds.
+policy call number: 20
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.4134 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7011 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.7945 seconds.
+policy call number: 21
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.9432 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7451 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8741 seconds.
+policy call number: 22
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7412 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6231 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.9177 seconds.
+policy call number: 23
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7059 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6726 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3162 seconds.
+policy call number: 24
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.9211 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7898 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6509 seconds.
+policy call number: 25
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6685 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7270 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7730 seconds.
+policy call number: 26
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6589 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8951 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.2085 seconds.
+policy call number: 27
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5505 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6448 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6297 seconds.
+policy call number: 28
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5528 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7434 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4052 seconds.
+policy call number: 29
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6562 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4433 seconds.
+policy call number: 30
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8765 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8340 seconds.
+policy call number: 31
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7319 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1062 seconds.
+policy call number: 32
+level 1 planning horizon: 4
+GradientSolver.solve completed in 3.1237 seconds.
+policy call number: 33
+level 1 planning horizon: 3
+GradientSolver.solve completed in 2.4294 seconds.
+policy call number: 34
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:251 - 🌍🌍🌍 World swm/OGBAntMaze-v0 initialized 🌍🌍🌍
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:253 - 🕹️ 🕹️ 🕹️ Action space 🕹️ 🕹️ 🕹️
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:254 - Box(-1.0, 1.0, (1, 8), float32)
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:256 - 👁️ 👁️ 👁️ Observation space 👁️ 👁️ 👁️
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:257 - Box(0, 255, (1, 64, 64, 3), uint8)
+2026-11-18 12:49:05.451 +08:00 | INFO     | stable_worldmodel.world:__init__:260 - ⚗️ ⚗️ ⚗️ Variation space ⚗️ ⚗️ ⚗️
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7216 seconds.
+policy call number: 35
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.8978 seconds.
+policy call number: 36
+level 1 planning horizon: 1
+GradientSolver.solve completed in 1.1463 seconds.
+tasks 3-4: success_rate 0.0
+agent:
+    color: Box(0.0, 1.0, (3,), float64)
+floor:
+    color: Box(0.0, 1.0, (2, 3), float64)
+    pixel_encoding: Discrete(2)
+light:
+    intensity: Box(0.0, 1.0, (1,), float64)
+wall:
+    color: Box(0.0, 1.0, (3,), float64)
+2026-11-18 12:49:05.458 +08:00 | WARNING  | stable_worldmodel.world:evaluate_from_dataset:1036 - Data type <class 'numpy.str_'> for column env_name not supported, yet skipping conversion
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\gymnasium\utils\passive_env_checker.py:334: UserWarning: WARN: No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps.
+  logger.warn(
+policy call number: 1
+level 3 planning horizon: 5
+GradientSolver.solve completed in 2.3224 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6190 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.3364 seconds.
+policy call number: 2
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8082 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7038 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1050 seconds.
+policy call number: 3
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.5614 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6349 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.6524 seconds.
+policy call number: 4
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8047 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8361 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7376 seconds.
+policy call number: 5
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.3948 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6116 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6837 seconds.
+policy call number: 6
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.8293 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.8689 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5345 seconds.
+policy call number: 7
+level 3 planning horizon: 5
+GradientSolver.solve completed in 1.4497 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6222 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.5143 seconds.
+policy call number: 8
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.5078 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6739 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.1735 seconds.
+policy call number: 9
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.0934 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6946 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8002 seconds.
+policy call number: 10
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3178 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6674 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4283 seconds.
+policy call number: 11
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.2417 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7776 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6956 seconds.
+policy call number: 12
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3042 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7709 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7688 seconds.
+policy call number: 13
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.1884 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6557 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.0631 seconds.
+policy call number: 14
+level 3 planning horizon: 4
+GradientSolver.solve completed in 1.3207 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6853 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8199 seconds.
+policy call number: 15
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.1024 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6635 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5494 seconds.
+policy call number: 16
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8780 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6753 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6845 seconds.
+policy call number: 17
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.9079 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7232 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6840 seconds.
+policy call number: 18
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.8680 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6944 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 2.0411 seconds.
+policy call number: 19
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.2693 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6172 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5238 seconds.
+policy call number: 20
+level 3 planning horizon: 3
+GradientSolver.solve completed in 1.2016 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6251 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5469 seconds.
+policy call number: 21
+level 3 planning horizon: 3
+GradientSolver.solve completed in 0.9649 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6226 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7029 seconds.
+policy call number: 22
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6241 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7473 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6222 seconds.
+policy call number: 23
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.6360 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5734 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5829 seconds.
+policy call number: 24
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5823 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6673 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6912 seconds.
+policy call number: 25
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.8115 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7829 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.9531 seconds.
+policy call number: 26
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5923 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6631 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7426 seconds.
+policy call number: 27
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.7031 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7166 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.8554 seconds.
+policy call number: 28
+level 3 planning horizon: 2
+GradientSolver.solve completed in 0.5993 seconds.
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.7172 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.4859 seconds.
+policy call number: 29
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.5705 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.6026 seconds.
+policy call number: 30
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.6989 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.5451 seconds.
+policy call number: 31
+level 2 planning horizon: 2
+GradientSolver.solve completed in 0.9996 seconds.
+level 1 planning horizon: 2
+GradientSolver.solve completed in 1.7371 seconds.
+policy call number: 32
+level 1 planning horizon: 4
+GradientSolver.solve completed in 3.7113 seconds.
+policy call number: 33
+level 1 planning horizon: 3
+GradientSolver.solve completed in 2.7699 seconds.
+policy call number: 34
+level 1 planning horizon: 2
+GradientSolver.solve completed in 0.9430 seconds.
+policy call number: 35
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.5536 seconds.
+policy call number: 36
+level 1 planning horizon: 1
+GradientSolver.solve completed in 0.4145 seconds.
+tasks 4-5: success_rate 0.0
+{'success_rate': 20.0, 'episode_successes': [True, False, False, False, False], 'seeds': None, 'wall_clock_to_success': [79.25314639999851, nan, nan, nan, nan], 'steps_to_success': [315.0, nan, nan, nan, nan], 'loaded_eval_original_lengths': [68, 116, 80, 89, 104], 'steps_to_success_success_only': 315.0, 'evaluation_time': 537.879878282547, 'chunk_size': 1}

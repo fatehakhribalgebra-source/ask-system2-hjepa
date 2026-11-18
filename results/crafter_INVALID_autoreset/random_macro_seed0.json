@@ -1,0 +1,305 @@
+{
+ "args": {
+  "goal_source": "random_macro",
+  "episodes": 5,
+  "steps": 1000,
+  "segment": 60,
+  "k": 16,
+  "imagine_h": 3,
+  "act_scale": 1.0,
+  "seed": 0,
+  "ckpt": "C:\\Users\\TP130289\\Downloads\\ask\\data\\ckpts\\crafter\\crafter_ft_hjepa_l3\\seed42\\crafter_ft_hjepa_l3_object.ckpt",
+  "record": true,
+  "out": "C:\\Users\\TP130289\\Downloads\\ask\\results\\crafter"
+ },
+ "summary": {
+  "score": 0.0,
+  "success_rates": {
+   "collect_wood": 0.0,
+   "place_table": 0.0,
+   "eat_cow": 0.0,
+   "collect_sapling": 0.0,
+   "collect_drink": 0.0,
+   "make_wood_pickaxe": 0.0,
+   "make_wood_sword": 0.0,
+   "place_plant": 0.0,
+   "defeat_zombie": 0.0,
+   "collect_stone": 0.0,
+   "place_stone": 0.0,
+   "eat_plant": 0.0,
+   "defeat_skeleton": 0.0,
+   "make_stone_pickaxe": 0.0,
+   "make_stone_sword": 0.0,
+   "wake_up": 0.0,
+   "place_furnace": 0.0,
+   "collect_coal": 0.0,
+   "collect_iron": 0.0,
+   "collect_diamond": 0.0,
+   "make_iron_pickaxe": 0.0,
+   "make_iron_sword": 0.0
+  },
+  "mean_achievements": 0.0,
+  "mean_tiles": 37.4
+ },
+ "episodes": [
+  {
+   "episode": 0,
+   "achievements": {
+    "collect_wood": false,
+    "place_table": false,
+    "eat_cow": false,
+    "collect_sapling": false,
+    "collect_drink": false,
+    "make_wood_pickaxe": false,
+    "make_wood_sword": false,
+    "place_plant": false,
+    "defeat_zombie": false,
+    "collect_stone": false,
+    "place_stone": false,
+    "eat_plant": false,
+    "defeat_skeleton": false,
+    "make_stone_pickaxe": false,
+    "make_stone_sword": false,
+    "wake_up": false,
+    "place_furnace": false,
+    "collect_coal": false,
+    "collect_iron": false,
+    "collect_diamond": false,
+    "make_iron_pickaxe": false,
+    "make_iron_sword": false
+   },
+   "n_achievements": 0,
+   "tiles": 70,
+   "motion": 0.7056451612903226,
+   "steps": 249,
+   "died": true,
+   "seconds": 43.535794496536255,
+   "segments": [
+    {
+     "t": 0,
+     "tiles": 1,
+     "ach": 0,
+     "goal_dist": 12.659676551818848
+    },
+    {
+     "t": 60,
+     "tiles": 26,
+     "ach": 2,
+     "goal_dist": 9.696115493774414
+    },
+    {
+     "t": 120,
+     "tiles": 50,
+     "ach": 4,
+     "goal_dist": 13.734465599060059
+    },
+    {
+     "t": 180,
+     "tiles": 57,
+     "ach": 4,
+     "goal_dist": 12.722169876098633
+    },
+    {
+     "t": 240,
+     "tiles": 68,
+     "ach": 4,
+     "goal_dist": 11.17566204071045
+    }
+   ]
+  },
+  {
+   "episode": 1,
+   "achievements": {
+    "collect_wood": false,
+    "place_table": false,
+    "eat_cow": false,
+    "collect_sapling": false,
+    "collect_drink": false,
+    "make_wood_pickaxe": false,
+    "make_wood_sword": false,
+    "place_plant": false,
+    "defeat_zombie": false,
+    "collect_stone": false,
+    "place_stone": false,
+    "eat_plant": false,
+    "defeat_skeleton": false,
+    "make_stone_pickaxe": false,
+    "make_stone_sword": false,
+    "wake_up": false,
+    "place_furnace": false,
+    "collect_coal": false,
+    "collect_iron": false,
+    "collect_diamond": false,
+    "make_iron_pickaxe": false,
+    "make_iron_sword": false
+   },
+   "n_achievements": 0,
+   "tiles": 21,
+   "motion": 0.65,
+   "steps": 61,
+   "died": true,
+   "seconds": 11.750875234603882,
+   "segments": [
+    {
+     "t": 0,
+     "tiles": 1,
+     "ach": 0,
+     "goal_dist": 12.614530563354492
+    },
+    {
+     "t": 60,
+     "tiles": 21,
+     "ach": 0,
+     "goal_dist": 17.231054306030273
+    }
+   ]
+  },
+  {
+   "episode": 2,
+   "achievements": {
+    "collect_wood": false,
+    "place_table": false,
+    "eat_cow": false,
+    "collect_sapling": false,
+    "collect_drink": false,
+    "make_wood_pickaxe": false,
+    "make_wood_sword": false,
+    "place_plant": false,
+    "defeat_zombie": false,
+    "collect_stone": false,
+    "place_stone": false,
+    "eat_plant": false,
+    "defeat_skeleton": false,
+    "make_stone_pickaxe": false,
+    "make_stone_sword": false,
+    "wake_up": false,
+    "place_furnace": false,
+    "collect_coal": false,
+    "collect_iron": false,
+    "collect_diamond": false,
+    "make_iron_pickaxe": false,
+    "make_iron_sword": false
+   },
+   "n_achievements": 0,
+   "tiles": 35,
+   "motion": 0.6263736263736264,
+   "steps": 92,
+   "died": true,
+   "seconds": 18.02523183822632,
+   "segments": [
+    {
+     "t": 0,
+     "tiles": 1,
+     "ach": 0,
+     "goal_dist": 7.788700103759766
+    },
+    {
+     "t": 60,
+     "tiles": 23,
+     "ach": 1,
+     "goal_dist": 13.540348052978516
+    }
+   ]
+  },
+  {
+   "episode": 3,
+   "achievements": {
+    "collect_wood": false,
+    "place_table": false,
+    "eat_cow": false,
+    "collect_sapling": false,
+    "collect_drink": false,
+    "make_wood_pickaxe": false,
+    "make_wood_sword": false,
+    "place_plant": false,
+    "defeat_zombie": false,
+    "collect_stone": false,
+    "place_stone": false,
+    "eat_plant": false,
+    "defeat_skeleton": false,
+    "make_stone_pickaxe": false,
+    "make_stone_sword": false,
+    "wake_up": false,
+    "place_furnace": false,
+    "collect_coal": false,
+    "collect_iron": false,
+    "collect_diamond": false,
+    "make_iron_pickaxe": false,
+    "make_iron_sword": false
+   },
+   "n_achievements": 0,
+   "tiles": 13,
+   "motion": 0.5319148936170213,
+   "steps": 48,
+   "died": true,
+   "seconds": 9.666989803314209,
+   "segments": [
+    {
+     "t": 0,
+     "tiles": 1,
+     "ach": 0,
+     "goal_dist": 9.560927391052246
+    }
+   ]
+  },
+  {
+   "episode": 4,
+   "achievements": {
+    "collect_wood": false,
+    "place_table": false,
+    "eat_cow": false,
+    "collect_sapling": false,
+    "collect_drink": false,
+    "make_wood_pickaxe": false,
+    "make_wood_sword": false,
+    "place_plant": false,
+    "defeat_zombie": false,
+    "collect_stone": false,
+    "place_stone": false,
+    "eat_plant": false,
+    "defeat_skeleton": false,
+    "make_stone_pickaxe": false,
+    "make_stone_sword": false,
+    "wake_up": false,
+    "place_furnace": false,
+    "collect_coal": false,
+    "collect_iron": false,
+    "collect_diamond": false,
+    "make_iron_pickaxe": false,
+    "make_iron_sword": false
+   },
+   "n_achievements": 0,
+   "tiles": 48,
+   "motion": 0.6192893401015228,
+   "steps": 198,
+   "died": true,
+   "seconds": 34.97961091995239,
+   "segments": [
+    {
+     "t": 0,
+     "tiles": 1,
+     "ach": 0,
+     "goal_dist": 10.634112358093262
+    },
+    {
+     "t": 60,
+     "tiles": 20,
+     "ach": 1,
+     "goal_dist": 9.509303092956543
+    },
+    {
+     "t": 120,
+     "tiles": 32,
+     "ach": 1,
+     "goal_dist": 11.724769592285156
+    },
+    {
+     "t": 180,
+     "tiles": 41,
+     "ach": 2,
+     "goal_dist": 13.898092269897461
+    }
+   ]
+  }
+ ]
+}

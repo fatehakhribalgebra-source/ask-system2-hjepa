@@ -1,0 +1,161 @@
+{
+ "fourroom": {
+  "EFE selection (pattern:*) vs no selection (direct:*, random_macro)": {
+   "mean_a": 13.28125,
+   "mean_b": 9.15798611111111,
+   "n_a": 30,
+   "n_b": 18,
+   "welch_p": 0.00024201665398639293,
+   "mwu_p": 0.0002166613369054179,
+   "cohens_d": 1.1945843192569552
+  },
+  "structured patterns vs unstructured (shuffled/noise), both with EFE": {
+   "mean_a": 12.825520833333334,
+   "mean_b": 13.96484375,
+   "n_a": 18,
+   "n_b": 12,
+   "welch_p": 0.40597922711802714,
+   "mwu_p": 0.5108690638055344,
+   "cohens_d": -0.31554527608002075
+  },
+  "System 2 (pattern:*) vs random actions": {
+   "mean_a": 13.28125,
+   "mean_b": 6.575520833333333,
+   "n_a": 30,
+   "n_b": 6,
+   "welch_p": 2.8578541582781696e-07,
+   "mwu_p": 0.0005721793450674949,
+   "cohens_d": 2.4492660510142907
+  },
+  "fractal vs shuffled fractal (EFE)": {
+   "mean_a": 13.671875,
+   "mean_b": 12.044270833333334,
+   "n_a": 6,
+   "n_b": 6,
+   "welch_p": 0.2665761465996167,
+   "mwu_p": 0.29369409085078535,
+   "cohens_d": 0.6805650709300115
+  },
+  "v2 fractal vs v2 no pattern": {
+   "mean_a": 14.908854166666666,
+   "mean_b": 14.0625,
+   "n_a": 6,
+   "n_b": 6,
+   "welch_p": 0.6892835673664361,
+   "mwu_p": 0.6303555263618644,
+   "cohens_d": 0.23770326430007221
+  },
+  "v2 fractal learned vs frozen readout": {
+   "mean_a": 14.908854166666666,
+   "mean_b": 15.234375,
+   "n_a": 6,
+   "n_b": 6,
+   "welch_p": 0.8579481934537367,
+   "mwu_p": 0.9359624729209428,
+   "cohens_d": -0.10662459379439178
+  },
+  "v2 (all) vs v1 System 2 (all)": {
+   "mean_a": 14.778645833333334,
+   "mean_b": 13.28125,
+   "n_a": 24,
+   "n_b": 30,
+   "welch_p": 0.115049826379687,
+   "mwu_p": 0.13391515537411774,
+   "cohens_d": 0.4366986849599748
+  }
+ },
+ "crafter": {
+  "EFE selection (pattern:*) vs no selection (direct:*, random_macro)": {
+   "mean_a": 42.42,
+   "mean_b": 43.15,
+   "n_a": 50,
+   "n_b": 20,
+   "welch_p": 0.8968646633941205,
+   "mwu_p": 0.8199284803189999,
+   "cohens_d": -0.03468367528855364
+  },
+  "structured patterns vs unstructured (shuffled/noise), both with EFE": {
+   "mean_a": 43.8,
+   "mean_b": 40.35,
+   "n_a": 30,
+   "n_b": 20,
+   "welch_p": 0.558013617061347,
+   "mwu_p": 0.5788198391664359,
+   "cohens_d": 0.1673040151309985
+  },
+  "System 2 (pattern:*) vs random actions": {
+   "mean_a": 42.42,
+   "mean_b": 16.8,
+   "n_a": 50,
+   "n_b": 10,
+   "welch_p": 7.261095700973272e-09,
+   "mwu_p": 7.808368745782037e-05,
+   "cohens_d": 1.6545847408395353
+  },
+  "fractal vs shuffled fractal (EFE)": {
+   "mean_a": 49.1,
+   "mean_b": 42.7,
+   "n_a": 10,
+   "n_b": 10,
+   "welch_p": 0.5683679354515485,
+   "mwu_p": 0.7332471880755206,
+   "cohens_d": 0.2606881991459012
+  },
+  "Free Lunch literal mapping vs random actions": {
+   "mean_a": 27.35,
+   "mean_b": 16.8,
+   "n_a": 20,
+   "n_b": 10,
+   "welch_p": 0.02100335700012375,
+   "mwu_p": 0.10788899364120966,
+   "cohens_d": 0.8260482805878899
+  }
+ },
+ "crafter_achievements_ex_wakeup": {
+  "EFE selection (pattern:*) vs no selection (direct:*, random_macro)": {
+   "mean_a": 1.96,
+   "mean_b": 1.65,
+   "n_a": 50,
+   "n_b": 20,
+   "welch_p": 0.31721407898649145,
+   "mwu_p": 0.5697621731727068,
+   "cohens_d": 0.24980729679144353
+  },
+  "structured patterns vs unstructured (shuffled/noise), both with EFE": {
+   "mean_a": 2.1333333333333333,
+   "mean_b": 1.7,
+   "n_a": 30,
+   "n_b": 20,
+   "welch_p": 0.2810641603475516,
+   "mwu_p": 0.2899393666299176,
+   "cohens_d": 0.3109852810718875
+  },
+  "System 2 (pattern:*) vs random actions": {
+   "mean_a": 1.96,
+   "mean_b": 1.7,
+   "n_a": 50,
+   "n_b": 10,
+   "welch_p": 0.5429781610782272,
+   "mwu_p": 0.8456062446862602,
+   "cohens_d": 0.201109405918106
+  },
+  "fractal vs shuffled fractal (EFE)": {
+   "mean_a": 1.9,
+   "mean_b": 1.5,
+   "n_a": 10,
+   "n_b": 10,
+   "welch_p": 0.5546469444822406,
+   "mwu_p": 0.781132032824034,
+   "cohens_d": 0.27036354543559965
+  },
+  "Free Lunch literal mapping vs random actions": {
+   "mean_a": 0.0,
+   "mean_b": 1.7,
+   "n_a": 20,
+   "n_b": 10,
+   "welch_p": 0.0012255637610538196,
+   "mwu_p": 6.7856393396652414e-06,
+   "cohens_d": -2.0734448518634414
+  }
+ }
+}

@@ -1,0 +1,47 @@
+# Crafter: fine-tune the pretrained FourRoom 3-level H-JEPA on CrafterPlay (native 144px frames,
+# upscaled on GPU to FourRoom's 224px). Same architecture as fourroom_hjepa_l3; only the level-1 action
+# input grows from 2-d moves to 14-d Crafter action vectors (first 2 dims = the same image-space move).
+defaults:
+- fourroom_hjepa_l3
+- _self_
+output_model_name: crafter_ft_hjepa_l3
+env: crafter
+init_from:
+  ckpt: ${oc.env:HJEPA_HOME}/ckpts/fourroom/fourroom_hjepa_l3/seed42/fourroom_hjepa_l3_object.ckpt
+  old_action_dim: 2
+resize_pixels_on_device: true
+data:
+  dataset:
+    name: crafter_play144_train
+    val_name: crafter_play144_val
+    keys_to_load:
+    - pixels
+    - action
+    keys_to_cache:
+    - action
+    total_transitions: null
+    val_total_transitions: null
+num_workers: 4
+optimizer:
+  warmup_ratio: 0.05
+trainer:
+  max_epochs: 2
+  limit_train_batches: 8000
+  limit_val_batches: 40
+  devices: 1
+loader:
+  batch_size: 24
+  prefetch_factor: 4
+planning_eval:
+  enabled: false
+  run_on_train_end: false
+final_probing_decoding_eval:
+  enabled: false
+level1:
+  lr: 2.0e-05
+  wm:
+    action_dim: 14
+level2:
+  lr: 5.0e-06
+level3:
+  lr: 5.0e-06

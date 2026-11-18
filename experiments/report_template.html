@@ -1,0 +1,222 @@
+<title>System 2 over H-JEPA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: a single reading column (~70ch) with full-width figures; findings first, method and caveats after. */
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --fg: #15171a; --fg-2: #4d525a; --muted: #858a92;
+  --line: #e4e4e0; --grid: #ecebe6; --axis: #c3c2b7;
+  --s2: #2a78d6; --noefe: #eb6834; --base: #8f938f; --accent: #2a78d6;
+  --yes-bg: #e3f1e3; --yes-fg: #1d5e1d; --no-bg: #efefec; --no-fg: #5b5e63;
+  --display: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121315; --surface: #1a1b1e; --fg: #eeeeec; --fg-2: #bfc2c6; --muted: #8a8e95;
+  --line: #2c2e32; --grid: #26282b; --axis: #3c3e42;
+  --s2: #3987e5; --noefe: #d95926; --base: #7c807d; --accent: #5598e7;
+  --yes-bg: #183218; --yes-fg: #8fd68f; --no-bg: #26272a; --no-fg: #a6a9ae; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121315; --surface: #1a1b1e; --fg: #eeeeec; --fg-2: #bfc2c6; --muted: #8a8e95;
+  --line: #2c2e32; --grid: #26282b; --axis: #3c3e42;
+  --s2: #3987e5; --noefe: #d95926; --base: #7c807d; --accent: #5598e7;
+  --yes-bg: #183218; --yes-fg: #8fd68f; --no-bg: #26272a; --no-fg: #a6a9ae; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body); }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2.1rem; font-weight: 600; letter-spacing: -0.01em; }
+h2 { font-size: 1.4rem; font-weight: 600; margin-top: 18px; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0 0 10px; } ul { margin: 0; padding-left: 20px; } li { margin-bottom: 6px; }
+.eyebrow { font: 500 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.08rem; color: var(--fg-2); max-width: 68ch; }
+section { display: grid; gap: 14px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; }
+.stat b { font: 600 1.7rem/1.1 var(--display); }
+.stat span { color: var(--fg-2); font-size: 13px; }
+.findings li b { color: var(--fg); }
+figure { margin: 0; }
+.chartbox { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.chartbox .cap { color: var(--fg-2); font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--fg-2); }
+.legend span, .dot { display: inline-flex; align-items: center; gap: 6px; }
+.dot::before, .legend span::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--c); display: inline-block; }
+.dot { margin-right: 8px; } .dot.s2, .legend .s2 { --c: var(--s2); } .dot.noefe, .legend .noefe { --c: var(--noefe); } .dot.base, .legend .base { --c: var(--base); }
+.chart { width: 100%; height: auto; display: block; font-family: var(--body); }
+.chart .grid { stroke: var(--grid); stroke-width: 1; }
+.chart .axis { stroke: var(--axis); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart .lab { fill: var(--fg-2); font-size: 12.5px; }
+.chart .val { fill: var(--fg); font-size: 12px; font-variant-numeric: tabular-nums; }
+.chart .err { stroke: var(--fg); stroke-width: 1.5; opacity: .55; }
+.chart .hit { fill: transparent; }
+.chart .bar.s2 .fill { fill: var(--s2); } .chart .bar.noefe .fill { fill: var(--noefe); } .chart .bar.base .fill { fill: var(--base); }
+.chart .bar:hover .hit, .chart .bar:focus .hit { fill: var(--grid); }
+.chart .bar:focus { outline: none; } .chart .bar:focus .lab { text-decoration: underline; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 8px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font-weight: 600; color: var(--fg-2); font-size: 12px; letter-spacing: .03em; }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.yes { background: var(--yes-bg); color: var(--yes-fg); } .pill.no { background: var(--no-bg); color: var(--no-fg); }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+summary { cursor: pointer; font-weight: 500; }
+details[open] summary { margin-bottom: 10px; }
+code { font: 12.5px var(--mono); background: var(--no-bg); padding: 1px 5px; border-radius: 4px; }
+.pipeline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.pipeline span { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 4px 9px; }
+.pipeline i { color: var(--muted); font-style: normal; }
+.pipeline .s1 { border-color: var(--s2); }
+.replays { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.replay video { width: 100%; border-radius: 8px; border: 1px solid var(--line); background: #000; display: block; }
+.replay figcaption { font-size: 12.5px; color: var(--fg-2); margin-top: 6px; }
+.note { border-left: 3px solid var(--line); padding-left: 12px; color: var(--fg-2); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { h1 { font-size: 1.6rem; } }
+</style>
+
+<main class="wrap">
+  <header style="display:grid;gap:10px">
+    <div class="eyebrow">ASK project · experiment report · 18 Nov 2026</div>
+    <h1>System 2 over H-JEPA</h1>
+    <p class="lede">Can a frozen hierarchical world model explore on its own when goals come from fixed mathematical patterns, a reservoir, and an expected-free-energy choice? Tested on FourRoom and Crafter with no reward, using the evaluation logic of Ertle, Levin &amp; Scheutz's "Free Lunch" paper.</p>
+  </header>
+
+  <section>
+    <div class="stats">
+      <div class="stat"><b>[[ratio_fr]]×</b><span>FourRoom: System 2 explores [[s2_fr]]% of the arena vs [[rnd_fr]]% for random actions</span></div>
+      <div class="stat"><b>[[ratio_cr]]×</b><span>Crafter: System 2 visits [[s2_cr]] tiles per life vs [[rnd_cr]] for random actions</span></div>
+      <div class="stat"><b>No effect</b><span>of pattern structure: fractal ≈ shuffled fractal ≈ Gaussian noise, in both games</span></div>
+    </div>
+  </section>
+
+  <section class="prose findings">
+    <h2>What we found</h2>
+    <ul>
+      <li><b>The world model plus EFE selection drives exploration.</b> On FourRoom, choosing among imagined goals by novelty and ensemble disagreement beats acting on a single pattern-made goal. It also beats random actions by a wide margin.</li>
+      <li><b>Pattern structure did not matter.</b> Structured seeds (Halley fractal, Lorenz, Lévy flight) were statistically indistinguishable from their shuffled versions and from Gaussian noise, on FourRoom, on Crafter, and in our rebuild of the Free Lunch maze.</li>
+      <li><b>Exploring more is not achieving more in Crafter.</b> System 2 agents cover about 2.5× more ground and sometimes build a crafting table, which random play never does, but they unlock about the same number of achievements and die a little sooner.</li>
+      <li><b>Driving actions straight from the pattern hurts.</b> The literal Free Lunch mapping (pattern label → arrow key) gets zero Crafter achievements, and pattern → single goal without EFE is the weakest model-based condition on FourRoom.</li>
+      <li><b>v2:</b> [[v2_summary]]</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="pipeline">
+      <span>Pattern stream p<sub>t</sub></span><i>→</i><span>Fixed reservoir r<sub>t</sub></span><i>→</i><span>Readout → K macro-action plans</span><i>→</i>
+      <span>Imagine with H-JEPA level 3</span><i>→</i><span>EFE: novelty + ensemble disagreement</span><i>→</i><span class="s1">H-JEPA top-down planner (System 1)</span><i>→</i><span>Actions</span>
+    </div>
+    <div class="prose">
+      <p>System 1 is the pretrained, frozen 3-level H-JEPA (Zhang, Terver, Rabbat, LeCun, Balestriero, 2026). Every level plans by gradient descent; we replace the goal image at the top level with a latent goal from System 2, so no goal image or reward is ever given.</p>
+      <p>System 2 drives a fixed echo-state reservoir (512 units, spectral radius 0.95) with a pattern. A readout turns each of K = 16 reservoir states into a short sequence of abstract macro-actions, and H-JEPA's own level-3 predictor imagines where each leads. That keeps every candidate goal on the model's manifold. EFE picks the candidate with the most novelty against an episodic memory and the most disagreement in a small ensemble trained online on the agent's own outcomes.</p>
+      <p>Crafter uses the FourRoom model fine-tuned on CrafterPlay expert data at the original 144 px. Crafter's movement keys feed the same 2D move inputs FourRoom learned, and its other 12 actions get new inputs.</p>
+    </div>
+    <details>
+      <summary>Conditions</summary>
+      <div class="tablewrap"><table>
+        <tr><th>Condition</th><th>Pattern</th><th>World model</th><th>EFE choice</th></tr>
+        <tr><td><span class="dot s2"></span>System 2 · fractal / Lorenz / Lévy</td><td>structured</td><td>yes</td><td>yes</td></tr>
+        <tr><td><span class="dot s2"></span>System 2 · shuffled fractal / Gaussian noise</td><td>unstructured control</td><td>yes</td><td>yes</td></tr>
+        <tr><td><span class="dot noefe"></span>Pattern → goal, no EFE</td><td>yes</td><td>yes</td><td>no (K = 1)</td></tr>
+        <tr><td><span class="dot noefe"></span>Random macro-action goal</td><td>no</td><td>yes</td><td>no</td></tr>
+        <tr><td><span class="dot base"></span>Free Lunch mapping (Crafter)</td><td>labels → arrow keys</td><td>no</td><td>no</td></tr>
+        <tr><td><span class="dot base"></span>Random actions</td><td>no</td><td>no</td><td>no</td></tr>
+      </table></div>
+    </details>
+  </section>
+
+  <section>
+    <h2>FourRoom Distractors</h2>
+    <p class="prose">A dot moves through four rooms connected by doors while a second dot wanders and teleports. Metric, following Free Lunch: the percentage of the 16 × 16 arena grid visited in 600 steps. The pretrained model solved 19 of 19 goal-reaching tasks on this machine before we stopped the check (paper: 96%), so System 1 is sound here.</p>
+    <figure class="chartbox">
+      <div class="legend"><span class="s2">System 2 (EFE choice)</span><span class="noefe">World model, no EFE choice</span><span class="base">No world model</span></div>
+      [[chart_fr]]
+      <figcaption class="cap">Mean % of arena cells visited in 600 steps, ± 1 SE; [[n_fr]] episodes per condition (2 seeds × 3). One-way ANOVA: [[anova_fr]].</figcaption>
+    </figure>
+    <div class="tablewrap"><table>
+      <tr><th>Condition</th><th class="num">n</th><th class="num">% explored</th><th class="num">SE</th><th class="num">rooms reached</th></tr>
+      [[rows_fr]]
+    </table></div>
+    <h3>Planned comparisons</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Comparison</th><th class="num">means</th><th class="num">n</th><th class="num">Welch p</th><th class="num">Mann–Whitney p</th><th class="num">Cohen's d</th><th></th></tr>
+      [[contr_fr]]
+    </table></div>
+  </section>
+
+  <section>
+    <h2>System 2 v2</h2>
+    <p class="prose">v2 targets the weaknesses above. It keeps a goal while the planner makes progress toward it, measures novelty in a fixed 16-dimensional projection of the latent, mixes 12 pattern proposals with 12 random ones, and lets the readout learn by reward-weighted regression toward macro-actions that led somewhere new.</p>
+    <figure class="chartbox">
+      <div class="legend"><span class="s2">System 2</span><span class="noefe">No EFE choice</span></div>
+      [[chart_v2]]
+      <figcaption class="cap">FourRoom, % of arena cells visited in 600 steps, ± 1 SE. v1 fractal and random macro-action goals shown for reference.</figcaption>
+    </figure>
+    <div class="tablewrap"><table>
+      <tr><th>Comparison</th><th class="num">means</th><th class="num">n</th><th class="num">Welch p</th><th class="num">Mann–Whitney p</th><th class="num">Cohen's d</th><th></th></tr>
+      [[contr_v2]]
+    </table></div>
+    <p class="prose">[[v2_text]]</p>
+  </section>
+
+  <section>
+    <h2>Crafter</h2>
+    <p class="prose">Craftax-Classic, rendered exactly like the CrafterPlay videos. Episodes end at death or 1,000 steps; zombies kill most agents around the first night, so we score each life. Exploration is tiles visited; we also report achievements excluding <code>wake_up</code>, which random agents earn by falling asleep.</p>
+    <figure class="chartbox">
+      <div class="legend"><span class="s2">System 2 (EFE choice)</span><span class="noefe">World model, no EFE choice</span><span class="base">No world model</span></div>
+      [[chart_cr]]
+      <figcaption class="cap">Mean distinct tiles visited per life, ± 1 SE; [[n_cr]] episodes per condition (2 seeds × 5). One-way ANOVA: [[anova_cr]].</figcaption>
+    </figure>
+    <div class="tablewrap"><table>
+      <tr><th>Condition</th><th class="num">n</th><th class="num">tiles</th><th class="num">SE</th><th class="num">achievements*</th><th class="num">placed table</th><th class="num">woke up</th><th class="num">steps survived</th></tr>
+      [[rows_cr]]
+    </table></div>
+    <p class="cap" style="color:var(--fg-2);font-size:13px">* Mean achievements per life excluding <code>wake_up</code>.</p>
+    <h3>Planned comparisons</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Comparison</th><th class="num">means</th><th class="num">n</th><th class="num">Welch p</th><th class="num">Mann–Whitney p</th><th class="num">Cohen's d</th><th></th></tr>
+      [[contr_cr]]
+    </table></div>
+  </section>
+
+  <section>
+    <h2>Replays</h2>
+    <div class="replays">[[replays]]</div>
+  </section>
+
+  <section class="prose">
+    <h2>Conclusions, in the Free Lunch frame</h2>
+    <p>Free Lunch asked whether patterns from unrelated sources carry actionable intelligence for exploration. In a world-model agent, the answer from these runs is no: structure in the seed did not add exploration beyond what an unstructured seed with the same machinery achieved. Their second result points the same way: patterns helped there only alongside learning.</p>
+    <p>What did carry the effect is the System 2 loop itself: imagining many candidate futures with the world model and choosing by an expected-free-energy-like score. Seeds act as a source of variety, and any source of variety served equally well. That is a useful negative result for the proposal: the structure of the "Platonic" space is not doing the work here, while the active-inference selection is.</p>
+    <p>Two conditions would give patterns a fairer chance next: tasks where long-range structure matters (deceptive mazes, multi-step crafting chains), and a readout trained long enough for a pattern-specific mapping to form.</p>
+  </section>
+
+  <section class="prose">
+    <h2>Caveats</h2>
+    <ul>
+      <li><b>AntMaze.</b> The pretrained 3-level H-JEPA solved 1 of 11 goal tasks on this machine (paper: 73%), with matching package versions and pixel-identical rendering. We moved to FourRoom, where the model reproduces.</li>
+      <li><b>Free Lunch maze.</b> Our rebuild of their first experiment (60 Halley fractals, 20 × 20, best of 4 mappings, 11 × 11 Kruskal mazes) did not reproduce structured &gt; shuffled. The paper leaves the fractal's plot area and colouring unspecified, and those details decide the label balance. Results below.</li>
+      <li><b>Sample sizes</b> are 6 FourRoom and 10 Crafter episodes per condition. Large effects are clear; effects under about one standard deviation would be missed.</li>
+      <li><b>Planner budget.</b> FourRoom runs use a lighter planner than the paper (40 gradient steps, 100 samples), identical for every condition.</li>
+      <li><b>Crafter model</b> is fine-tuned for 16k steps on 80 expert episodes and has no published reference score.</li>
+    </ul>
+    <details>
+      <summary>Free Lunch maze rebuild (% of maze explored, 60 patterns each)</summary>
+      <div class="tablewrap"><table><tr><th>Pattern</th><th class="num">% explored</th><th class="num">SE</th></tr>[[fl_rows]]</table></div>
+    </details>
+  </section>
+
+  <section class="prose">
+    <h2>Files</h2>
+    <p>Code and results are in <code>Downloads\ask</code>: <code>system2\</code> (pattern sources, reservoir, EFE engine v1 and v2, H-JEPA bridge), <code>experiments\</code> (runners, statistics, this report's builder), <code>results\</code> (per-episode JSON with trajectories, all replays). Statistics: one-way ANOVA with Tukey HSD per environment (as in Free Lunch), plus pooled planned comparisons with Welch's t-test, Mann–Whitney U and Cohen's d.</p>
+  </section>
+</main>

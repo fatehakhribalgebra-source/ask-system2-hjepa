@@ -1,0 +1,98 @@
+# Crafter: H-JEPA with 3 levels, end-to-end. Level-1 step = 2 game steps; strides 3 -> L2 = 6, L3 = 18 steps.
+defaults:
+- base/crafter
+- _self_
+output_model_name: crafter_hjepa_l3
+num_levels: 3
+data:
+  dataset:
+    level2:
+      frameskip: ${level2.stride}
+      window_size: ${level2.window_size}
+      num_steps: ${eval:'${level2.wm.history_size} + ${level2.wm.rollout_n}'}
+    level3:
+      frameskip: ${level3.stride}
+      window_size: ${level3.window_size}
+      num_steps: ${eval:'${level3.wm.history_size} + ${level3.wm.rollout_n}'}
+level2:
+  lr: 1.0e-05
+  stride: 3
+  window_size: 1
+  wm:
+    history_size: 3
+    rollout_n: 1
+    rollout_loss_weight: 1.0
+    embed_dim: 192
+    use_proprio: false
+  encoder:
+    type: latent_mlp
+    input_dim: ${level1.wm.embed_dim}
+    hidden_dim: 384
+    final_ln: false
+    output_dim: ${level2.wm.embed_dim}
+    projector:
+      type: identity
+  action_encoder:
+    output_dim: 4
+    input_dim: ${level1.wm.embed_dim}
+    max_chunk: ${eval:'${data.dataset.level2.frameskip} + 1'}
+    queue_size: 4000
+  action_embed:
+    patch_embed: false
+    input_dim: ${level2.action_encoder.output_dim}
+  predictor:
+    depth: 4
+    heads: 8
+    mlp_dim: 1024
+    dim_head: 64
+    dropout: 0.1
+    emb_dropout: 0.0
+    hidden_dim: 192
+    projector:
+      type: mlp
+  loss:
+    embed:
+      sigreg:
+        enabled: true
+        weight: 0.09
+level3:
+  lr: 1.0e-05
+  stride: 3
+  window_size: 1
+  wm:
+    history_size: 3
+    rollout_n: 1
+    rollout_loss_weight: 1.0
+    embed_dim: 192
+    use_proprio: false
+  encoder:
+    type: latent_mlp
+    input_dim: ${level2.wm.embed_dim}
+    hidden_dim: 384
+    final_ln: false
+    output_dim: ${level3.wm.embed_dim}
+    projector:
+      type: identity
+  action_encoder:
+    output_dim: 4
+    input_dim: ${level2.wm.embed_dim}
+    max_chunk: ${eval:'${data.dataset.level3.frameskip} + 1'}
+    queue_size: 4000
+  action_embed:
+    patch_embed: false
+    input_dim: ${level3.action_encoder.output_dim}
+  predictor:
+    depth: 4
+    heads: 8
+    mlp_dim: 1024
+    dim_head: 64
+    dropout: 0.1
+    emb_dropout: 0.0
+    hidden_dim: 192
+    projector:
+      type: mlp
+  loss:
+    embed:
+      sigreg:
+        enabled: true
+        weight: 0.09

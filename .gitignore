@@ -1,0 +1,8 @@
+# Large, re-downloadable or rebuildable data (see RESTORE.md)
+data/
+H-JEPA/
+__pycache__/
+*.pyc
+results/fourroom_smoke/
+results/antmaze_smoke/
+results/crafter_smoke/

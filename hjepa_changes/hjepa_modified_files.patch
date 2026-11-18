@@ -1,0 +1,121 @@
+diff --git a/h_jepa/data.py b/h_jepa/data.py
+index de79609..bd3500a 100644
+--- a/h_jepa/data.py
++++ b/h_jepa/data.py
+@@ -21,6 +21,19 @@ class ColumnTransform:
+         return sample
+ 
+ 
++class ZNorm:
++    """Picklable z-score normaliser (closures cannot cross Windows' spawn-based DataLoader workers)."""
++
++    def __init__(self, mean, std, fill_nan: bool = True):
++        self.mean, self.std, self.fill_nan = mean, std, fill_nan
++
++    def __call__(self, x):
++        x = (x - self.mean) / self.std
++        if self.fill_nan:
++            x = torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
++        return x.float()
++
++
+ class Compose:
+     """Apply dict-sample transforms in sequence."""
+ 
+@@ -113,11 +126,7 @@ def get_column_normalizer(dataset, source: str, target: str):
+         mean = data.mean(0, keepdim=True).clone()
+         std = data.std(0, keepdim=True).clone()
+ 
+-    def norm_fn(x):
+-        x = (x - mean) / std
+-        return torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0).float()
+-
+-    normalizer = ColumnTransform(norm_fn, source=source, target=target)
++    normalizer = ColumnTransform(ZNorm(mean, std), source=source, target=target)
+ 
+     return normalizer
+ 
+@@ -142,13 +151,7 @@ def get_column_normalizer_from_artifact(
+     mean = torch.from_numpy(np.asarray(col_stats["mean"])).float()
+     std = torch.from_numpy(np.asarray(col_stats["std"])).float()
+ 
+-    def norm_fn(x):
+-        x = (x - mean) / std
+-        if fill_nan:
+-            x = torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
+-        return x.float()
+-
+-    return ColumnTransform(norm_fn, source=source, target=target)
++    return ColumnTransform(ZNorm(mean, std, fill_nan), source=source, target=target)
+ 
+ 
+ def normalizer_columns_from_dataset_cfg(dataset_cfg) -> list[str]:
+diff --git a/h_jepa/eval.py b/h_jepa/eval.py
+index 2200e8a..91dacc2 100644
+--- a/h_jepa/eval.py
++++ b/h_jepa/eval.py
+@@ -1,6 +1,6 @@
+ import os
+ 
+-os.environ['MUJOCO_GL'] = 'egl'
++os.environ['MUJOCO_GL'] = 'glfw' if os.name == 'nt' else 'egl'  # Windows has no EGL
+ 
+ import hydra
+ from omegaconf import DictConfig
+diff --git a/h_jepa/main_hjepa.py b/h_jepa/main_hjepa.py
+index c826b5b..37a60ef 100644
+--- a/h_jepa/main_hjepa.py
++++ b/h_jepa/main_hjepa.py
+@@ -1,6 +1,12 @@
+ import os
+ 
+-os.environ['MUJOCO_GL'] = 'egl'
++os.environ['MUJOCO_GL'] = 'glfw' if os.name == 'nt' else 'egl'  # Windows has no EGL
++if os.name == 'nt':  # Windows: stable_pretraining references POSIX-only signals
++    import signal as _signal
++    for _name in ('SIGUSR1', 'SIGUSR2', 'SIGCONT'):
++        if not hasattr(_signal, _name):
++            setattr(_signal, _name, _signal.SIGTERM)
++    os.environ.setdefault('HOME', os.environ.get('USERPROFILE', ''))
+ 
+ from functools import partial
+ from pathlib import Path
+@@ -119,12 +125,20 @@ def _configure_runtime_performance():
+     torch.backends.cudnn.benchmark = True
+ 
+ 
++_RESIZE_TO = None  # set from cfg.resize_pixels_on_device: stored frames are upscaled on GPU to img_size
++
++
+ def _normalize_uint8_images_on_device(batch):
+     for key, value in list(batch.items()):
+         if not key.startswith("pixels"):
+             continue
+         if not torch.is_tensor(value) or value.dtype != torch.uint8:
+             continue
++        if _RESIZE_TO is not None and value.ndim >= 4 and value.shape[-1] != _RESIZE_TO:
++            lead = value.shape[:-3]
++            v = value.reshape(-1, *value.shape[-3:]).float()
++            v = torch.nn.functional.interpolate(v, size=(_RESIZE_TO, _RESIZE_TO), mode="nearest")
++            value = v.round().clamp(0, 255).to(torch.uint8).reshape(*lead, 3, _RESIZE_TO, _RESIZE_TO)
+         if value.ndim < 4 or value.size(-3) != 3:
+             raise ValueError(
+                 f"Expected uint8 pixel tensor '{key}' to have channel-first RGB "
+@@ -199,6 +213,17 @@ def run(cfg):
+ 
+     normalizer_artifact = build_normalizer_artifact(cfg, train_dataset)
+     world_model, losses = create_world_model(cfg)
++    if cfg.get("resize_pixels_on_device", False):
++        global _RESIZE_TO
++        _RESIZE_TO = int(cfg.img_size)
++    if cfg.get("init_from", None):
++        from transfer_init import init_from_pretrained
++        init_from_pretrained(
++            world_model, cfg.init_from.ckpt,
++            old_action_dim=int(cfg.init_from.old_action_dim),
++            new_action_dim=int(cfg.level1.wm.action_dim),
++            frameskip=int(cfg.data.dataset.level1.frameskip),
++        )
+     world_model.normalizer_artifact = normalizer_artifact
+     models = {
+         "model": world_model,
