@@ -119,3 +119,18 @@ index c826b5b..37a60ef 100644
      world_model.normalizer_artifact = normalizer_artifact
      models = {
          "model": world_model,
+diff --git a/h_jepa/planning_eval.py b/h_jepa/planning_eval.py
+index 8f6f264..f7411eb 100644
+--- a/h_jepa/planning_eval.py
++++ b/h_jepa/planning_eval.py
+@@ -387,6 +387,10 @@ def _run_chunked_eval(
+         tmp.write_text(json.dumps(_serialize_metrics(metrics)))
+         os.replace(tmp, path)  # atomic: a preemption never leaves a partial chunk file
+         print(f"tasks {start}-{end}: success_rate {metrics['success_rate']:.1f}")
++        if os.environ.get("HJEPA_ONE_CHUNK_PER_PROCESS") and len([p for p in chunk_paths.values() if not p.exists()]):
++            # Windows/glfw: after a World is closed, Worlds created later in the same process render black
++            # frames, so run each chunk in a fresh process (see experiments/run_ant_eval_isolated.py).
++            return None
+ 
+     chunks = [json.loads(p.read_text()) for p in chunk_paths.values()]
+     successes = np.concatenate([np.asarray(c["episode_successes"], dtype=bool) for c in chunks])
