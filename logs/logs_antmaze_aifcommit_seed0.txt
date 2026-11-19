@@ -1,0 +1,6 @@
+[aif_fractal_commit] ep 0: coverage 15.4% (4/26), motion 66%, upright 96% (flip at None), belief spread 0.64, model loss -1.8394474029541015, IG spread 11.11, 241s
+[aif_fractal_commit] ep 1: coverage 11.5% (3/26), motion 58%, upright 96% (flip at None), belief spread 0.73, model loss -2.027505226135254, IG spread 15.18, 241s
+[aif_fractal_commit] ep 2: coverage 7.7% (2/26), motion 62%, upright 96% (flip at None), belief spread 0.63, model loss -1.8048743438720702, IG spread 23.86, 244s
+[aif_fractal_commit] ep 3: coverage 3.8% (1/26), motion 58%, upright 96% (flip at None), belief spread 0.34, model loss -1.7723907089233397, IG spread 27.22, 258s
+[aif_fractal_commit] ep 4: coverage 15.4% (4/26), motion 60%, upright 96% (flip at None), belief spread 0.82, model loss -1.6494803237915039, IG spread 9.14, 244s
+[aif_fractal_shuffled_commit] ep 0: coverage 11.5% (3/26), motion 61%, upright 96% (flip at None), belief spread 0.58, model loss -2.1502914810180664, IG spread 15.19, 257s

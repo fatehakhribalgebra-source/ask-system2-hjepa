@@ -1,0 +1,31 @@
+[fractal_learn] ep 0: coverage 26.9% (7/26), goals 14, readout updates so far 2 real + 123 imagined, motion 65%, 201s
+[fractal_learn] ep 1: coverage 26.9% (7/26), goals 12, readout updates so far 6 real + 223 imagined, motion 67%, 211s
+[fractal_learn] ep 2: coverage 19.2% (5/26), goals 16, readout updates so far 9 real + 357 imagined, motion 69%, 239s
+[fractal_learn] ep 3: coverage 23.1% (6/26), goals 12, readout updates so far 14 real + 458 imagined, motion 68%, 233s
+[fractal_learn] ep 4: coverage 26.9% (7/26), goals 10, readout updates so far 19 real + 545 imagined, motion 71%, 214s
+[fractal_shuffled_learn] ep 0: coverage 23.1% (6/26), goals 13, readout updates so far 4 real + 106 imagined, motion 67%, 237s
+[fractal_shuffled_learn] ep 1: coverage 19.2% (5/26), goals 16, readout updates so far 8 real + 238 imagined, motion 65%, 268s
+[fractal_shuffled_learn] ep 2: coverage 3.8% (1/26), goals 15, readout updates so far 9 real + 387 imagined, motion 20%, 249s
+[fractal_shuffled_learn] ep 3: coverage 7.7% (2/26), goals 19, readout updates so far 11 real + 581 imagined, motion 21%, 214s
+[fractal_shuffled_learn] ep 4: coverage 19.2% (5/26), goals 14, readout updates so far 20 real + 685 imagined, motion 65%, 216s
+[noise_gauss_learn] ep 0: coverage 19.2% (5/26), goals 16, readout updates so far 9 real + 139 imagined, motion 63%, 245s
+[noise_gauss_learn] ep 1: coverage 15.4% (4/26), goals 16, readout updates so far 16 real + 270 imagined, motion 57%, 243s
+[noise_gauss_learn] ep 2: coverage 26.9% (7/26), goals 12, readout updates so far 23 real + 360 imagined, motion 65%, 238s
+[noise_gauss_learn] ep 3: coverage 3.8% (1/26), goals 18, readout updates so far 24 real + 498 imagined, motion 13%, 225s
+[noise_gauss_learn] ep 4: coverage 23.1% (6/26), goals 11, readout updates so far 32 real + 571 imagined, motion 56%, 206s
+[fractal_frozen] ep 0: coverage 15.4% (4/26), goals 13, readout updates so far 0 real + 0 imagined, motion 60%, upright 100% (flip at None), 203s
+[fractal_frozen] ep 1: coverage 15.4% (4/26), goals 14, readout updates so far 0 real + 0 imagined, motion 61%, upright 100% (flip at None), 203s
+[fractal_frozen] ep 2: coverage 19.2% (5/26), goals 13, readout updates so far 0 real + 0 imagined, motion 66%, upright 100% (flip at None), 284s
+[fractal_frozen] ep 3: coverage 26.9% (7/26), goals 13, readout updates so far 0 real + 0 imagined, motion 68%, upright 100% (flip at None), 362s
+[fractal_frozen] ep 4: coverage 30.8% (8/26), goals 11, readout updates so far 0 real + 0 imagined, motion 66%, upright 100% (flip at None), 382s
+[fractal_shuffled_frozen] ep 0: coverage 23.1% (6/26), goals 14, readout updates so far 0 real + 0 imagined, motion 67%, upright 100% (flip at None), 358s
+[fractal_shuffled_frozen] ep 1: coverage 19.2% (5/26), goals 10, readout updates so far 0 real + 0 imagined, motion 62%, upright 100% (flip at None), 372s
+[fractal_shuffled_frozen] ep 2: coverage 11.5% (3/26), goals 15, readout updates so far 0 real + 0 imagined, motion 37%, upright 53% (flip at 534), 466s
+[fractal_shuffled_frozen] ep 3: coverage 19.2% (5/26), goals 15, readout updates so far 0 real + 0 imagined, motion 67%, upright 100% (flip at None), 409s
+[fractal_shuffled_frozen] ep 4: coverage 15.4% (4/26), goals 9, readout updates so far 0 real + 0 imagined, motion 64%, upright 100% (flip at None), 332s
+[none_learn] ep 0: coverage 7.7% (2/26), goals 18, readout updates so far 0 real + 0 imagined, motion 24%, upright 21% (flip at 212), 390s
+[none_learn] ep 1: coverage 30.8% (8/26), goals 13, readout updates so far 0 real + 0 imagined, motion 67%, upright 100% (flip at None), 375s
+[none_learn] ep 2: coverage 19.2% (5/26), goals 12, readout updates so far 0 real + 0 imagined, motion 65%, upright 100% (flip at None), 366s
+[none_learn] ep 3: coverage 7.7% (2/26), goals 14, readout updates so far 0 real + 0 imagined, motion 60%, upright 100% (flip at None), 350s
+[none_learn] ep 4: coverage 23.1% (6/26), goals 12, readout updates so far 0 real + 0 imagined, motion 67%, upright 100% (flip at None), 345s
+ALL DONE seed 0

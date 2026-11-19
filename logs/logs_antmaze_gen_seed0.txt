@@ -1,0 +1,21 @@
+[vae_fractal] ep 0: coverage 23.1% (6/26), goals 13, readout updates so far 0 real + 0 imagined, motion 63%, upright 100% (flip at None), 399s
+[vae_fractal] ep 1: coverage 7.7% (2/26), goals 16, readout updates so far 0 real + 0 imagined, motion 60%, upright 100% (flip at None), 364s
+[vae_fractal] ep 2: coverage 7.7% (2/26), goals 12, readout updates so far 0 real + 0 imagined, motion 58%, upright 100% (flip at None), 370s
+[vae_fractal] ep 3: coverage 38.5% (10/26), goals 13, readout updates so far 0 real + 0 imagined, motion 66%, upright 100% (flip at None), 369s
+[vae_fractal] ep 4: coverage 23.1% (6/26), goals 12, readout updates so far 0 real + 0 imagined, motion 65%, upright 100% (flip at None), 507s
+[vae_fractal_shuffled] ep 0: coverage 15.4% (4/26), goals 15, readout updates so far 0 real + 0 imagined, motion 59%, upright 100% (flip at None), 365s
+[vae_fractal_shuffled] ep 1: coverage 7.7% (2/26), goals 11, readout updates so far 0 real + 0 imagined, motion 62%, upright 100% (flip at None), 361s
+[vae_fractal_shuffled] ep 2: coverage 15.4% (4/26), goals 12, readout updates so far 0 real + 0 imagined, motion 60%, upright 100% (flip at None), 378s
+[vae_fractal_shuffled] ep 3: coverage 26.9% (7/26), goals 13, readout updates so far 0 real + 0 imagined, motion 64%, upright 100% (flip at None), 373s
+[vae_fractal_shuffled] ep 4: coverage 19.2% (5/26), goals 11, readout updates so far 0 real + 0 imagined, motion 59%, upright 100% (flip at None), 350s
+[vae_noise_gauss] ep 0: coverage 15.4% (4/26), goals 12, readout updates so far 0 real + 0 imagined, motion 60%, upright 100% (flip at None), 366s
+[vae_noise_gauss] ep 1: coverage 23.1% (6/26), goals 12, readout updates so far 0 real + 0 imagined, motion 65%, upright 100% (flip at None), 345s
+[vae_noise_gauss] ep 2: coverage 19.2% (5/26), goals 14, readout updates so far 0 real + 0 imagined, motion 62%, upright 100% (flip at None), 377s
+[vae_noise_gauss] ep 3: coverage 7.7% (2/26), goals 11, readout updates so far 0 real + 0 imagined, motion 61%, upright 100% (flip at None), 374s
+[vae_noise_gauss] ep 4: coverage 19.2% (5/26), goals 10, readout updates so far 0 real + 0 imagined, motion 64%, upright 100% (flip at None), 477s
+[vae_none] ep 0: coverage 19.2% (5/26), goals 10, readout updates so far 0 real + 0 imagined, motion 62%, upright 100% (flip at None), 502s
+[vae_none] ep 1: coverage 11.5% (3/26), goals 14, readout updates so far 0 real + 0 imagined, motion 64%, upright 100% (flip at None), 471s
+[vae_none] ep 2: coverage 11.5% (3/26), goals 15, readout updates so far 0 real + 0 imagined, motion 62%, upright 100% (flip at None), 320s
+[vae_none] ep 3: coverage 7.7% (2/26), goals 13, readout updates so far 0 real + 0 imagined, motion 23%, upright 25% (flip at 251), 347s
+[vae_none] ep 4: coverage 19.2% (5/26), goals 13, readout updates so far 0 real + 0 imagined, motion 59%, upright 100% (flip at None), 325s
+ALL DONE gen seed 0

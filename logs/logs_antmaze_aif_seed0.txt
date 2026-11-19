@@ -1,0 +1,5 @@
+[aif] ep 0: coverage 34.6% (9/26), motion 70%, upright 100% (flip at None), belief spread 0.97, model loss -1.9735113525390624, IG spread 2.31, 272s
+[aif] ep 1: coverage 15.4% (4/26), motion 69%, upright 100% (flip at None), belief spread 0.87, model loss -1.4222794342041014, IG spread 6.63, 272s
+[aif] ep 2: coverage 11.5% (3/26), motion 66%, upright 100% (flip at None), belief spread 0.42, model loss -1.5251277732849122, IG spread 7.44, 272s
+[aif] ep 3: coverage 11.5% (3/26), motion 56%, upright 82% (flip at 819), belief spread 0.57, model loss -1.3226016807556153, IG spread 8.04, 274s
+[aif] ep 4: coverage 15.4% (4/26), motion 64%, upright 100% (flip at None), belief spread 0.80, model loss -1.3202425003051759, IG spread 8.35, 219s

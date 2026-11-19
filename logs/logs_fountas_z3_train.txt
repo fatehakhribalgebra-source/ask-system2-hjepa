@@ -1,0 +1,22 @@
+train 16875 transitions, val 1875 (episode split); action usage [2583, 1981, 1307, 841, 1698, 1429, 1212, 1194, 1154, 1975, 2438, 938]
+epoch 10: val R^2 reconstruction 0.570 | next-obs prediction 0.400 (copy-current baseline 0.335) | gamma 0.00
+epoch 20: val R^2 reconstruction 0.701 | next-obs prediction 0.504 (copy-current baseline 0.335) | gamma 0.18
+epoch 30: val R^2 reconstruction 0.761 | next-obs prediction 0.586 (copy-current baseline 0.335) | gamma 0.38
+epoch 40: val R^2 reconstruction 0.797 | next-obs prediction 0.641 (copy-current baseline 0.335) | gamma 0.58
+epoch 50: val R^2 reconstruction 0.825 | next-obs prediction 0.678 (copy-current baseline 0.335) | gamma 0.78
+epoch 60: val R^2 reconstruction 0.854 | next-obs prediction 0.710 (copy-current baseline 0.335) | gamma 0.80
+epoch 70: val R^2 reconstruction 0.874 | next-obs prediction 0.733 (copy-current baseline 0.335) | gamma 0.80
+epoch 80: val R^2 reconstruction 0.887 | next-obs prediction 0.745 (copy-current baseline 0.335) | gamma 0.80
+epoch 90: val R^2 reconstruction 0.898 | next-obs prediction 0.757 (copy-current baseline 0.335) | gamma 0.80
+epoch 100: val R^2 reconstruction 0.905 | next-obs prediction 0.766 (copy-current baseline 0.335) | gamma 0.80
+epoch 110: val R^2 reconstruction 0.914 | next-obs prediction 0.773 (copy-current baseline 0.335) | gamma 0.80
+epoch 120: val R^2 reconstruction 0.919 | next-obs prediction 0.779 (copy-current baseline 0.335) | gamma 0.80
+epoch 130: val R^2 reconstruction 0.924 | next-obs prediction 0.786 (copy-current baseline 0.335) | gamma 0.80
+epoch 140: val R^2 reconstruction 0.928 | next-obs prediction 0.793 (copy-current baseline 0.335) | gamma 0.80
+epoch 150: val R^2 reconstruction 0.937 | next-obs prediction 0.802 (copy-current baseline 0.335) | gamma 0.80
+epoch 160: val R^2 reconstruction 0.939 | next-obs prediction 0.807 (copy-current baseline 0.335) | gamma 0.80
+epoch 170: val R^2 reconstruction 0.948 | next-obs prediction 0.813 (copy-current baseline 0.335) | gamma 0.80
+epoch 180: val R^2 reconstruction 0.949 | next-obs prediction 0.817 (copy-current baseline 0.335) | gamma 0.80
+epoch 190: val R^2 reconstruction 0.950 | next-obs prediction 0.819 (copy-current baseline 0.335) | gamma 0.80
+epoch 200: val R^2 reconstruction 0.952 | next-obs prediction 0.818 (copy-current baseline 0.335) | gamma 0.80
+saved C:\Users\TP130289\ask-system2-hjepa\data\fountas_z3.pt

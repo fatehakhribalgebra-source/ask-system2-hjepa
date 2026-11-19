@@ -1,0 +1,9 @@
+{"task": 1, "planner": "tschantz", "success": true, "steps_to_success": 315.0, "seconds": 60.67812633514404}
+{"task": 2, "planner": "tschantz", "success": true, "steps_to_success": 288.0, "seconds": 41.85676097869873}
+{"task": 3, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 68.31540775299072}
+{"task": 5, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 68.58802342414856}
+{"task": 6, "planner": "tschantz", "success": true, "steps_to_success": 246.0, "seconds": 67.87250995635986}
+{"task": 7, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 60.41906237602234}
+{"task": 8, "planner": "tschantz", "success": true, "steps_to_success": 327.0, "seconds": 58.192569971084595}
+{"task": 9, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 73.52203035354614}
+{"task": 10, "planner": "tschantz", "success": true, "steps_to_success": 262.0, "seconds": 71.19703197479248}

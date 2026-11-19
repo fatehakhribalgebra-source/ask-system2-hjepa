@@ -1,0 +1,20 @@
+[daif_none_nov1_prag1_obs] ep 0: coverage 15.4% (4/26), decisions 4, target place reached 0/4, latent places 3, motion 62%, upright 100% (flip at None), 389s
+[daif_fractal_nov1_prag1_obs] ep 0: coverage 15.4% (4/26), decisions 5, target place reached 2/5, latent places 4, motion 63%, upright 100% (flip at None), 399s
+[daif_none_nov1_prag1_obs] ep 1: coverage 15.4% (4/26), decisions 5, target place reached 2/5, latent places 5, motion 65%, upright 100% (flip at None), 387s
+[daif_fractal_nov1_prag1_obs] ep 1: coverage 11.5% (3/26), decisions 6, target place reached 4/6, latent places 4, motion 65%, upright 100% (flip at None), 424s
+[daif_fractal_nov0_prag1_obs] ep 0: coverage 3.8% (1/26), decisions 4, target place reached 0/4, latent places 1, motion 19%, upright 9% (flip at 93), 389s
+[daif_fractal_shuffled_nov1_prag1_obs] ep 0: coverage 19.2% (5/26), decisions 7, target place reached 3/7, latent places 7, motion 67%, upright 100% (flip at None), 410s
+[daif_fractal_nov0_prag1_obs] ep 1: coverage 15.4% (4/26), decisions 5, target place reached 2/5, latent places 6, motion 63%, upright 100% (flip at None), 449s
+[daif_fractal_shuffled_nov1_prag1_obs] ep 1: coverage 11.5% (3/26), decisions 6, target place reached 3/6, latent places 4, motion 67%, upright 100% (flip at None), 475s
+[daif_fractal_nov0_prag1_obs] ep 2: coverage 19.2% (5/26), decisions 5, target place reached 2/5, latent places 5, motion 66%, upright 100% (flip at None), 496s
+[daif_fractal_shuffled_nov1_prag1_obs] ep 2: coverage 15.4% (4/26), decisions 5, target place reached 1/5, latent places 4, motion 58%, upright 100% (flip at None), 486s
+[daif_fractal_nov0_prag1_obs] ep 3: coverage 3.8% (1/26), decisions 4, target place reached 0/4, latent places 2, motion 12%, upright 6% (flip at 55), 456s
+[daif_fractal_shuffled_nov1_prag1_obs] ep 3: coverage 15.4% (4/26), decisions 5, target place reached 3/5, latent places 5, motion 68%, upright 100% (flip at None), 460s
+[daif_fractal_nov0_prag1_obs] ep 4: coverage 11.5% (3/26), decisions 5, target place reached 2/5, latent places 4, motion 68%, upright 100% (flip at None), 456s
+[daif_fractal_shuffled_nov1_prag1_obs] ep 4: coverage 15.4% (4/26), decisions 4, target place reached 1/4, latent places 5, motion 62%, upright 100% (flip at None), 430s
+[random_place_obs] ep 0: coverage 11.5% (3/26), decisions 4, target place reached 0/4, latent places 2, motion 19%, upright 15% (flip at 147), 295s
+[random_place_obs] ep 1: coverage 23.1% (6/26), decisions 5, target place reached 4/5, latent places 5, motion 64%, upright 100% (flip at None), 289s
+[random_place_obs] ep 2: coverage 7.7% (2/26), decisions 4, target place reached 0/4, latent places 2, motion 18%, upright 10% (flip at 98), 310s
+[random_place_obs] ep 3: coverage 26.9% (7/26), decisions 5, target place reached 1/5, latent places 6, motion 65%, upright 100% (flip at None), 264s
+[random_place_obs] ep 4: coverage 23.1% (6/26), decisions 5, target place reached 4/5, latent places 5, motion 68%, upright 100% (flip at None), 338s
+ALL DONE discrete-aif seed 0

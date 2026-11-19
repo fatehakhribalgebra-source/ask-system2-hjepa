@@ -1,0 +1,9 @@
+{"task": 1, "success": true, "steps": 350, "dist_start": 8.983300678527568, "dist_min": 0.3523383226119841, "dist_end": 0.35720039757015754, "z_min": 0.3620067597469928, "up_min": 0.7446462222715089, "expert_len": 116}
+{"task": 0, "success": true, "steps": 350, "dist_start": 7.129734772887868, "dist_min": 0.5032575081261539, "dist_end": 0.7997079869479155, "z_min": 0.35926470473367067, "up_min": 0.8719462689118883, "expert_len": 68}
+{"task": 4, "success": true, "steps": 350, "dist_start": 9.583999481013702, "dist_min": 0.03557756150153447, "dist_end": 1.315605399661729, "z_min": 0.3295881070170884, "up_min": 0.7838592482137469, "expert_len": 104}
+{"task": 2, "success": true, "steps": 350, "dist_start": 9.105935006910537, "dist_min": 0.18206547931961958, "dist_end": 0.56735487510818, "z_min": 0.3564878497706627, "up_min": 0.8226577967895883, "expert_len": 80}
+{"task": 6, "success": true, "steps": 350, "dist_start": 11.604275962324227, "dist_min": 0.0378429407218753, "dist_end": 0.3138036339538653, "z_min": 0.37204253897732115, "up_min": 0.8856142580191467, "expert_len": 113}
+{"task": 7, "success": true, "steps": 350, "dist_start": 8.705079195670697, "dist_min": 0.5590829922067534, "dist_end": 0.655051153337896, "z_min": 0.37213763565514224, "up_min": 0.9112147991897948, "expert_len": 75}
+{"task": 8, "success": true, "steps": 350, "dist_start": 9.194882264148305, "dist_min": 0.06407362166044941, "dist_end": 0.06407362166044941, "z_min": 0.36903604165422405, "up_min": 0.804378910273816, "expert_len": 70}
+{"task": 9, "success": false, "steps": 350, "dist_start": 6.864753685621418, "dist_min": 2.0421247401497276, "dist_end": 2.4317914984871836, "z_min": 0.34886704547316355, "up_min": 0.8566141483491433, "expert_len": 62}
+ALL DONE goalpath

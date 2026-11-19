@@ -1,0 +1,6 @@
+[cem] ep 0: coverage 15.4% (4/26), goals 13, readout updates so far 0 real + 0 imagined, motion 65%, upright 100% (flip at None), 355s
+[cem] ep 1: coverage 15.4% (4/26), goals 15, readout updates so far 0 real + 0 imagined, motion 57%, upright 100% (flip at None), 362s
+[cem] ep 2: coverage 7.7% (2/26), goals 16, readout updates so far 0 real + 0 imagined, motion 29%, upright 36% (flip at 359), 461s
+[cem] ep 3: coverage 26.9% (7/26), goals 11, readout updates so far 0 real + 0 imagined, motion 69%, upright 100% (flip at None), 507s
+[cem] ep 4: coverage 30.8% (8/26), goals 13, readout updates so far 0 real + 0 imagined, motion 63%, upright 100% (flip at None), 528s
+ALL DONE cem seed 0

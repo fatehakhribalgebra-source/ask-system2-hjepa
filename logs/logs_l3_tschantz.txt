@@ -1,0 +1,13 @@
+{"task": 1, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 75.95427179336548}
+{"task": 2, "planner": "tschantz", "success": true, "steps_to_success": 149.0, "seconds": 64.23588371276855}
+{"task": 3, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 62.39461946487427}
+{"task": 4, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 62.27785849571228}
+{"task": 5, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 65.64424657821655}
+{"task": 6, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 69.53826427459717}
+{"task": 7, "planner": "tschantz", "success": true, "steps_to_success": 170.0, "seconds": 103.90094828605652}
+{"task": 8, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 112.52139043807983}
+{"task": 9, "planner": "tschantz", "success": true, "steps_to_success": 141.0, "seconds": 96.67160487174988}
+{"task": 10, "planner": "tschantz", "success": true, "steps_to_success": 279.0, "seconds": 88.15078163146973}
+{"task": 11, "planner": "tschantz", "success": false, "steps_to_success": NaN, "seconds": 64.12382555007935}
+{"task": 12, "planner": "tschantz", "success": true, "steps_to_success": 267.0, "seconds": 62.16312527656555}
+tschantz: 6/13 tasks solved
