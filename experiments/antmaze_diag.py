@@ -31,6 +31,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--tasks', type=int, nargs='+', default=[1])
     ap.add_argument('--seed', type=int, default=42)
+    ap.add_argument('--goal-mode', default='full', choices=['full', 'top_only'],
+                    help='full = paper (goal encoded at every level); top_only = goal only as its level-3 latent, '
+                         'through ExplorationSolver (the path System 2 uses)')
     ap.add_argument('--out', default=str(ROOT / 'results' / 'antmaze_diag'))
     a = ap.parse_args()
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
@@ -45,6 +48,20 @@ def main():
     process = pe._build_eval_process_from_policy_normalizer(cfg, model=None)
     policy = pe._build_policy(cfg, process, transform, model=None)
     solver = policy.solver
+    if a.goal_mode == 'top_only':
+        sys.path.insert(0, str(ROOT))
+        from system2.hjepa_bridge import ExplorationSolver
+
+        class TopOnlyGoal(ExplorationSolver):
+            def _encode_all_levels(self, info_dict, key='pixels'):
+                if key != 'goal':
+                    return super(ExplorationSolver, self)._encode_all_levels(info_dict, key)
+                full = super(ExplorationSolver, self)._encode_all_levels(info_dict, key)
+                Lq = len(self.level_models)
+                return {f'embed_{Lq}': full[f'embed_{Lq}']}
+        solver = TopOnlyGoal.from_solver(solver)
+        solver.__class__ = TopOnlyGoal
+        policy.solver = solver
     gens = [(s.torch_gen, s.torch_gen.initial_seed()) for s in solver.level_solvers.values() if hasattr(s, 'torch_gen')]
     payload = torch.load(str(HJ / cfg.load_eval_trajs_path), map_location='cpu', weights_only=False)
     callables = OmegaConf.to_container(cfg.eval.callables, resolve=True)
@@ -86,11 +103,11 @@ def main():
                  expert_len=int(m['loaded_eval_original_lengths'][0]))
         print(json.dumps(s), flush=True)
         summary.append(s)
-        (out / f'task{t:02d}.json').write_text(json.dumps(dict(summary=s, log=log)))
+        (out / f'task{t:02d}_{a.goal_mode}.json').write_text(json.dumps(dict(summary=s, log=log)))
         import imageio
-        imageio.mimsave(out / f'task{t:02d}.mp4', [np.kron(f, np.ones((4, 4, 1), np.uint8)) for f in frames[::2]],
+        imageio.mimsave(out / f'task{t:02d}_{a.goal_mode}.mp4', [np.kron(f, np.ones((4, 4, 1), np.uint8)) for f in frames[::2]],
                         fps=20, macro_block_size=1)
-    (out / 'summary.json').write_text(json.dumps(summary, indent=1))
+    (out / f'summary_{a.goal_mode}_{"_".join(map(str, a.tasks))}.json').write_text(json.dumps(summary, indent=1))
 
 
 if __name__ == '__main__':
