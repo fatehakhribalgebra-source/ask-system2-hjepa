@@ -36,14 +36,18 @@ class ExplorationSolver(HierarchicalSolver):
         new.goal_top = None
         return new
 
+    full_goal: bool = False                    # True: goal = a real observation in info['goal'], encoded at all levels
+
     def _encode_all_levels(self, info_dict, key='pixels'):
-        if key != 'goal':
+        if key != 'goal' or getattr(self, 'full_goal', False):
             return super()._encode_all_levels(info_dict, key)
         assert self.goal_top is not None, 'set solver.goal_top before planning'
         L = len(self.level_models)
         return {f'embed_{L}': self.goal_top}
 
     def solve(self, info_dict, steps_taken, eval_budget):
+        if getattr(self, 'full_goal', False):        # paper path: goal observation at every level
+            return HierarchicalSolver.solve(self, info_dict, steps_taken, eval_budget)
         # Same algorithm as HierarchicalSolver.solve, with anchoring restricted to the top level.
         from hierarchical_solver import planning_call_index as _pci
         subgoal_latents = subgoal_actions = None

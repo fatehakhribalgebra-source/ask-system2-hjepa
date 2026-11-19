@@ -1,0 +1,5 @@
+[aif_fractal] ep 0: coverage 19.2% (5/26), motion 61%, upright 100% (flip at None), belief spread 0.82, model loss -2.2271348571777345, IG spread 4.45, 183s
+[aif_fractal] ep 1: coverage 11.5% (3/26), motion 65%, upright 100% (flip at None), belief spread 0.45, model loss -2.1751166915893556, IG spread 5.76, 186s
+[aif_fractal] ep 2: coverage 15.4% (4/26), motion 69%, upright 100% (flip at None), belief spread 0.84, model loss -1.2868871879577637, IG spread 9.93, 180s
+[aif_fractal] ep 3: coverage 11.5% (3/26), motion 64%, upright 100% (flip at None), belief spread 0.54, model loss -1.4759097862243653, IG spread 9.12, 180s
+[aif_fractal] ep 4: coverage 7.7% (2/26), motion 72%, upright 100% (flip at None), belief spread 0.65, model loss -1.4549098587036133, IG spread 3.83, 151s
