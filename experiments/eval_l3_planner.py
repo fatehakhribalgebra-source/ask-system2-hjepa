@@ -25,9 +25,10 @@ HJ = ROOT / 'H-JEPA' / 'h_jepa'
 class AIFLevel3:
     """Stands in for level_solvers[3]: same solve() signature and output format."""
 
-    def __init__(self, orig, agent_fn, name):
+    def __init__(self, orig, agent_fn, name, pass_steps=False):
         self.__dict__['_orig'] = orig
         self.__dict__['_agent_fn'] = agent_fn
+        self.__dict__['_pass_steps'] = pass_steps
         self.__dict__['solve_records'] = []
         self.__dict__['_name'] = name
         self.__dict__['decisions'] = []
@@ -40,7 +41,10 @@ class AIFLevel3:
         t0 = time.time()
         z = info_dict['embed_0'][:, -1]
         g = info_dict['goal_embed_0'].reshape(z.shape[0], -1, z.shape[-1])[:, -1]
-        acts, info = self._agent_fn(z[0], g[0], int(planning_horizon))
+        if self._pass_steps:
+            acts, info = self._agent_fn(z[0], g[0], int(planning_horizon), steps_taken=int(steps_taken))
+        else:
+            acts, info = self._agent_fn(z[0], g[0], int(planning_horizon))
         if acts is None:                                    # route finished: H-JEPA's own planner does the rest
             self.decisions.append(dict(step=int(steps_taken), horizon=int(planning_horizon), **info))
             return self._orig.solve(info_dict=info_dict, planning_horizon=planning_horizon,
@@ -51,6 +55,46 @@ class AIFLevel3:
                                    'wall_clock': time.time() - t0})
         self.decisions.append(dict(step=int(steps_taken), horizon=int(planning_horizon), **info))
         return {'actions': acts.detach().cpu(), 'predictions': preds}
+
+
+class PaperLevel:
+    """Stands in for level_solvers[n] (n = observed level): the paper-style RGM observes z_n, plans by inductive
+    inference and PREDICTS the next latent; it returns that prediction as the plan the level below must follow (the
+    reflex). Predictions are [now, target, target] so H-JEPA's last-subgoal anchoring never replaces the target with
+    the goal image. In a goal state (or without a plan) it hands over to H-JEPA's own planner for this level."""
+
+    def __init__(self, orig, rgm, ex, level, outer, lr=0.0):
+        d = self.__dict__
+        d['_orig'], d['_rgm'], d['_ex'], d['_level'], d['_outer'], d['_lr'] = orig, rgm, ex, level, outer, lr
+        d['decisions'], d['solve_records'], d['_target'] = [], [], None
+
+    def __getattr__(self, k):
+        return getattr(self.__dict__['_orig'], k)
+
+    def solve(self, info_dict, planning_horizon, steps_taken, eval_budget):
+        import numpy as np
+        import torch
+        lv = self._level
+        z = info_dict['embed_0'][:, -1]                                     # (1, D) current latent at this level
+        with torch.no_grad():
+            zg = self._outer._encode_all_levels(info_dict, key='goal')[f'embed_{lv}'].reshape(1, -1)
+        every = 10 * (lv - 1)                                               # env steps per latent step
+        observe = steps_taken % every == 0 or self._target is None
+        if observe:
+            target, info = self._rgm.step(z[0].cpu().numpy(), zg[0].cpu().numpy(), observe=True, lr=self._lr)
+            self.__dict__['_target'] = target
+        else:
+            target, info = self._target, dict(held=True)
+        if target is None:
+            self.decisions.append(dict(step=int(steps_taken), handover=True, **info))
+            return self._orig.solve(info_dict=info_dict, planning_horizon=planning_horizon,
+                                    steps_taken=steps_taken, eval_budget=eval_budget)
+        tgt = self._ex[target].reshape(1, -1).to(z.device, z.dtype)
+        preds = torch.stack([z, tgt, tgt], dim=1)                           # (1, 3, D)
+        acts = torch.zeros(1, 2, 4, device=z.device)
+        self.decisions.append(dict(step=int(steps_taken), horizon=int(planning_horizon), **info))
+        self.solve_records.append({'level': lv, 'horizon': int(planning_horizon), 'planner': 'rgm_paper'})
+        return {'actions': acts.cpu(), 'predictions': {'predicted_embed_0': preds}}
 
 
 def run_task(a, t):
@@ -64,11 +108,15 @@ def run_task(a, t):
     import planning_eval as pe
     import stable_worldmodel as swm
 
-    cfg = OmegaConf.load(HJ / 'config' / 'eval' / 'ant_l3.yaml')
+    cfg = OmegaConf.load(HJ / 'config' / 'eval' / f'{a.env}_l{a.levels}.yaml')
     cfg.seed = a.seed
-    cfg.policy = str(ROOT / 'data' / 'ckpts' / 'ant' / 'ant_hjepa_l3' / f'seed{a.seed}' / 'ant_hjepa_l3_object.ckpt')
+    name = f'{a.env}_hjepa_l{a.levels}'
+    cfg.policy = str(ROOT / 'data' / 'ckpts' / a.env / name / f'seed{a.seed}' / f'{name}_object.ckpt')
     cfg.cache_dir = os.environ['HJEPA_HOME']
     cfg.world.max_episode_steps = 2 * cfg.eval.eval_budget
+    if a.planner == 'rgm_paper' and a.rgm_obs_level == 2:
+        # the RGM hands level 1 a predicted observation, not a macro-action: the reflex follows the observation only
+        OmegaConf.update(cfg, 'hierarchical_plan_config.level1.action_cost_weight', 0.0)
     world_cfg = OmegaConf.create(OmegaConf.to_container(cfg.world, resolve=True))
     transform = {'pixels': pe.img_transform(cfg), 'goal': pe.img_transform(cfg)}
     process = pe._build_eval_process_from_policy_normalizer(cfg, model=None)
@@ -79,7 +127,7 @@ def run_task(a, t):
         gen.manual_seed(seed + t)                           # identical to the paper's chunked eval
 
     dev = 'cuda'
-    if a.planner != 'gd':
+    if a.planner not in ('gd', 'rgm_paper'):           # AntMaze level-3 assets for the action planners
         from system2.active_inference import StateVAE
         ck = torch.load(ROOT / 'data' / 'state_vae_ant_l3.pt', map_location=dev, weights_only=False)
         svae = StateVAE(ck['d_z'], ck['d_s'], d_obs=ck.get('d_obs')).to(dev).eval(); svae.load_state_dict(ck['state_dict'])
@@ -152,10 +200,184 @@ def run_task(a, t):
             return acts, info
         solver.level_solvers[3] = AIFLevel3(solver.level_solvers[3], agent_fn, 'tschantz')
 
+    if a.planner == 'rgm':
+        from system2.rgm_l3 import RGMLevel3
+        rgm = RGMLevel3.from_state(torch.load(a.rgm_path, weights_only=False), levels=a.rgm_levels)
+        P = torch.as_tensor(rgm.P, dtype=torch.float32, device=dev)
+        route = dict(acts=None, states=None, t0=0, plans=0)
+
+        def rollout_states(y, acts):                         # expected discrete states along a committed route
+            q = rgm.posterior(y); out = [int(q.argmax())]
+            for u in acts:
+                q = rgm.b1[:, :, u] @ q; q = q / max(q.sum(), 1e-12); out.append(int(q.argmax()))
+            return out
+
+        def agent_fn(z, g, H, steps_taken=0):
+            with torch.no_grad():
+                y = svae.zn(z.reshape(1, -1))[0].cpu().numpy()
+                yg = svae.zn(g.reshape(1, -1))[0].cpu().numpy()
+            if a.rgm_mode == 'closed':
+                acts, info = rgm.plan(y, yg, H)
+                if acts is None:                             # in a goal state (or no path): H-JEPA finishes
+                    return None, info | dict(handover=True)
+                return P[acts], info
+            if a.rgm_mode == 'bridge':
+                # closed loop + learning from reality + RGM/F3 product of experts with precisions learned from reality
+                q_now = rgm.posterior(y)
+                top = solver.level_models[-1]
+
+                @torch.no_grad()
+                def f3_post(us):
+                    zz = z.reshape(1, 1, -1).expand(len(us), 1, -1)
+                    aa = top.action_embed(P[torch.as_tensor(us, device=P.device)].reshape(len(us), 1, -1))
+                    zn = top.predict(zz, aa)[:, -1]
+                    return [rgm.posterior(v) for v in svae.zn(zn).cpu().numpy()]
+
+                st_ = route.setdefault('bridge', dict(acts=None, t_dec=0, win=None, n=0, s_rgm=0.0, s_f3=0.0,
+                                                      log=[]))
+                cal = getattr(rgm, 'calib', {}) or {}
+                prior_n = 10.0
+
+                def w_f3():
+                    if a.bridge_f3 >= 0:
+                        return a.bridge_f3
+                    m_r = (cal.get('ll_rgm', -0.7) * prior_n + st_['s_rgm']) / (prior_n + st_['n'])
+                    m_f = (cal.get('ll_f3', -0.7) * prior_n + st_['s_f3']) / (prior_n + st_['n'])
+                    return float(np.clip(np.exp(m_f - m_r), 0.1, 3.0))
+
+                info, force = {}, False
+                on_grid = steps_taken % 20 == 0
+                win = st_['win']
+                if on_grid and win is not None and steps_taken - win['t'] == 20:      # feedback from reality
+                    ll_r = float(np.log(win['pred_rgm'] @ q_now + 1e-12))
+                    ll_f = float(np.log(win['pred_f3'] @ q_now + 1e-12))
+                    st_['n'] += 1; st_['s_rgm'] += ll_r; st_['s_f3'] += ll_f
+                    if a.rgm_learn:
+                        rgm.learn(win['q'], win['u'], q_now, lr=a.rgm_lr)
+                    info |= dict(surprise=-ll_r, ll_f3=ll_f)
+                    force = -ll_r > rgm.surprise_thresh
+                if rgm.goal_states(yg)[int(q_now.argmax())]:
+                    return None, dict(reason='at_goal', handover=True)
+                if st_['acts'] is None or force or (steps_taken - st_['t_dec']) >= a.bridge_hold * 10:
+                    acts, preds, dinfo = rgm.bridge_decide(q_now, yg, f3_post, w_f3(), H=max(H, 5))
+                    if acts is None:                                                 # no progress move: induction
+                        acts, pinfo = rgm.plan(y, yg, max(H, 5))
+                        if acts is None:
+                            return None, pinfo | dict(handover=True)
+                        dinfo = pinfo | dict(fallback=True)
+                    st_.update(acts=[int(u) for u in acts], t_dec=steps_taken)
+                    info |= dinfo | dict(decided=True, forced=bool(force))
+                k = (steps_taken - st_['t_dec']) // 20
+                seq = st_['acts'][k:k + H] or st_['acts'][-1:]
+                seq = seq + [seq[-1]] * (H - len(seq))
+                if on_grid:                                                          # open a feedback window
+                    u0 = int(seq[0])
+                    pr = rgm.b1[:, :, u0] @ q_now
+                    st_['win'] = dict(t=steps_taken, q=q_now, u=u0, pred_rgm=pr / max(pr.sum(), 1e-12),
+                                      pred_f3=f3_post([u0])[0])
+                return P[np.asarray(seq)], info | dict(s=int(q_now.argmax()), w=round(w_f3(), 3), k=int(k))
+            if a.rgm_mode == 'feedback':
+                # two realities: inner loop checks the route in F3 before committing; outer loop compares every real
+                # level-3 step (20 env steps) with the committed, F3-checked expectation and replans on surprise
+                q_now = rgm.posterior(y)
+                if rgm.goal_states(yg)[int(q_now.argmax())]:
+                    return None, dict(reason='at_goal', handover=True)
+                top = solver.level_models[-1]
+
+                @torch.no_grad()
+                def imagine(acts_):
+                    zz, out = z.reshape(1, 1, -1), []
+                    for u in acts_:
+                        zz = top.predict(zz, top.action_embed(P[int(u)].reshape(1, 1, -1)))[:, -1:]
+                        out.append(svae.zn(zz.reshape(1, -1))[0].cpu().numpy())
+                    return out
+
+                info, why = {}, None
+                if route['acts'] is None:
+                    why = 'start'
+                else:
+                    p = (steps_taken - route['t0']) // 20
+                    if p > route['checked']:                    # a real level-3 step finished: feedback
+                        e = route['exp'][min(p, len(route['exp'])) - 1]
+                        s_val = rgm.surprise(e, q_now)
+                        route['surprises'].append(round(s_val, 3))
+                        if a.rgm_learn and (p - 1) in route['q_at'] and p - 1 < len(route['acts']):
+                            # continual learning from a single real level-3 transition (skipped when level 3 was not
+                            # called for a while and several actions passed between two observations)
+                            rgm.learn(route['q_at'][p - 1], route['acts'][p - 1], q_now)
+                        route['q_at'][p] = q_now
+                        route['checked'] = p
+                        info['surprise'] = s_val
+                        if a.rgm_every_action:                  # replan from the real state after every action
+                            why = 'every_action'
+                        elif s_val > rgm.surprise_thresh:
+                            why = 'surprise'
+                    if why is None and p >= len(route['acts']):
+                        why = 'route_end'
+                if why is not None:
+                    acts, exp, pinfo = rgm.verified_route(y, yg, a.max_route, imagine)
+                    if acts is None:
+                        return None, pinfo | dict(handover=True, why=why)
+                    route.update(acts=[int(u) for u in acts], exp=exp, t0=steps_taken, checked=0,
+                                 q_at={0: q_now}, plans=route['plans'] + 1, surprises=route.get('surprises', []))
+                    info |= dict(why=why, attempts=pinfo['attempts'], blocked=pinfo['blocked'],
+                                 inner=pinfo['inner'])
+                p = (steps_taken - route['t0']) // 20
+                seq = route['acts'][p:p + H] or route['acts'][-1:]
+                seq = seq + [seq[-1]] * (H - len(seq))
+                return P[np.asarray(seq)], info | dict(route_pos=int(p), route_len=len(route['acts']),
+                                                       plans=route['plans'], s=int(q_now.argmax()))
+            if a.rgm_mode == 'adaptive':
+                # EFE choice at every call: continue the committed route or switch to a fresh plan
+                p = 0 if route['acts'] is None else (steps_taken - route['t0']) // 20
+                remaining = [] if route['acts'] is None else route['acts'][p:]
+                replan, fresh, info, terms = rgm.commit_or_replan(y, yg, remaining, a.max_route, a.switch_cost)
+                if fresh is None and info.get('reason') == 'at_goal':
+                    return None, info | dict(handover=True)
+                if replan and fresh is not None:
+                    route.update(acts=[int(u) for u in fresh], t0=steps_taken, plans=route['plans'] + 1)
+                    p, remaining = 0, route['acts']
+                if not remaining:                            # nothing to continue and no plan: H-JEPA finishes
+                    return None, info | dict(handover=True)
+                seq = list(remaining[:H]); seq = seq + [seq[-1]] * (H - len(seq))
+                return P[np.asarray(seq)], {k: v for k, v in info.items() if k != 'reason'} | terms | dict(
+                    replanned=bool(replan), route_pos=int(p), route_len=len(route['acts']), plans=route['plans'])
+            # commit: one macro-action per level-3 step (20 env steps), replan only on drift / end of route
+            s_now = int(rgm.posterior(y).argmax())
+            p = (steps_taken - route['t0']) // 20
+            drift = route['acts'] is None or p >= len(route['acts']) or \
+                s_now not in route['states'][max(0, p - 2): p + 3]
+            info = {}
+            if drift:
+                acts, info = rgm.plan(y, yg, a.max_route)
+                if acts is None:
+                    return None, info | dict(handover=True)
+                k = max(1, int(info.get('plan_len', len(acts))))               # real route, without padding
+                route.update(acts=list(acts[:k]), states=rollout_states(y, acts[:k]), t0=steps_taken,
+                             plans=route['plans'] + 1)
+                p = 0
+            seq = route['acts'][p:p + H]
+            seq = seq + [seq[-1]] * (H - len(seq))
+            return P[np.asarray(seq)], info | dict(route_pos=int(p), route_len=len(route['acts']),
+                                                    plans=route['plans'], s=s_now)
+        solver.level_solvers[3] = AIFLevel3(solver.level_solvers[3], agent_fn, 'rgm', pass_steps=True)
+
+    if a.planner == 'rgm_paper':
+        import pickle
+        from system2.rgm_paper import PaperRGM
+        path = a.rgm_paper_path or str(ROOT / 'data' / f'rgm_paper_z{a.rgm_obs_level}_k64.pkl')
+        with open(path, 'rb') as fh:
+            prgm = PaperRGM.from_state(pickle.load(fh))
+        ex = torch.as_tensor(prgm.ex, dtype=torch.float32, device=dev)
+        lv = a.rgm_obs_level
+        solver.level_solvers[lv] = PaperLevel(solver.level_solvers[lv], prgm, ex, lv, solver,
+                                              lr=a.rgm_lr if a.rgm_learn else 0.0)
+
     payload = torch.load(str(HJ / cfg.load_eval_trajs_path), map_location='cpu', weights_only=False)
     callables = OmegaConf.to_container(cfg.eval.callables, resolve=True)
     chunk = {**payload, 'data': [dict(payload['data'][t])], 'episodes_idx': [t]}
-    world = swm.World(**{**world_cfg, 'num_envs': 1}, image_shape=(64, 64))
+    img = int(cfg.eval.img_size)
+    world = swm.World(**{**world_cfg, 'num_envs': 1}, image_shape=(img, img))
     world.set_policy(policy)
     t0 = time.time()
     try:
@@ -166,7 +388,7 @@ def run_task(a, t):
                 start_state_mode=cfg.eval.start_state_mode, goal_state_mode=cfg.eval.goal_state_mode)
     finally:
         world.close()
-    l3 = solver.level_solvers[3]
+    l3 = solver.level_solvers[a.rgm_obs_level if a.planner == 'rgm_paper' else 3]
     r = dict(task=t, planner=a.planner, success=bool(m['episode_successes'][0]),
              steps_to_success=float(m['steps_to_success'][0]), seconds=time.time() - t0,
              decisions=getattr(l3, 'decisions', None))
@@ -175,9 +397,30 @@ def run_task(a, t):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--planner', default='gd', choices=['gd', 'fountas', 'tschantz'])
+    ap.add_argument('--planner', default='gd', choices=['gd', 'fountas', 'tschantz', 'rgm', 'rgm_paper'])
+    ap.add_argument('--rgm-obs-level', type=int, default=3, choices=[2, 3],
+                    help='rgm_paper: H-JEPA level the RGM observes (its reflex is the level below)')
+    ap.add_argument('--rgm-paper-path', default='', help='rgm_paper: model pickle (default rgm_paper_z<level>_k64.pkl)')
+    ap.add_argument('--rgm-path', default=str(ROOT / 'data' / 'rgm_l3_k64.pt'))
+    ap.add_argument('--rgm-levels', type=int, default=2, help='rgm: 1 = level-1 induction only, 2 = with events')
+    ap.add_argument('--rgm-learn', action='store_true', help='rgm feedback: learn B1 counts from real transitions')
+    ap.add_argument('--rgm-lr', type=float, default=1.0,
+                    help='rgm learning: weight of one real in-episode transition, in units of offline Dirichlet counts')
+    ap.add_argument('--bridge-hold', type=int, default=1,
+                    help='rgm bridge: keep a decision for this many calls (1 = decide every call, 2 = per level-3 '
+                         'action, 4 = per level-2 event); a surprising real step always forces a new decision')
+    ap.add_argument('--bridge-f3', type=float, default=-1.0,
+                    help='rgm bridge: F3 weight; -1 = learned precision (calibrated offline, updated from reality)')
+    ap.add_argument('--rgm-every-action', action='store_true',
+                    help='rgm feedback: replan (with the F3 check) after every real level-3 action, not only on surprise')
+    ap.add_argument('--rgm-mode', default='closed', choices=['closed', 'commit', 'adaptive', 'feedback', 'bridge'],
+                    help='rgm: closed = replan every call; commit = follow the route, replan on drift; '
+                         'adaptive = EFE choice between continuing the route and switching to a fresh plan')
+    ap.add_argument('--switch-cost', type=float, default=0.5, help='rgm adaptive: habit cost of switching (nats)')
     ap.add_argument('--tasks', type=int, nargs='+', default=list(range(13)))
     ap.add_argument('--seed', type=int, default=42)
+    ap.add_argument('--env', default='ant', choices=['ant', 'pusht'], help='paper environment (eval config <env>_l<levels>)')
+    ap.add_argument('--levels', type=int, default=3, choices=[2, 3], help='H-JEPA model depth')
     ap.add_argument('--sigma-goal', type=float, default=1.0)
     ap.add_argument('--mcts-repeats', type=int, default=300)
     ap.add_argument('--expl-scale', type=float, default=0.1)
@@ -202,8 +445,13 @@ def main():
     for t in a.tasks:
         if (out / f'{name}_task{t:02d}.json').exists():
             continue
-        cmd = [sys.executable, __file__, '--single', '--planner', a.planner, '--tasks', str(t), '--seed', str(a.seed),
-               '--sigma-goal', str(a.sigma_goal), '--mcts-repeats', str(a.mcts_repeats), '--expl-scale', str(a.expl_scale), '--plan-len', str(a.plan_len), '--near', str(a.near), '--drift', str(a.drift), '--max-route', str(a.max_route), *(['--route'] if a.route else []), '--tag', a.tag, '--out', str(out)]
+        cmd = [sys.executable, __file__, '--single', '--planner', a.planner, '--tasks', str(t), '--seed', str(a.seed), '--env', a.env, '--levels', str(a.levels),
+               '--sigma-goal', str(a.sigma_goal), '--mcts-repeats', str(a.mcts_repeats), '--expl-scale', str(a.expl_scale), '--plan-len', str(a.plan_len), '--near', str(a.near), '--drift', str(a.drift), '--max-route', str(a.max_route), *(['--route'] if a.route else []),
+               '--rgm-path', a.rgm_path, '--rgm-levels', str(a.rgm_levels), '--rgm-mode', a.rgm_mode,
+               '--switch-cost', str(a.switch_cost), *(['--rgm-learn'] if a.rgm_learn else []),
+               *(['--rgm-every-action'] if a.rgm_every_action else []),
+               '--bridge-hold', str(a.bridge_hold), '--bridge-f3', str(a.bridge_f3), '--rgm-lr', str(a.rgm_lr),
+               '--rgm-obs-level', str(a.rgm_obs_level), '--rgm-paper-path', a.rgm_paper_path, '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]
         print(line[-1] if line else r.stderr[-2000:], flush=True)

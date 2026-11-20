@@ -17,20 +17,39 @@ left out on purpose; the steps below rebuild them.
 | `checkpoints/crafter_ft_hjepa_l3/` | Fine-tuned Crafter H-JEPA (FourRoom init, 16k steps on CrafterPlay 144px) + normalizer + config |
 | `hjepa_changes/` | Our changes to kevinghst/H-JEPA: `BASE_COMMIT.txt`, `hjepa_modified_files.patch`, `new_files/` |
 | `DESIGN.md` | Working design notes |
+| `system2/rgm_paper.py` | Paper-style RGM (states/events/episodes, inductive planning, prediction + H-JEPA reflex) — the 20 Nov result |
+| `system2/rgm_l3.py` | RGM as level-3 action planner (closed / commit / adaptive / feedback / bridge modes) |
+| `experiments/eval_l3_planner.py` | Paper eval with a swappable level-3 (or level-2) planner: gd, tschantz, fountas, rgm, rgm_paper; `--env ant|pusht --levels 2|3` |
+| `experiments/build_latent_seqs.py`, `build_rgm_paper.py`, `build_rgm_l3.py`, `record_l3_planner.py` | RGM data, builds (with offline checks), replays |
+| `checkpoints/rgm/` | Paper-style RGM models (AntMaze z3 seeds 42/43/44, z2 seed 42) |
+| `results/paper_eval_rgm/` | Paper protocol: RGM on 50 tasks x 3 seeds, + replays |
+| `results/l3_planner_pc2/` | All RGM variants on tasks 0-12 (`summary_A.md`), 21 replays |
+| `docs/NOTES_2026-11-20.md` | Session report and next steps |
 
 ## Restore on a new Windows machine
+Verified on 20 Nov 2026 (RTX 5070 Ti, Windows 11, about 1 h end to end).
 ```bash
-winget install Git.Git Anaconda.Miniconda3
-git clone <this repo> ask && cd ask
+winget install --id Git.Git -e --source winget
+winget install --id GitHub.cli -e --source winget
+winget install --id Anaconda.Miniconda3 -e --source winget     # installs to %LOCALAPPDATA%\miniconda3
+git config --global core.longpaths true                         # needed for deep paths on Windows
+gh auth login                                                   # interactive, in your own terminal
+gh repo clone fatehakhribalgebra-source/ask-system2-hjepa C:\Users\<you>\Documents\ask-system2-hjepa
+cd C:\Users\<you>\Documents\ask-system2-hjepa
 git clone https://github.com/kevinghst/H-JEPA.git
 cd H-JEPA && git checkout 97054ecaff83e13839195ec4b92d74c08a0127c5
 git apply ../hjepa_changes/hjepa_modified_files.patch
 xcopy /E /I /Y ..\hjepa_changes\new_files\h_jepa h_jepa
-conda create -n hjepa python=3.11.13 -y && conda activate hjepa
-pip install -e ".[train,env]" --extra-index-url https://download.pytorch.org/whl/cu128
-pip install craftax imageio-ffmpeg huggingface_hub
+# conda-forge only (avoids accepting Anaconda's default-channel terms of service)
+%LOCALAPPDATA%\miniconda3\Scripts\conda.exe create -y -n hjepa --override-channels -c conda-forge python=3.11.13
+set PY=%LOCALAPPDATA%\miniconda3\envs\hjepa\python.exe
+%PY% -m pip install -e ".[train,env]" --extra-index-url https://download.pytorch.org/whl/cu128
+# if this fails on antlr4-python3-runtime, just run the same command again (transient wheel-build failure)
+%PY% -m pip install craftax imageio-ffmpeg huggingface_hub
 cd ..
+%PY% -c "import torch; print(torch.__version__, torch.cuda.is_available())"   # expect 2.7.1+cu128 True
 ```
+Use `%PY%` (the env's python.exe) for every command below; `hf` is `%LOCALAPPDATA%\miniconda3\envs\hjepa\Scripts\hf.exe`.
 Environment variables for every session (PowerShell):
 ```bash
 $env:HJEPA_HOME="$PWD\data"; $env:HOME=$env:USERPROFILE; $env:PYTHONUTF8="1"
@@ -47,6 +66,32 @@ copy checkpoints\system2\*.pt data\
 python experiments/build_macro_action_data.py      # data/macro_actions_ant_l3_h5.npz (real level-3 transitions)
 python experiments/build_z3_game_assets.py         # data/z3_game_assets.pt (macro-action prototypes, eval-only xy probe)
 ```
+RGM data (20 Nov 2026 work). The paper-style RGM models are committed in `checkpoints/rgm/`; copy them to `data/`.
+The AntMaze seeds 43/44 checkpoints and the latent sequences are needed to rebuild or extend them:
+```bash
+hf download jepa-world-models/h-jepa --local-dir data/ckpts --include "ant/ant_hjepa_l3/seed43/*" --include "ant/ant_hjepa_l3/seed44/*"
+copy checkpoints\rgm\*.pkl data\
+copy data\rgm_paper_z3_k64_seed42.pkl data\rgm_paper_z3_k64.pkl
+python experiments/build_latent_seqs.py                                    # seed 42 -> data/latent_seqs_ant_l2_l3.npz
+python experiments/build_latent_seqs.py --ckpt data/ckpts/ant/ant_hjepa_l3/seed43/ant_hjepa_l3_object.ckpt --out data/latent_seqs_ant_l2_l3_seed43.npz
+python experiments/build_latent_seqs.py --ckpt data/ckpts/ant/ant_hjepa_l3/seed44/ant_hjepa_l3_object.ckpt --out data/latent_seqs_ant_l2_l3_seed44.npz
+python experiments/build_rgm_paper.py --level 3 --k 64 --seqs data/latent_seqs_ant_l2_l3_seed43.npz --out data/rgm_paper_z3_k64_seed43.pkl   # rebuild only if needed
+python experiments/build_rgm_l3.py --k 64                                  # action-planner RGM (103 MB, not committed)
+```
+Push-T (next session; code ready, nothing built yet). Checkpoints and val split from the H-JEPA release; the TRAIN
+split is LeWM's release (13.1 GB compressed, MIT). Build the RGM from TRAIN only: the eval tasks come from val.
+```bash
+hf download jepa-world-models/h-jepa --local-dir data/ckpts --include "pusht/pusht_hjepa_l2/*" --include "pusht/pusht_hjepa_l3/*"
+hf download jepa-world-models/h-jepa --repo-type dataset --local-dir data/datasets --include "pusht_expert_val.h5"
+hf download jepa-world-models/h-jepa --repo-type dataset --local-dir H-JEPA/h_jepa/assets --include "eval_trajs/pusht/*"
+hf download quentinll/lewm-pusht --repo-type dataset --local-dir data/datasets --include "*.zst"
+%PY% -c "import zstandard as z; z.ZstdDecompressor().copy_stream(open('data/datasets/pusht_expert_train.h5.zst','rb'), open('data/datasets/pusht_expert_train.h5','wb'))"
+%PY% experiments/build_latent_seqs.py --env pusht --data data/datasets/pusht_expert_train.h5 --ckpt data/ckpts/pusht/pusht_hjepa_l2/seed42/pusht_hjepa_l2_object.ckpt --episodes 3000 --out data/latent_seqs_pusht_l2_seed42.npz
+%PY% experiments/build_rgm_paper.py --level 2 --k 64 --seqs data/latent_seqs_pusht_l2_seed42.npz --out data/rgm_paper_pusht_z2_seed42.pkl
+%PY% experiments/eval_l3_planner.py --env pusht --levels 2 --planner rgm_paper --rgm-obs-level 2 --rgm-paper-path data/rgm_paper_pusht_z2_seed42.pkl --seed 42 --tasks 0 1 2 --out results/pusht_smoke
+```
+(For the 3-level Push-T model use `--level 3 --n-levels 2`: Push-T episodes give only ~5 z3 steps.)
+
 Third-party active-inference code (cloned, not committed):
 ```bash
 git clone https://github.com/alec-tschantz/rl-inference third_party/rl-inference
@@ -69,4 +114,8 @@ python experiments/crafter_explore.py --goal-source pattern:fractal --episodes 5
 python experiments/contrasts.py; python experiments/build_report.py
 python experiments/run_ant_eval_isolated.py                                   # paper AntMaze eval (9/13 on tasks 0-12)
 python experiments/eval_l3_planner.py --planner tschantz --plan-len 15 --tasks 0 1 2 3 4 5 6 7 8 9 10 11 12
+# paper-style RGM, paper protocol (50 tasks, one seed per run; run seeds 42/43/44 in parallel, ~1.5 h each)
+python experiments/eval_l3_planner.py --planner rgm_paper --rgm-obs-level 3 --seed 42 --rgm-paper-path data/rgm_paper_z3_k64_seed42.pkl --tasks 0 1 ... 49 --out results/paper_eval_rgm/seed42
+python experiments/eval_l3_planner.py --planner rgm --rgm-mode bridge --rgm-learn --rgm-lr 10 --tasks 0 ... 12   # best action-planner RGM
+python experiments/record_l3_planner.py --planners rgm_paper_z3 --tasks 3 10 --out results/paper_eval_rgm/replays
 ```
