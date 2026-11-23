@@ -403,6 +403,15 @@ def run_task(a, t):
                     zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1).repeat(len(_P), 1, 1)
                     return _top.predict(zz, _top.action_embed(_P[:, None]))[:, -1].float().cpu().numpy()
             prgm.f3_latents = f3_latents
+            if a.rgm_dream:                                 # offline structure learning inside F3 dreams
+                gb = torch.Generator(device=dev).manual_seed(a.seed * 1000 + t)
+
+                def f3_batch(Zb, _top=top, _ln=ln, _g=gb):
+                    with torch.no_grad():
+                        u = torch.randn(len(Zb), _ln.normalized_shape[0], generator=_g, device=dev)
+                        zz = torch.as_tensor(Zb, dtype=torch.float32, device=dev)[:, None]
+                        return _top.predict(zz, _top.action_embed(_ln(u)[:, None]))[:, -1].float().cpu().numpy()
+                prgm.dreaming, prgm.f3_batch = True, f3_batch
         elif a.rgm_agent:                                     # RGM agent: + control evidence, surprise, EFE, F3 live
             from system2.rgm_agent import RGMAgent
             persist = pathlib.Path(a.rgm_persist) if a.rgm_persist else None
@@ -496,6 +505,7 @@ def main():
     ap.add_argument('--rgm-calib-seqs', default='', help='rgm-agent: latent sequences for the surprise threshold')
     ap.add_argument('--rgm-live', action='store_true',
                     help='rgm_paper: system2/rgm_live.LiveRGM -- no offline map, states and moves learned while playing')
+    ap.add_argument('--rgm-dream', action='store_true', help='rgm-live: structure learning on F3 dreams')
     ap.add_argument('--rgm-persist', default='',
                     help='rgm-agent: carry the learned model from task to task through this pickle (continual protocol)')
     ap.add_argument('--rgm-no-filter', action='store_true', help='rgm-full: decode each latent alone')
@@ -559,7 +569,7 @@ def main():
                *(['--rgm-full'] if a.rgm_full else []), *(['--rgm-no-filter'] if a.rgm_no_filter else []),
                *(['--rgm-no-gate'] if a.rgm_no_gate else []), '--rgm-f3', a.rgm_f3,
                '--rgm-f3-weight', str(a.rgm_f3_weight), *(['--rgm-agent'] if a.rgm_agent else []),
-               *(['--rgm-live'] if a.rgm_live else []),
+               *(['--rgm-live'] if a.rgm_live else []), *(['--rgm-dream'] if a.rgm_dream else []),
                '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist, '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]

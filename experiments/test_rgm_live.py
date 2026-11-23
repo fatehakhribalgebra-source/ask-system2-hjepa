@@ -28,6 +28,7 @@ def main():
     ap.add_argument('--episodes', type=int, default=200)
     ap.add_argument('--rho', type=float, default=1.0)
     ap.add_argument('--no-f3', action='store_true')
+    ap.add_argument('--dream', action='store_true', help='offline structure learning inside F3 dreams')
     a = ap.parse_args()
     dev = 'cuda'
     seqs = ROOT / 'data' / ('latent_seqs_ant_l2_l3.npz' if a.seed == 42 else f'latent_seqs_ant_l2_l3_seed{a.seed}.npz')
@@ -45,10 +46,20 @@ def main():
             zz = torch.as_tensor(zn, device=dev).reshape(1, 1, -1).repeat(len(P), 1, 1)
             return top.predict(zz, top.action_embed(P[:, None]))[:, -1].float().cpu().numpy()
 
+    gb = torch.Generator(device=dev).manual_seed(a.seed + 1)
+
+    def f3_batch(Zb):                                               # one F3 step, random on-manifold macro-actions
+        with torch.no_grad():
+            u = torch.randn(len(Zb), ln.normalized_shape[0], generator=gb, device=dev)
+            zz = torch.as_tensor(Zb, device=dev)[:, None]
+            return top.predict(zz, top.action_embed(ln(u)[:, None]))[:, -1].float().cpu().numpy()
+
     m = LiveRGM()
     m.rho = a.rho
     if not a.no_f3:
         m.f3_latents = f3_latents
+    if a.dream:
+        m.dreaming, m.f3_batch = True, f3_batch
     eps = np.unique(EP)
     rng = np.random.default_rng(0)
     order = rng.permutation(eps)[: a.episodes]
@@ -70,8 +81,9 @@ def main():
         m.reset()
         for i in idx[:-1]:
             m.step(Z[i], Z[idx[-1]], lr=1.0)
-        if k in (1, 5, 10, 25, 50, 100, 200, 400) or k == len(order):
-            print(f'after {k:3d} episodes ({len(idx)} steps each): states {m.K:4d} | radius {m.radius:.2f} | '
+        if k in (1, 2, 3, 5, 10, 25, 50, 100, 200, 400) or k == len(order):
+            nreal = sum(m.real) if hasattr(m, 'real') else m.K
+            print(f'after {k:3d} episodes ({len(idx)} steps each): states {m.K:4d} ({nreal} real) | radius {m.radius:.2f} | '
                   f'held-out start->goal routes {routes()}/{len(probe)} | last episode {m.stats}', flush=True)
 
 
