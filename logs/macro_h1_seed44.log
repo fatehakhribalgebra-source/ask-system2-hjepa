@@ -1,0 +1,16 @@
+episode 0: level-1 steps 80 | z3 (20, 384) | a3 (20, 4) | macro-action mean/std 0.00039841310353949666 1.0192010402679443
+episode 0: 19 pairs
+episode 100: 1919 pairs
+episode 200: 3819 pairs
+episode 300: 5719 pairs
+episode 400: 7619 pairs
+episode 500: 9519 pairs
+episode 600: 11419 pairs
+episode 700: 13319 pairs
+episode 800: 15219 pairs
+episode 900: 17119 pairs
+episode 1000: 19019 pairs
+episode 1100: 20919 pairs
+episode 1200: 22819 pairs
+saved data/macro_actions_ant_l3_h1_seed44.npz (23750, 384) (23750, 1, 4) act mean -0.00022568215 act std per dim [0.73406893 0.7635524  0.6180348  0.6037762 ]
+check: planner z vs dataset z  cos 1.0000  rel err 0.0000

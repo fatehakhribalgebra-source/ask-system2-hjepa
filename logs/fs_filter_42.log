@@ -1,0 +1,9 @@
+{"task": 0, "planner": "rgm_paper", "success": true, "steps_to_success": 294.0, "seconds": 244.16259479522705}
+{"task": 1, "planner": "rgm_paper", "success": true, "steps_to_success": 292.0, "seconds": 247.27236938476562}
+{"task": 2, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 253.83665919303894}
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 206.07027220726013}
+{"task": 4, "planner": "rgm_paper", "success": true, "steps_to_success": 216.0, "seconds": 225.6195821762085}
+{"task": 5, "planner": "rgm_paper", "success": true, "steps_to_success": 333.0, "seconds": 246.74953079223633}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 285.0, "seconds": 224.2156913280487}
+{"task": 7, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 305.3451545238495}
+{"task": 8, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 294.98450088500977}

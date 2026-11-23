@@ -9,7 +9,9 @@ H-JEPA's lower levels as its reflex.
 
 1. **Restore** the environment and data: [RESTORE.md](RESTORE.md) (verified 20 Nov 2026, about 1 h; ~60 GB of data
    is downloaded or rebuilt, nothing large is in git).
-2. **Read the latest session report and next steps:** [docs/NOTES_2026-11-20.md](docs/NOTES_2026-11-20.md).
+2. **Read the latest session report and next steps:** [docs/NOTES_2026-11-23.md](docs/NOTES_2026-11-23.md)
+   (branch `rgm-beat-76`: full RGM agent, RGM with no offline map + dreaming); before that
+   [docs/NOTES_2026-11-20.md](docs/NOTES_2026-11-20.md).
 3. Earlier context: [docs/NOTES_2026-11-19.md](docs/NOTES_2026-11-19.md), [DESIGN.md](DESIGN.md) (the proposal PDF
    is a loose guide only).
 

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\TP130289\code\ask-system2-hjepa\experiments\build_latent_seqs.py", line 100, in <module>
+    main()
+  File "C:\Users\TP130289\code\ask-system2-hjepa\experiments\build_latent_seqs.py", line 94, in main
+    d = np.load(ROOT / 'data' / 'macro_actions_ant_l3_h5.npz')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\Lib\site-packages\numpy\lib\_npyio_impl.py", line 454, in load
+    fid = stack.enter_context(open(os.fspath(file), "rb"))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TP130289\\code\\ask-system2-hjepa\\data\\macro_actions_ant_l3_h5.npz'
