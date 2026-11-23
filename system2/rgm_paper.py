@@ -125,11 +125,16 @@ class Level:
     def item_ok(self, i, blocked):
         return not blocked or not self._has_blocked(self.items[i], blocked)
 
+    # Dwelling is not a competing path: with ignore_self, the 1/16 threshold compares an exit only with other exits.
+    # Without it, a state the agent lingers in (self-count >> exits) keeps no exit at all and becomes a dead end.
+    ignore_self = False
+
     def allowed(self, i, thresh=U_THRESH, blocked=None):
         c = self.succ[i]
         if not c:
             return []
-        m = max(c.values())
+        others = [v for j, v in c.items() if j != i]
+        m = max(others) if self.ignore_self and others else max(c.values())
         out = [j for j, v in c.items() if v > m * thresh]
         if blocked:                                                 # episodic memory of moves reality refused
             out = [j for j in out if not self._has_blocked(self.items[i] + self.items[j], blocked)]
@@ -198,6 +203,10 @@ class PaperRGM:
         return set(order[: int(np.searchsorted(np.cumsum(q[order]), mass)) + 1].tolist())
 
     # ------------------------------------------------------------------ inductive planning
+    def choose_item(self, lv, cand, s_now):
+        """Among items starting in s_now on a shortest path: the most frequently experienced (habit)."""
+        return max(cand, key=lambda i: sum(lv.succ[i].values()) + 1e-3)
+
     def induce(self, s_now, goal, thresh=U_THRESH, blocked=None, depth=MAX_DEPTH):
         """Plan from state s_now: returns (state sequence starting at s_now, level used, depth) or (None, ...)."""
         for li in range(len(self.levels) - 1, -1, -1):
@@ -211,8 +220,7 @@ class PaperRGM:
                 continue
             d0 = min(dist[i] for i in cand)
             cand = [i for i in cand if dist[i] == d0]
-            weight = lambda i: sum(lv.succ[i].values()) + 1e-3
-            i = max(cand, key=weight)
+            i = self.choose_item(lv, cand, s_now)
             seq = list(lv.items[i])
             while dist[i] > 0 and len(seq) < 64:
                 nxt = [j for j in lv.allowed(i, thresh, blocked) if j in dist and dist[j] < dist[i]]
@@ -285,12 +293,26 @@ class PaperRGM:
         d = ((self.ctx_Y[idx - 1] - self.white(z)[None]) ** 2).sum(-1)
         return self.ctx_Z[idx[int(d.argmin())]]
 
+    def infer_state(self, z, tick):
+        """Current level-1 state: the most likely state of this latent alone (no temporal prior)."""
+        d2 = ((self.C - self.white(z)[None]) ** 2).sum(-1)
+        self.last_fit = float(d2.min() / self.tau)                  # distance to the nearest state, in units of tau
+        return int(d2.argmin())
+
+    def learn(self, lr):
+        """Continual learning from the visited states (plain count increments at every level)."""
+        for lv in self.levels:
+            if len(self.history) >= 2 * lv.L:
+                h = self.history[-2 * lv.L:]
+                a = lv.item(h[:lv.L]); b = lv.item(h[lv.L:])
+                lv.succ[a][b] += lr
+
     def step(self, z, zg, observe=True, lr=0.0, tick=True):
         """One latent step: observe z, keep or re-induce the plan, return (target state or None at goal, info).
         tick=False: an extra look between latent steps (the clock of temporal depth and learning does not advance)."""
         goal = self.goal_states(zg)
-        s_now = int(self.posterior(z).argmax())
         observe_clock = observe and tick
+        s_now = self.infer_state(z, observe_clock)
         if observe_clock and self.stuck_k > 0 and self.last_target is not None:
             self.stuck = self.stuck + 1 if s_now != self.last_target else 0
             if self.stuck >= self.stuck_k:                          # reality keeps refusing this move: block it
@@ -299,12 +321,8 @@ class PaperRGM:
                 self.plan, self.stuck, self.last_target = None, 0, None
         if observe_clock:
             self.history.append(s_now)
-            if lr > 0:                                              # continual learning from the visited states
-                for lv in self.levels:
-                    if len(self.history) >= 2 * lv.L:
-                        h = self.history[-2 * lv.L:]
-                        a = lv.item(h[:lv.L]); b = lv.item(h[lv.L:])
-                        lv.succ[a][b] += lr
+            if lr > 0:
+                self.learn(lr)
         if s_now in goal:
             return None, dict(reason='at_goal', s=s_now)
         kept = False
@@ -339,7 +357,8 @@ class PaperRGM:
         if self.last_target is not None and int(target) != self.last_target:
             self.stuck = 0                                          # a new target gets a fresh chance
         self.last_target = int(target) if int(target) != s_now else None
-        return int(target), info | dict(s=s_now, target=int(target), ptr=self.ptr)
+        return int(target), info | dict(s=s_now, target=int(target), ptr=self.ptr,
+                                        fit=round(getattr(self, 'last_fit', -1.0), 2))
 
     # ------------------------------------------------------------------ io
     def state_dict(self):

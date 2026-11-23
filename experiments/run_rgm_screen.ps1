@@ -12,7 +12,7 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $PY = "$env:LOCALAPPDATA\miniconda3\envs\hjepa\python.exe"
 $env:HJEPA_HOME = "$PWD\data"; $env:HOME = $env:USERPROFILE; $env:PYTHONUTF8 = '1'
 $seqs = if ($Seed -eq 42) { 'data/latent_seqs_ant_l2_l3.npz' } else { "data/latent_seqs_ant_l2_l3_seed$Seed.npz" }
-$extra = switch ($Variant) {
+$extra = @(switch ($Variant) {
   'base'  { @() }
   'stuck' { @('--rgm-stuck', '3', '--rgm-relax') }
   'ctx'   { @('--rgm-ctx-seqs', $seqs) }
@@ -20,7 +20,12 @@ $extra = switch ($Variant) {
   'obs10' { @('--rgm-observe-every', '10') }
   'la2'   { @('--rgm-lookahead', '2') }
   'la2obs10' { @('--rgm-lookahead', '2', '--rgm-observe-every', '10') }
+  'agent'  { @('--rgm-agent', '--rgm-paper-path', "data/rgm_emeans_z3_k64_seed$Seed.pkl", '--rgm-calib-seqs', $seqs,
+               '--rgm-f3', "data/f3_transitions_emeans_seed$Seed.npz", '--rgm-f3-weight', '0.1', '--rgm-learn', '--rgm-lr', '1') }
+  'filter' { @('--rgm-full') }
+  'full'   { @('--rgm-full', '--rgm-learn', '--rgm-lr', '3') }
+  'fullf3' { @('--rgm-full', '--rgm-learn', '--rgm-lr', '3', '--rgm-f3', "data/f3_transitions_seed$Seed.npz", '--rgm-f3-weight', '0.1') }
   default { $Variant.Split(' ') }
-}
+})
 & $PY experiments/eval_l3_planner.py --planner rgm_paper --rgm-obs-level 3 --seed $Seed `
   --rgm-paper-path "data/rgm_paper_z3_k64_seed$Seed.pkl" --tasks @taskList @extra --out "$Out/$Variant/seed$Seed"

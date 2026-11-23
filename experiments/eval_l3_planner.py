@@ -378,7 +378,39 @@ def run_task(a, t):
         from system2.rgm_paper import PaperRGM
         path = a.rgm_paper_path or str(ROOT / 'data' / f'rgm_paper_z{a.rgm_obs_level}_k64.pkl')
         with open(path, 'rb') as fh:
-            prgm = PaperRGM.from_state(pickle.load(fh))
+            state = pickle.load(fh)
+        if a.rgm_agent:                                     # RGM agent: + control evidence, surprise, EFE, F3 live
+            from system2.rgm_agent import RGMAgent
+            persist = pathlib.Path(a.rgm_persist) if a.rgm_persist else None
+            if persist is not None and persist.exists():    # continual protocol: model carried from earlier tasks
+                with open(persist, 'rb') as fh:
+                    prgm = pickle.load(fh)
+                prgm.reset()
+            else:
+                prgm = RGMAgent.from_paper(state)
+                sq = np.load(a.rgm_calib_seqs)
+                prgm.calibrate(sq[f'z{a.rgm_obs_level}'])
+                if a.rgm_f3:
+                    prgm.add_transitions(np.load(a.rgm_f3)['N_imag'], a.rgm_f3_weight)
+            if a.rgm_f3:                                    # live F3: states reachable in one level-3 step from now
+                top = solver.level_models[len(solver.level_models) - 1]
+                protos = torch.as_tensor(np.load(a.rgm_f3)['protos'], dtype=torch.float32, device=dev)
+
+                def f3_states(zn, _m=prgm, _top=top, _P=protos):
+                    with torch.no_grad():
+                        zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1).repeat(len(_P), 1, 1)
+                        nxt = _top.predict(zz, _top.action_embed(_P[:, None]))[:, -1].float().cpu().numpy()
+                    Y = _m.white(nxt)
+                    return set(((Y[:, None] - _m.C[None]) ** 2).sum(-1).argmin(1).tolist())
+                prgm.f3 = f3_states
+        elif a.rgm_full:                                    # fuller RGM: filtering, gated learning, F3 transitions
+            from system2.rgm_full import FullRGM
+            prgm = FullRGM.from_paper(state)
+            prgm.filtering, prgm.gated = not a.rgm_no_filter, not a.rgm_no_gate
+            if a.rgm_f3:
+                prgm.add_transitions(np.load(a.rgm_f3)['N_imag'], a.rgm_f3_weight)
+        else:
+            prgm = PaperRGM.from_state(state)
         prgm.stuck_k, prgm.relax, prgm.lookahead = a.rgm_stuck, a.rgm_relax, a.rgm_lookahead
         if a.rgm_ctx_seqs:
             sq = np.load(a.rgm_ctx_seqs)
@@ -407,6 +439,11 @@ def run_task(a, t):
     r = dict(task=t, planner=a.planner, success=bool(m['episode_successes'][0]),
              steps_to_success=float(m['steps_to_success'][0]), seconds=time.time() - t0,
              decisions=getattr(l3, 'decisions', None))
+    if a.planner == 'rgm_paper':
+        r['rgm_stats'] = {k: int(v) for k, v in prgm.stats.items()}
+        if a.rgm_agent and a.rgm_persist:
+            with open(a.rgm_persist, 'wb') as fh:
+                pickle.dump(prgm, fh)
     return r
 
 
@@ -428,6 +465,17 @@ def main():
     ap.add_argument('--rgm-observe-every', type=int, default=0,
                     help='rgm_paper: also look at the state every this many env steps (0 = once per latent step); '
                          'the target advances as soon as a hop is reached, temporal depth still ticks per latent step')
+    ap.add_argument('--rgm-full', action='store_true',
+                    help='rgm_paper: use system2/rgm_full.FullRGM (filtering + gated continual learning)')
+    ap.add_argument('--rgm-agent', action='store_true',
+                    help='rgm_paper: system2/rgm_agent.RGMAgent (full + control evidence, surprise, EFE fallback, live F3)')
+    ap.add_argument('--rgm-calib-seqs', default='', help='rgm-agent: latent sequences for the surprise threshold')
+    ap.add_argument('--rgm-persist', default='',
+                    help='rgm-agent: carry the learned model from task to task through this pickle (continual protocol)')
+    ap.add_argument('--rgm-no-filter', action='store_true', help='rgm-full: decode each latent alone')
+    ap.add_argument('--rgm-no-gate', action='store_true', help='rgm-full: plain (ungated) continual learning')
+    ap.add_argument('--rgm-f3', default='', help='rgm-full: imagined F3 transitions npz (build_f3_transitions.py)')
+    ap.add_argument('--rgm-f3-weight', type=float, default=0.1, help='rgm-full: weight of one imagined transition')
     ap.add_argument('--rgm-path', default=str(ROOT / 'data' / 'rgm_l3_k64.pt'))
     ap.add_argument('--rgm-levels', type=int, default=2, help='rgm: 1 = level-1 induction only, 2 = with events')
     ap.add_argument('--rgm-learn', action='store_true', help='rgm feedback: learn B1 counts from real transitions')
@@ -481,7 +529,11 @@ def main():
                '--rgm-obs-level', str(a.rgm_obs_level), '--rgm-paper-path', a.rgm_paper_path,
                '--rgm-stuck', str(a.rgm_stuck), *(['--rgm-relax'] if a.rgm_relax else []),
                '--rgm-ctx-seqs', a.rgm_ctx_seqs, '--rgm-lookahead', str(a.rgm_lookahead),
-               '--rgm-observe-every', str(a.rgm_observe_every), '--tag', a.tag, '--out', str(out)]
+               '--rgm-observe-every', str(a.rgm_observe_every),
+               *(['--rgm-full'] if a.rgm_full else []), *(['--rgm-no-filter'] if a.rgm_no_filter else []),
+               *(['--rgm-no-gate'] if a.rgm_no_gate else []), '--rgm-f3', a.rgm_f3,
+               '--rgm-f3-weight', str(a.rgm_f3_weight), *(['--rgm-agent'] if a.rgm_agent else []),
+               '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist, '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]
         print(line[-1] if line else r.stderr[-2000:], flush=True)
