@@ -89,7 +89,9 @@ class PaperLevel:
                                           tick=tick or self._target is None)
             self.__dict__['_target'] = target
             lat = None
-            if target is not None and hasattr(self._rgm, 'ctx_pairs'):   # reachable exemplar from here
+            if target is not None and getattr(self._rgm, 'live', False):  # states grow: look the exemplar up now
+                lat = self._rgm.exemplar(target)
+            elif target is not None and hasattr(self._rgm, 'ctx_pairs'):   # reachable exemplar from here
                 lat = self._rgm.target_latent(zn, info['s'], target)
                 info = info | dict(ctx=lat is not None)
             self.__dict__['_tgt_lat'] = lat
@@ -377,9 +379,31 @@ def run_task(a, t):
         import pickle
         from system2.rgm_paper import PaperRGM
         path = a.rgm_paper_path or str(ROOT / 'data' / f'rgm_paper_z{a.rgm_obs_level}_k64.pkl')
-        with open(path, 'rb') as fh:
-            state = pickle.load(fh)
-        if a.rgm_agent:                                     # RGM agent: + control evidence, surprise, EFE, F3 live
+        state = None
+        if not a.rgm_live:
+            with open(path, 'rb') as fh:
+                state = pickle.load(fh)
+        if a.rgm_live:                                      # no offline map: the RGM starts empty and grows
+            from system2.rgm_live import LiveRGM
+            persist = pathlib.Path(a.rgm_persist) if a.rgm_persist else None
+            if persist is not None and persist.exists():
+                with open(persist, 'rb') as fh:
+                    prgm = pickle.load(fh)
+                prgm.reset()
+            else:
+                prgm = LiveRGM()
+            top = solver.level_models[len(solver.level_models) - 1]
+            ln = list(top.action_encoder.children())[-1]    # level 3's action manifold (LayerNorm)
+            g = torch.Generator().manual_seed(a.seed)
+            with torch.no_grad():
+                live_protos = ln(torch.randn(12, ln.normalized_shape[0], generator=g).to(dev))
+
+            def f3_latents(zn, _top=top, _P=live_protos):
+                with torch.no_grad():
+                    zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1).repeat(len(_P), 1, 1)
+                    return _top.predict(zz, _top.action_embed(_P[:, None]))[:, -1].float().cpu().numpy()
+            prgm.f3_latents = f3_latents
+        elif a.rgm_agent:                                     # RGM agent: + control evidence, surprise, EFE, F3 live
             from system2.rgm_agent import RGMAgent
             persist = pathlib.Path(a.rgm_persist) if a.rgm_persist else None
             if persist is not None and persist.exists():    # continual protocol: model carried from earlier tasks
@@ -415,7 +439,7 @@ def run_task(a, t):
         if a.rgm_ctx_seqs:
             sq = np.load(a.rgm_ctx_seqs)
             prgm.set_context(sq[f'z{a.rgm_obs_level}'], sq[f'ep{a.rgm_obs_level}'])
-        ex = torch.as_tensor(prgm.ex, dtype=torch.float32, device=dev)
+        ex = None if a.rgm_live else torch.as_tensor(prgm.ex, dtype=torch.float32, device=dev)
         lv = a.rgm_obs_level
         solver.level_solvers[lv] = PaperLevel(solver.level_solvers[lv], prgm, ex, lv, solver,
                                               lr=a.rgm_lr if a.rgm_learn else 0.0, obs_every=a.rgm_observe_every)
@@ -441,7 +465,7 @@ def run_task(a, t):
              decisions=getattr(l3, 'decisions', None))
     if a.planner == 'rgm_paper':
         r['rgm_stats'] = {k: int(v) for k, v in prgm.stats.items()}
-        if a.rgm_agent and a.rgm_persist:
+        if (a.rgm_agent or a.rgm_live) and a.rgm_persist:
             with open(a.rgm_persist, 'wb') as fh:
                 pickle.dump(prgm, fh)
     return r
@@ -470,6 +494,8 @@ def main():
     ap.add_argument('--rgm-agent', action='store_true',
                     help='rgm_paper: system2/rgm_agent.RGMAgent (full + control evidence, surprise, EFE fallback, live F3)')
     ap.add_argument('--rgm-calib-seqs', default='', help='rgm-agent: latent sequences for the surprise threshold')
+    ap.add_argument('--rgm-live', action='store_true',
+                    help='rgm_paper: system2/rgm_live.LiveRGM -- no offline map, states and moves learned while playing')
     ap.add_argument('--rgm-persist', default='',
                     help='rgm-agent: carry the learned model from task to task through this pickle (continual protocol)')
     ap.add_argument('--rgm-no-filter', action='store_true', help='rgm-full: decode each latent alone')
@@ -533,6 +559,7 @@ def main():
                *(['--rgm-full'] if a.rgm_full else []), *(['--rgm-no-filter'] if a.rgm_no_filter else []),
                *(['--rgm-no-gate'] if a.rgm_no_gate else []), '--rgm-f3', a.rgm_f3,
                '--rgm-f3-weight', str(a.rgm_f3_weight), *(['--rgm-agent'] if a.rgm_agent else []),
+               *(['--rgm-live'] if a.rgm_live else []),
                '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist, '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]

@@ -25,6 +25,7 @@ $extra = @(switch ($Variant) {
   'agentp' { @('--rgm-agent', '--rgm-paper-path', "data/rgm_emeans_z3_k64_seed$Seed.pkl", '--rgm-calib-seqs', $seqs,
                '--rgm-f3', "data/f3_transitions_emeans_seed$Seed.npz", '--rgm-f3-weight', '0.1', '--rgm-learn', '--rgm-lr', '1',
                '--rgm-persist', "$Out/agentp/model_seed$Seed.pkl") }
+  'live'   { @('--rgm-live', '--rgm-learn', '--rgm-lr', '1', '--rgm-persist', "$Out/live/model_seed$Seed.pkl") }
   'filter' { @('--rgm-full') }
   'full'   { @('--rgm-full', '--rgm-learn', '--rgm-lr', '3') }
   'fullf3' { @('--rgm-full', '--rgm-learn', '--rgm-lr', '3', '--rgm-f3', "data/f3_transitions_seed$Seed.npz", '--rgm-f3-weight', '0.1') }
