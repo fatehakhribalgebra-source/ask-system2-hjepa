@@ -40,6 +40,59 @@ def kmeans(X, k, iters=50, seed=0):
     return C
 
 
+def emeans(X, k, epochs=25, batch=1024, alpha0=0.1, tau=0.1, revive_every=5, delta=1 / 128, seed=0):
+    """e-means (Bessa et al. 2026, "e-means: outperforming k-means (in one-tenth the epochs)", Algorithm 1):
+    mini-batch k-means with EMA counts/sums, a cosine-annealed step alpha (floor 0.1 * alpha0), dead-cluster revival
+    every `revive_every` batches by splitting a donor drawn proportionally to its count (Appendix H.1), and a
+    last-epoch-mean finalisation. Random initialisation from the data, as in the paper."""
+    rng = np.random.default_rng(seed)
+    X = np.asarray(X, np.float32)
+    n = len(X)
+    batch = min(batch, n)
+    C0 = X[rng.choice(n, k, replace=False)].astype(np.float64)
+    N = np.full(k, 1e-10); S = C0 * N[:, None]
+    nb = max(n // batch, 1)
+    M = epochs * nb
+    t = 0
+    last = np.zeros(n, np.int64)
+    for ep in range(epochs):
+        perm = rng.permutation(n)
+        for b in range(nb):
+            ib = perm[b * batch:(b + 1) * batch]
+            xb = X[ib]
+            C = S / N[:, None]
+            a = ((xb[:, None] - C[None]) ** 2).sum(-1).argmin(1)
+            if ep == epochs - 1:
+                last[ib] = a
+            alpha = alpha0 * (0.1 + 0.9 * 0.5 * (1 + np.cos(np.pi * t / M)))
+            nj = np.bincount(a, minlength=k).astype(np.float64)
+            sj = np.zeros_like(S); np.add.at(sj, a, xb)
+            N = (1 - alpha) * N + alpha * nj
+            S = (1 - alpha) * S + alpha * sj
+            t += 1
+            if t % revive_every == 0:
+                dead = np.flatnonzero(N < tau * N.mean())
+                if len(dead):
+                    live = np.setdiff1d(np.arange(k), dead)
+                    p = N[live] / N[live].sum()
+                    donors = rng.choice(live, size=min(len(dead), len(live)), replace=False, p=p)
+                    sign = np.where(np.arange(X.shape[1]) % 2 == 0, 1.0, -1.0)
+                    for j, jd in zip(dead, donors):
+                        c = S[jd] / N[jd]
+                        half = N[jd] / 2
+                        N[j] = N[jd] = half
+                        S[j] = c * (1 + delta * sign) * half
+                        S[jd] = c * (1 - delta * sign) * half
+    C = S / N[:, None]
+    if nb * batch < n:                                              # points the last epoch did not visit
+        rest = perm[nb * batch:]
+        last[rest] = ((X[rest][:, None] - C[None]) ** 2).sum(-1).argmin(1)
+    for j in range(k):                                              # last-epoch-mean finalisation
+        if (last == j).any():
+            C[j] = X[last == j].mean(0)
+    return C.astype(np.float32)
+
+
 class Level:
     """Items (tuples of states) with counted transitions item -> next item."""
 
@@ -65,22 +118,32 @@ class Level:
             a = self.item(states[t:t + L]); b = self.item(states[t + L:t + 2 * L])
             self.succ[a][b] += lr
 
-    def allowed(self, i):
+    @staticmethod
+    def _has_blocked(seq, blocked):
+        return any((a, b) in blocked for a, b in zip(seq, seq[1:]) if a != b)
+
+    def item_ok(self, i, blocked):
+        return not blocked or not self._has_blocked(self.items[i], blocked)
+
+    def allowed(self, i, thresh=U_THRESH, blocked=None):
         c = self.succ[i]
         if not c:
             return []
         m = max(c.values())
-        return [j for j, v in c.items() if v > m * U_THRESH]
+        out = [j for j, v in c.items() if v > m * thresh]
+        if blocked:                                                 # episodic memory of moves reality refused
+            out = [j for j in out if not self._has_blocked(self.items[i] + self.items[j], blocked)]
+        return out
 
-    def backward(self, goal_items):
-        """dist[i] = shortest number of item transitions from i to a goal item (<= 16), via thresholded edges."""
+    def backward(self, goal_items, thresh=U_THRESH, blocked=None, depth=MAX_DEPTH):
+        """dist[i] = shortest number of item transitions from i to a goal item (<= depth), via thresholded edges."""
         pred = defaultdict(list)
         for i in range(len(self.items)):
-            for j in self.allowed(i):
+            for j in self.allowed(i, thresh, blocked):
                 pred[j].append(i)
         dist = {g: 0 for g in goal_items}
         frontier = list(goal_items)
-        for n in range(1, MAX_DEPTH + 1):
+        for n in range(1, depth + 1):
             nxt = []
             for j in frontier:
                 for i in pred[j]:
@@ -101,13 +164,13 @@ class PaperRGM:
 
     # ------------------------------------------------------------------ structure learning
     @classmethod
-    def fit(cls, Z, EP, k=64, n_levels=3, d_white=32, seed=0):
+    def fit(cls, Z, EP, k=64, n_levels=3, d_white=32, seed=0, cluster='kmeans', **ckw):
         Z = Z.astype(np.float32)
         mean = Z.mean(0)
         ev, V = np.linalg.eigh(np.cov((Z - mean).T))
         proj = (V[:, ::-1][:, :d_white] / np.sqrt(ev[::-1][:d_white])).T.astype(np.float32)   # (d, D)
         Y = (Z - mean) @ proj.T
-        C = kmeans(Y, k, seed=seed)
+        C = emeans(Y, k, seed=seed, **ckw) if cluster == 'emeans' else kmeans(Y, k, seed=seed)
         s = ((Y[:, None] - C[None]) ** 2).sum(-1).argmin(1)
         tau = float(((Y - C[s]) ** 2).sum(-1).mean())
         ex = np.stack([Z[np.flatnonzero(s == j)[((Y[s == j] - C[j]) ** 2).sum(-1).argmin()]] if (s == j).any()
@@ -135,15 +198,15 @@ class PaperRGM:
         return set(order[: int(np.searchsorted(np.cumsum(q[order]), mass)) + 1].tolist())
 
     # ------------------------------------------------------------------ inductive planning
-    def induce(self, s_now, goal):
+    def induce(self, s_now, goal, thresh=U_THRESH, blocked=None, depth=MAX_DEPTH):
         """Plan from state s_now: returns (state sequence starting at s_now, level used, depth) or (None, ...)."""
         for li in range(len(self.levels) - 1, -1, -1):
             lv = self.levels[li]
-            goal_items = [i for i, key in enumerate(lv.items) if goal & set(key)]
+            goal_items = [i for i, key in enumerate(lv.items) if goal & set(key) and lv.item_ok(i, blocked)]
             if not goal_items:
                 continue
-            dist = lv.backward(goal_items)
-            cand = [i for i in lv.by_start.get(s_now, []) if i in dist]
+            dist = lv.backward(goal_items, thresh, blocked, depth)
+            cand = [i for i in lv.by_start.get(s_now, []) if i in dist and lv.item_ok(i, blocked)]
             if not cand:
                 continue
             d0 = min(dist[i] for i in cand)
@@ -152,7 +215,7 @@ class PaperRGM:
             i = max(cand, key=weight)
             seq = list(lv.items[i])
             while dist[i] > 0 and len(seq) < 64:
-                nxt = [j for j in lv.allowed(i) if j in dist and dist[j] < dist[i]]
+                nxt = [j for j in lv.allowed(i, thresh, blocked) if j in dist and dist[j] < dist[i]]
                 if not nxt:
                     break
                 i = max(nxt, key=lambda j: lv.succ[i][j])
@@ -165,13 +228,76 @@ class PaperRGM:
     # ------------------------------------------------------------------ acting by prediction (reflex)
     def reset(self):
         self.plan, self.ptr, self.history, self.since = None, 0, [], 0
-        self.stats = dict(inductions=0, kept=0)
+        self.stats = dict(inductions=0, kept=0, blocked=0, relaxed=0)
+        self.blocked, self.last_target, self.stuck = set(), None, 0
 
-    def step(self, z, zg, observe=True, lr=0.0):
-        """One latent step: observe z, keep or re-induce the plan, return (target state or None at goal, info)."""
+    # Options beyond the paper (defaults = the 20 Nov 2026 planner, 76.0 +- 4.2 on AntMaze):
+    #   stuck_k > 0 : a target not reached after stuck_k consecutive observations blocks the move (s_now -> target)
+    #                 for the rest of the episode, and induction plans around it (reality refused that transition).
+    #   relax       : when induction finds no path, retry with every counted edge and depth 32, then without the
+    #                 blocks, then with a wider goal set (posterior mass 0.9), before handing over to H-JEPA.
+    #   lookahead k : hand down the k-th next distinct state of the plan (1 = the paper's next state), so the reflex
+    #                 does not decelerate into every intermediate state.
+    stuck_k = 0
+    relax = False
+    lookahead = 1
+
+    def _induce_with_fallbacks(self, s_now, goal, zg):
+        seq, lvl, depth = self.induce(s_now, goal, blocked=self.blocked)
+        if seq is not None or not (self.relax or self.blocked):
+            return seq, lvl, depth
+        tries = []
+        if self.relax:
+            tries.append(dict(thresh=0.0, depth=2 * MAX_DEPTH, blocked=self.blocked))
+        if self.blocked:
+            tries.append(dict(blocked=None))
+        if self.relax:
+            tries.append(dict(thresh=0.0, depth=2 * MAX_DEPTH, blocked=None, goal=self.goal_states(zg, mass=0.9)))
+        for kw in tries:
+            g = kw.pop('goal', goal)
+            seq, lvl, depth = self.induce(s_now, g, **kw)
+            if seq is not None:
+                self.stats['relaxed'] += 1
+                if kw.get('blocked', 1) is None:                    # every route was blocked: forget the blocks
+                    self.blocked = set()
+                return seq, lvl, depth
+        return None, 0, -1
+
+    # ------------------------------------------------------------------ reachable target latents
+    def set_context(self, Z, EP):
+        """Real transitions of the data, to hand down a REACHABLE exemplar of the next state: the latent of `target`
+        that the data reached from the state nearest to the current latent (instead of the state's medoid)."""
+        Z = np.asarray(Z, np.float32)
+        Y = (Z - self.mean) @ self.proj.T
+        lab = np.concatenate([((Y[i:i + 4096, None] - self.C[None]) ** 2).sum(-1).argmin(1)
+                              for i in range(0, len(Y), 4096)])
+        same = EP[1:] == EP[:-1]
+        self.ctx_Z, self.ctx_Y = Z, Y
+        self.ctx_pairs = defaultdict(list)
+        for t in np.flatnonzero(same & (lab[1:] != lab[:-1])) + 1:
+            self.ctx_pairs[(int(lab[t - 1]), int(lab[t]))].append(int(t))
+        self.ctx_pairs = {k: np.asarray(v) for k, v in self.ctx_pairs.items()}
+
+    def target_latent(self, z, s_now, target):
+        idx = getattr(self, 'ctx_pairs', {}).get((int(s_now), int(target)))
+        if idx is None or not len(idx):
+            return None
+        d = ((self.ctx_Y[idx - 1] - self.white(z)[None]) ** 2).sum(-1)
+        return self.ctx_Z[idx[int(d.argmin())]]
+
+    def step(self, z, zg, observe=True, lr=0.0, tick=True):
+        """One latent step: observe z, keep or re-induce the plan, return (target state or None at goal, info).
+        tick=False: an extra look between latent steps (the clock of temporal depth and learning does not advance)."""
         goal = self.goal_states(zg)
         s_now = int(self.posterior(z).argmax())
-        if observe:
+        observe_clock = observe and tick
+        if observe_clock and self.stuck_k > 0 and self.last_target is not None:
+            self.stuck = self.stuck + 1 if s_now != self.last_target else 0
+            if self.stuck >= self.stuck_k:                          # reality keeps refusing this move: block it
+                self.blocked.add((s_now, int(self.last_target)))
+                self.stats['blocked'] += 1
+                self.plan, self.stuck, self.last_target = None, 0, None
+        if observe_clock:
             self.history.append(s_now)
             if lr > 0:                                              # continual learning from the visited states
                 for lv in self.levels:
@@ -183,7 +309,7 @@ class PaperRGM:
             return None, dict(reason='at_goal', s=s_now)
         kept = False
         top_len = self.levels[-1].L
-        if self.plan is not None and observe:
+        if self.plan is not None and observe_clock:
             self.since += 1
         if self.plan is not None and self.since < top_len:          # temporal depth: hold one top-level item
             window = self.plan[self.ptr:self.ptr + 3]
@@ -191,8 +317,9 @@ class PaperRGM:
                 self.ptr += window.index(s_now)
                 kept = True
         if not kept:
-            seq, lvl, depth = self.induce(s_now, goal)
+            seq, lvl, depth = self._induce_with_fallbacks(s_now, goal, zg)
             if seq is None:
+                self.last_target = None
                 return None, dict(reason='no_path', s=s_now)
             self.plan, self.ptr, self.since = seq, 0, 0
             self.stats['inductions'] += 1
@@ -201,10 +328,17 @@ class PaperRGM:
             self.stats['kept'] += 1
             info = dict(induced=False)
         rest = self.plan[self.ptr + 1:]
-        target = next((x for x in rest if x != s_now), None)
+        ahead = []                                                  # distinct states still ahead on the plan
+        for x in rest:
+            if x != s_now and (not ahead or x != ahead[-1]):
+                ahead.append(x)
+        target = ahead[min(self.lookahead, len(ahead)) - 1] if ahead else None
         if target is None:                                          # plan ends here: re-induce next time
             self.plan = None
             target = s_now
+        if self.last_target is not None and int(target) != self.last_target:
+            self.stuck = 0                                          # a new target gets a fresh chance
+        self.last_target = int(target) if int(target) != s_now else None
         return int(target), info | dict(s=s_now, target=int(target), ptr=self.ptr)
 
     # ------------------------------------------------------------------ io

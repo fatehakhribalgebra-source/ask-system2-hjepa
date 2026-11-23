@@ -1,0 +1,10 @@
+{"task": 0, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 156.24946475028992}
+{"task": 1, "planner": "rgm_paper", "success": true, "steps_to_success": 174.0, "seconds": 126.50737237930298}
+{"task": 2, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 114.76642179489136}
+{"task": 4, "planner": "rgm_paper", "success": true, "steps_to_success": 193.0, "seconds": 118.540287733078}
+{"task": 7, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 104.86567497253418}
+{"task": 9, "planner": "rgm_paper", "success": true, "steps_to_success": 290.0, "seconds": 118.09075832366943}
+{"task": 10, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 108.44310736656189}
+{"task": 11, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 109.41805672645569}
+{"task": 12, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 106.67698502540588}
+rgm_paper: 3/9 tasks solved

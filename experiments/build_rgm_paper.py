@@ -33,7 +33,14 @@ def main():
     ap.add_argument('--seqs', default=str(ROOT / 'data' / 'latent_seqs_ant_l2_l3.npz'),
                     help='latent sequences from build_latent_seqs.py (one file per H-JEPA model seed)')
     ap.add_argument('--out', default=None)
+    ap.add_argument('--cluster', default='kmeans', choices=['kmeans', 'emeans'],
+                    help='level-1 states: Lloyd k-means (20 Nov 2026 models) or e-means (Bessa et al. 2026)')
+    ap.add_argument('--em-epochs', type=int, default=25)
+    ap.add_argument('--em-batch', type=int, default=1024)
+    ap.add_argument('--em-alpha', type=float, default=0.1, help='e-means peak EMA step alpha0')
     a = ap.parse_args()
+    ckw = dict(cluster=a.cluster) | (dict(epochs=a.em_epochs, batch=a.em_batch, alpha0=a.em_alpha)
+                                     if a.cluster == 'emeans' else {})
     out = pathlib.Path(a.out or ROOT / 'data' / f'rgm_paper_z{a.level}_k{a.k}.pkl')
     d = np.load(a.seqs)
     Z, EP, XY = d[f'z{a.level}'].astype(np.float32), d[f'ep{a.level}'], d[f'xy{a.level}']
@@ -43,15 +50,22 @@ def main():
     va = np.isin(EP, val_eps)
 
     t0 = time.time()
-    m = PaperRGM.fit(Z[~va], EP[~va], k=a.k, n_levels=a.n_levels, seed=a.seed)
-    print(f'z{a.level}, K={a.k}: fit in {time.time() - t0:.1f}s | ' + ' | '.join(
+    m = PaperRGM.fit(Z[~va], EP[~va], k=a.k, n_levels=a.n_levels, seed=a.seed, **ckw)
+    print(f'z{a.level}, K={a.k}, {a.cluster}: fit in {time.time() - t0:.1f}s | ' + ' | '.join(
         f'level {i + 1}: {len(lv.items)} items, {sum(len(c) for c in lv.succ)} transitions'
         for i, lv in enumerate(m.levels)), flush=True)
     s_tr = m.labels
+    Ytr, Yva = m.white(Z[~va]), m.white(Z[va])
+    mse = lambda Y: float(((Y[:, None] - m.C[None]) ** 2).sum(-1).min(1).mean())
+    cnt = np.bincount(s_tr, minlength=a.k)
     stay = np.mean([np.mean(s_tr[EP[~va] == e][1:] == s_tr[EP[~va] == e][:-1]) for e in np.unique(EP[~va])])
     sxy = np.stack([XY[~va][s_tr == j].mean(0) if (s_tr == j).any() else np.zeros(2) for j in range(a.k)])
-    spread = np.mean([np.linalg.norm(XY[~va][s_tr == j] - sxy[j], axis=1).mean() for j in range(a.k) if (s_tr == j).sum() > 1])
-    print(f'self-transition {stay:.2f} | mean xy spread within a state {spread:.2f} (cell = 4)', flush=True)
+    sp = np.array([np.linalg.norm(XY[~va][s_tr == j] - sxy[j], axis=1).mean() if (s_tr == j).sum() > 1 else 0.0
+                   for j in range(a.k)])
+    print(f'MSE train {mse(Ytr):.3f} val {mse(Yva):.3f} | state sizes min {cnt.min()} median {int(np.median(cnt))} '
+          f'max {cnt.max()} | self-transition {stay:.2f}', flush=True)
+    print(f'xy spread within a state (analysis only, cell = 4): mean {sp.mean():.2f} max {sp.max():.2f} | '
+          f'aliased states (spread > 2) {int((sp > 2).sum())}, holding {int(cnt[sp > 2].sum())} points', flush=True)
 
     found, lv_used, lens, end_err, start_err, t_plan = 0, Counter(), [], [], [], []
     for e in val_eps:
@@ -76,7 +90,7 @@ def main():
     print(f'goal distance (xy): start {np.mean(start_err):.2f} -> plan end {np.mean(end_err):.2f} '
           f'(median end {np.median(end_err):.2f})', flush=True)
 
-    final = PaperRGM.fit(Z, EP, k=a.k, n_levels=a.n_levels, seed=a.seed)
+    final = PaperRGM.fit(Z, EP, k=a.k, n_levels=a.n_levels, seed=a.seed, **ckw)
     with open(out, 'wb') as f:
         pickle.dump(final.state_dict(), f)
     print('saved', out)

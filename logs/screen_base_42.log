@@ -1,0 +1,13 @@
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 211.99294924736023}
+{"task": 5, "planner": "rgm_paper", "success": true, "steps_to_success": 151.0, "seconds": 119.44714570045471}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 199.0, "seconds": 130.05906748771667}
+{"task": 8, "planner": "rgm_paper", "success": true, "steps_to_success": 317.0, "seconds": 121.95697975158691}
+{"task": 22, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 132.73554468154907}
+{"task": 23, "planner": "rgm_paper", "success": true, "steps_to_success": 172.0, "seconds": 129.46469449996948}
+{"task": 27, "planner": "rgm_paper", "success": true, "steps_to_success": 165.0, "seconds": 120.47289800643921}
+{"task": 29, "planner": "rgm_paper", "success": true, "steps_to_success": 197.0, "seconds": 141.45840787887573}
+{"task": 35, "planner": "rgm_paper", "success": true, "steps_to_success": 192.0, "seconds": 141.89000368118286}
+{"task": 36, "planner": "rgm_paper", "success": true, "steps_to_success": 109.0, "seconds": 146.82398200035095}
+{"task": 39, "planner": "rgm_paper", "success": true, "steps_to_success": 143.0, "seconds": 134.21381902694702}
+{"task": 43, "planner": "rgm_paper", "success": true, "steps_to_success": 178.0, "seconds": 123.47498393058777}
+rgm_paper: 10/12 tasks solved

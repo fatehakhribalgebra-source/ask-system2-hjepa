@@ -63,9 +63,10 @@ class PaperLevel:
     reflex). Predictions are [now, target, target] so H-JEPA's last-subgoal anchoring never replaces the target with
     the goal image. In a goal state (or without a plan) it hands over to H-JEPA's own planner for this level."""
 
-    def __init__(self, orig, rgm, ex, level, outer, lr=0.0):
+    def __init__(self, orig, rgm, ex, level, outer, lr=0.0, obs_every=0):
         d = self.__dict__
         d['_orig'], d['_rgm'], d['_ex'], d['_level'], d['_outer'], d['_lr'] = orig, rgm, ex, level, outer, lr
+        d['_outer_obs_every'] = obs_every
         d['decisions'], d['solve_records'], d['_target'] = [], [], None
 
     def __getattr__(self, k):
@@ -79,17 +80,27 @@ class PaperLevel:
         with torch.no_grad():
             zg = self._outer._encode_all_levels(info_dict, key='goal')[f'embed_{lv}'].reshape(1, -1)
         every = 10 * (lv - 1)                                               # env steps per latent step
-        observe = steps_taken % every == 0 or self._target is None
+        look = self._outer_obs_every or every                               # extra looks between latent steps
+        tick = steps_taken % every == 0
+        observe = tick or steps_taken % look == 0 or self._target is None
         if observe:
-            target, info = self._rgm.step(z[0].cpu().numpy(), zg[0].cpu().numpy(), observe=True, lr=self._lr)
+            zn = z[0].cpu().numpy()
+            target, info = self._rgm.step(zn, zg[0].cpu().numpy(), observe=True, lr=self._lr,
+                                          tick=tick or self._target is None)
             self.__dict__['_target'] = target
+            lat = None
+            if target is not None and hasattr(self._rgm, 'ctx_pairs'):   # reachable exemplar from here
+                lat = self._rgm.target_latent(zn, info['s'], target)
+                info = info | dict(ctx=lat is not None)
+            self.__dict__['_tgt_lat'] = lat
         else:
             target, info = self._target, dict(held=True)
         if target is None:
             self.decisions.append(dict(step=int(steps_taken), handover=True, **info))
             return self._orig.solve(info_dict=info_dict, planning_horizon=planning_horizon,
                                     steps_taken=steps_taken, eval_budget=eval_budget)
-        tgt = self._ex[target].reshape(1, -1).to(z.device, z.dtype)
+        lat = self.__dict__.get('_tgt_lat')
+        tgt = (torch.as_tensor(lat) if lat is not None else self._ex[target]).reshape(1, -1).to(z.device, z.dtype)
         preds = torch.stack([z, tgt, tgt], dim=1)                           # (1, 3, D)
         acts = torch.zeros(1, 2, 4, device=z.device)
         self.decisions.append(dict(step=int(steps_taken), horizon=int(planning_horizon), **info))
@@ -368,10 +379,14 @@ def run_task(a, t):
         path = a.rgm_paper_path or str(ROOT / 'data' / f'rgm_paper_z{a.rgm_obs_level}_k64.pkl')
         with open(path, 'rb') as fh:
             prgm = PaperRGM.from_state(pickle.load(fh))
+        prgm.stuck_k, prgm.relax, prgm.lookahead = a.rgm_stuck, a.rgm_relax, a.rgm_lookahead
+        if a.rgm_ctx_seqs:
+            sq = np.load(a.rgm_ctx_seqs)
+            prgm.set_context(sq[f'z{a.rgm_obs_level}'], sq[f'ep{a.rgm_obs_level}'])
         ex = torch.as_tensor(prgm.ex, dtype=torch.float32, device=dev)
         lv = a.rgm_obs_level
         solver.level_solvers[lv] = PaperLevel(solver.level_solvers[lv], prgm, ex, lv, solver,
-                                              lr=a.rgm_lr if a.rgm_learn else 0.0)
+                                              lr=a.rgm_lr if a.rgm_learn else 0.0, obs_every=a.rgm_observe_every)
 
     payload = torch.load(str(HJ / cfg.load_eval_trajs_path), map_location='cpu', weights_only=False)
     callables = OmegaConf.to_container(cfg.eval.callables, resolve=True)
@@ -401,6 +416,18 @@ def main():
     ap.add_argument('--rgm-obs-level', type=int, default=3, choices=[2, 3],
                     help='rgm_paper: H-JEPA level the RGM observes (its reflex is the level below)')
     ap.add_argument('--rgm-paper-path', default='', help='rgm_paper: model pickle (default rgm_paper_z<level>_k64.pkl)')
+    ap.add_argument('--rgm-stuck', type=int, default=0,
+                    help='rgm_paper: block a move after this many observations without reaching its target (0 = off)')
+    ap.add_argument('--rgm-relax', action='store_true',
+                    help='rgm_paper: on no path, retry with all counted edges / no blocks / wider goal before handover')
+    ap.add_argument('--rgm-ctx-seqs', default='',
+                    help='rgm_paper: latent sequences npz; hand down the real successor latent reached in the data '
+                         'from the place nearest to now, instead of the state medoid')
+    ap.add_argument('--rgm-lookahead', type=int, default=1,
+                    help='rgm_paper: hand down the k-th next distinct state of the plan (1 = next state, as before)')
+    ap.add_argument('--rgm-observe-every', type=int, default=0,
+                    help='rgm_paper: also look at the state every this many env steps (0 = once per latent step); '
+                         'the target advances as soon as a hop is reached, temporal depth still ticks per latent step')
     ap.add_argument('--rgm-path', default=str(ROOT / 'data' / 'rgm_l3_k64.pt'))
     ap.add_argument('--rgm-levels', type=int, default=2, help='rgm: 1 = level-1 induction only, 2 = with events')
     ap.add_argument('--rgm-learn', action='store_true', help='rgm feedback: learn B1 counts from real transitions')
@@ -451,7 +478,10 @@ def main():
                '--switch-cost', str(a.switch_cost), *(['--rgm-learn'] if a.rgm_learn else []),
                *(['--rgm-every-action'] if a.rgm_every_action else []),
                '--bridge-hold', str(a.bridge_hold), '--bridge-f3', str(a.bridge_f3), '--rgm-lr', str(a.rgm_lr),
-               '--rgm-obs-level', str(a.rgm_obs_level), '--rgm-paper-path', a.rgm_paper_path, '--tag', a.tag, '--out', str(out)]
+               '--rgm-obs-level', str(a.rgm_obs_level), '--rgm-paper-path', a.rgm_paper_path,
+               '--rgm-stuck', str(a.rgm_stuck), *(['--rgm-relax'] if a.rgm_relax else []),
+               '--rgm-ctx-seqs', a.rgm_ctx_seqs, '--rgm-lookahead', str(a.rgm_lookahead),
+               '--rgm-observe-every', str(a.rgm_observe_every), '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]
         print(line[-1] if line else r.stderr[-2000:], flush=True)
