@@ -6,6 +6,7 @@ __pycache__/
 results/fourroom_smoke/
 results/antmaze_smoke/
 results/crafter_smoke/
+restore.log
 
 # Cloned third-party code (see RESTORE.md for the pinned commits)
 third_party/
