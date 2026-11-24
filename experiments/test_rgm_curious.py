@@ -19,7 +19,10 @@ import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from system2.rgm_calib import CalibRGM  # noqa: E402
 from system2.rgm_curious import CuriousRGM  # noqa: E402
+
+CALIB = '--calib' in sys.argv   # CalibRGM: the toy imagination judges each hop, reality calibrates it
 
 STEP = 0.5
 DIRS = np.stack([np.cos(np.linspace(0, 2 * np.pi, 12, endpoint=False)),
@@ -51,7 +54,7 @@ def imagine(Z, steps, g, halluc):
 
 
 def make(explorer='curious', dream=True, seed=0, halluc=0.25):
-    m = CuriousRGM()
+    m = CalibRGM() if CALIB else CuriousRGM()
     m.explorer, m.rng = explorer, np.random.default_rng(seed)
     g = np.random.default_rng(seed + 1)
     m.f3_latents = lambda z: imagine(np.repeat(z[None], len(DIRS), 0), STEP * DIRS, g, halluc)
@@ -60,6 +63,9 @@ def make(explorer='curious', dream=True, seed=0, halluc=0.25):
         a = g.uniform(0, 2 * np.pi, len(Z))
         return imagine(Z, STEP * np.stack([np.cos(a), np.sin(a)], 1), g, halluc)
     m.f3_batch, m.dreaming = f3_batch, dream
+    if CALIB:
+        m.f3_reach = lambda Zs, Zt: np.array([np.linalg.norm(imagine(np.repeat(zs[None], len(DIRS), 0), STEP * DIRS, g, halluc)
+                                                             - zt, axis=1).min() for zs, zt in zip(Zs, Zt)])
     return m
 
 

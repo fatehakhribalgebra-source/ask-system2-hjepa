@@ -87,6 +87,7 @@ class CuriousRGM(LiveRGM):
     ticks_left = 17          # set by the runner each call (latent steps left in the episode)
     fresh_f3_targets = True  # imagined target -> fresh one-step F3 latent from now (False: its stored exemplar)
     hit_radius = True        # a hop counts as made within one radius of the target's centre (False: nearest only)
+    stride = 20              # env steps per level-3 step (sliding-window transitions in record())
 
     def __init__(self, n_levels=1):
         super().__init__(n_levels=n_levels)
@@ -100,8 +101,32 @@ class CuriousRGM(LiveRGM):
 
     def reset(self):
         super().reset()
-        self.stats.update(pragmatic=0, epistemic=0, random_step=0, handover=0, at_goal=0)
+        self.stats.update(pragmatic=0, epistemic=0, random_step=0, handover=0, at_goal=0, stream_steps=0,
+                          stream_edges=0)
         self._new_this_tick = 0
+        self._stream, self._visited = {}, set()
+
+    # ------------------------------------------------------------------ every env step (sliding window)
+    def record(self, step, z):
+        """One env step's z3. Each H-JEPA level encodes a single frame and one level-3 step spans `stride` env steps,
+        so every env step t gives a real transition state(z3[t - stride]) -> state(z3[t]): a sliding window with 20x
+        the evidence of one transition per latent step. Every frame also grows / refines states, and a state's
+        exemplar becomes the real latent closest to its centre (H-JEPA keeps similar situations close in z3, so the
+        centre is the typical one)."""
+        if not hasattr(self, '_stream'):
+            self._stream, self._visited = {}, set()
+        z = np.asarray(z, np.float32)
+        self._calibrate(z)
+        s, _ = self.observe(z, grow=True)
+        if self.real[s] and np.linalg.norm(z - self.C[s]) < np.linalg.norm(self.ex[s] - self.C[s]):
+            self.ex[s] = z.copy()
+        self._stream[int(step)] = s
+        self._visited.add(s)
+        self.stats['stream_steps'] += 1
+        s0 = self._stream.pop(int(step) - self.stride, None)
+        if s0 is not None and s0 != s:
+            self._edge(s0, s, real=1.0)
+            self.stats['stream_edges'] += 1
 
     # ------------------------------------------------------------------ evidence
     def _edge(self, s, t, real=0.0, dream=0.0, depth=1):
@@ -206,6 +231,7 @@ class CuriousRGM(LiveRGM):
             # made the hop: in t, or within one radius of t's centre (states overlap; nearest-centre alone is harsh)
             hit = s == t or (self.hit_radius and
                              float(np.linalg.norm(np.asarray(z, np.float32) - self.C[t])) <= self.radius)
+            hit = hit or t in getattr(self, '_visited', ())          # passed through t at some frame (stream)
             if hit and s != t:
                 s = t
             if hit:
@@ -215,8 +241,9 @@ class CuriousRGM(LiveRGM):
             if self.e_real.get((a, t), 0.0) == 0 and self.ok[(a, t)] + self.ko[(a, t)] == 1:
                 self.d_tests.append((a, t, float(hit), self.d_depth.get((a, t), 3)))   # first test of a dream-only hop
                 self.d_try_all += 1; self.d_ok_all += hit
-        if self.history and self.history[-1] != s:
-            self._edge(self.history[-1], s, real=1.0)
+        if self.history and self.history[-1] != s and not getattr(self, '_stream', None):
+            self._edge(self.history[-1], s, real=1.0)           # (with the stream, record() counts transitions)
+        self._visited = set()
         self._imagine_from(s, z)
         return s
 

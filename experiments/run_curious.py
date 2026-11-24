@@ -29,6 +29,10 @@ def run(args, tasks, out, persist, explore):
            '--tasks', *map(str, tasks)]
     if args.dream:
         cmd.append('--rgm-dream')
+    if args.stream:
+        cmd.append('--rgm-stream')
+        if explore and args.dump_stream:
+            cmd.append('--rgm-dump-stream')
     if explore:
         cmd.append('--rgm-explore')
     print(' '.join(cmd), flush=True)
@@ -40,6 +44,8 @@ def main():
     ap.add_argument('--arm', required=True)
     ap.add_argument('--explorer', default='curious', choices=['curious', 'random'])
     ap.add_argument('--dream', action='store_true')
+    ap.add_argument('--stream', action='store_true', help='count a sliding-window transition at every env step')
+    ap.add_argument('--dump-stream', action='store_true', help='save each explore episode\'s per-step z3 (stream npz)')
     ap.add_argument('--budgets', type=int, nargs='+', default=[0, 10, 25, 50], help='explore episodes per snapshot')
     ap.add_argument('--explore-tasks', type=int, nargs='+', default=list(range(50)),
                     help='start states of the explore episodes, in order (task goals are ignored)')

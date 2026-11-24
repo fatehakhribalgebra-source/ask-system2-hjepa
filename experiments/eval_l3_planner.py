@@ -415,6 +415,24 @@ def run_task(a, t):
                     zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1).repeat(len(_P), 1, 1)
                     return _top.predict(zz, _top.action_embed(_P[:, None]))[:, -1].float().cpu().numpy()
             prgm.f3_latents = f3_latents
+            if a.rgm_calib:                                 # F3 judges each hop, reality calibrates the judge
+                from system2.rgm_calib import CalibRGM
+                gr = torch.Generator().manual_seed(a.seed + 7)
+                with torch.no_grad():
+                    reach_protos = ln(torch.randn(a.rgm_reach_m, ln.normalized_shape[0], generator=gr).to(dev))
+
+                def f3_reach(Zs, Zt, _top=top, _P=reach_protos):
+                    M, out = len(_P), []
+                    with torch.no_grad():
+                        for i in range(0, len(Zs), 64):
+                            zs = torch.as_tensor(Zs[i:i + 64], dtype=torch.float32, device=dev)
+                            zt = torch.as_tensor(Zt[i:i + 64], dtype=torch.float32, device=dev)
+                            n = len(zs)
+                            pr = _top.predict(zs[:, None].repeat_interleave(M, 0),
+                                              _top.action_embed(_P[:, None].repeat(n, 1, 1)))[:, -1].float()
+                            out.append(torch.linalg.norm(pr.view(n, M, -1) - zt[:, None], dim=-1).min(1).values.cpu().numpy())
+                    return np.concatenate(out) if out else np.zeros(0)
+                prgm = CalibRGM.adopt(prgm, f3_reach)
             if a.rgm_dream:                                 # offline structure learning inside F3 dreams
                 gb = torch.Generator(device=dev).manual_seed(a.seed * 1000 + t)
 
@@ -465,6 +483,32 @@ def run_task(a, t):
         solver.level_solvers[lv] = PaperLevel(solver.level_solvers[lv], prgm, ex, lv, solver,
                                               lr=a.rgm_lr if a.rgm_learn else 0.0, obs_every=a.rgm_observe_every)
 
+    if a.planner == 'rgm_paper' and a.rgm_curious:
+        # Every env step: encode the frame (each H-JEPA level encodes ONE frame; levels differ only by predictor
+        # stride, one level-3 step = 20 env steps) and hand z3 to the RGM, which counts the sliding-window transition
+        # z3(t-20) -> z3(t) at every t. The solver itself only sees a frame every 10 env steps.
+        _orig_prep = policy._prepare_info
+        first = {}
+
+        def _prep(info_dict, _o=_orig_prep):
+            if a.rgm_explore:                               # phase 1 has no goal: H-JEPA's own late-episode planner
+                if not first:                               # (level 3 skipped) is aimed at the start frame, not at
+                    first.update({k: np.copy(info_dict[k]) for k in ('pixels', 'proprio') if k in info_dict})
+                info_dict = dict(info_dict)                 # the task's goal image (no leak into the map)
+                info_dict['goal'] = first['pixels']
+                if 'proprio' in first and 'goal_proprio' in info_dict:
+                    info_dict['goal_proprio'] = first['proprio']
+            out = _o(info_dict)
+            if a.rgm_stream:
+                with torch.no_grad():
+                    z3 = solver._encode_all_levels(out, key='pixels')[f'embed_{a.rgm_obs_level}'][0, -1]
+                z3 = z3.float().cpu().numpy()
+                prgm.record(int(policy._steps_taken), z3)
+                stream_buf.append((int(policy._steps_taken), z3))
+            return out
+        stream_buf = []
+        policy._prepare_info = _prep
+
     payload = torch.load(str(HJ / cfg.load_eval_trajs_path), map_location='cpu', weights_only=False)
     callables = OmegaConf.to_container(cfg.eval.callables, resolve=True)
     chunk = {**payload, 'data': [dict(payload['data'][t])], 'episodes_idx': [t]}
@@ -489,6 +533,10 @@ def run_task(a, t):
         if hasattr(prgm, 'map_summary'):
             r['rgm_map'] = prgm.map_summary()
             r['explore'] = bool(a.rgm_explore)
+        if a.rgm_curious and a.rgm_stream and a.rgm_dump_stream and stream_buf:   # raw experience, for build_rgm_stream.py
+            pathlib.Path(a.out).mkdir(parents=True, exist_ok=True)
+            np.savez_compressed(pathlib.Path(a.out) / f'stream_task{t:02d}.npz',
+                                step=np.array([s for s, _ in stream_buf]), z=np.stack([z for _, z in stream_buf]))
         if (a.rgm_agent or a.rgm_live or a.rgm_curious) and a.rgm_persist:
             with open(a.rgm_persist, 'wb') as fh:
                 pickle.dump(prgm, fh)
@@ -529,6 +577,13 @@ def main():
                     help='rgm-curious explore phase: EFE novelty, or a random F3 step every latent step')
     ap.add_argument('--rgm-eta', type=float, default=1.0, help='rgm-curious: epistemic precision with a goal')
     ap.add_argument('--rgm-rho', type=float, default=0.5, help='rgm-curious: state radius in median F3 steps')
+    ap.add_argument('--rgm-stream', action='store_true',
+                    help='rgm-curious: encode every env step and count sliding-window transitions z3(t-20) -> z3(t)')
+    ap.add_argument('--rgm-calib', action='store_true',
+                    help='rgm-curious: system2/rgm_calib.CalibRGM -- F3 reach check per hop, calibrated by reality')
+    ap.add_argument('--rgm-reach-m', type=int, default=64, help='rgm-calib: macro-actions F3 tries per hop')
+    ap.add_argument('--rgm-dump-stream', action='store_true',
+                    help='rgm-stream: also save the per-step z3 of each episode to <out>/stream_task<t>.npz')
     ap.add_argument('--rgm-persist', default='',
                     help='rgm-agent: carry the learned model from task to task through this pickle (continual protocol)')
     ap.add_argument('--rgm-no-filter', action='store_true', help='rgm-full: decode each latent alone')
@@ -595,6 +650,8 @@ def main():
                *(['--rgm-live'] if a.rgm_live else []), *(['--rgm-dream'] if a.rgm_dream else []),
                *(['--rgm-curious'] if a.rgm_curious else []), *(['--rgm-explore'] if a.rgm_explore else []),
                '--rgm-explorer', a.rgm_explorer, '--rgm-eta', str(a.rgm_eta), '--rgm-rho', str(a.rgm_rho),
+               *(['--rgm-stream'] if a.rgm_stream else []), *(['--rgm-dump-stream'] if a.rgm_dump_stream else []),
+               *(['--rgm-calib'] if a.rgm_calib else []), '--rgm-reach-m', str(a.rgm_reach_m),
                '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist, '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]

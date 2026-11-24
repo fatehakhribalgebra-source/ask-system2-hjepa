@@ -1,0 +1,8 @@
+{"task": 0, "planner": "rgm_paper", "success": true, "steps_to_success": 308.0, "seconds": 153.8430666923523, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 1, "planner": "rgm_paper", "success": true, "steps_to_success": 298.0, "seconds": 150.30081272125244, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 2, "planner": "rgm_paper", "success": true, "steps_to_success": 316.0, "seconds": 137.1581528186798, "rgm_stats": {"inductions": 3, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 3, "planner": "rgm_paper", "success": true, "steps_to_success": 247.0, "seconds": 143.69183588027954, "rgm_stats": {"inductions": 5, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 4, "planner": "rgm_paper", "success": true, "steps_to_success": 284.0, "seconds": 172.03776812553406, "rgm_stats": {"inductions": 1, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 5, "planner": "rgm_paper", "success": true, "steps_to_success": 248.0, "seconds": 111.3640468120575, "rgm_stats": {"inductions": 2, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 209.0, "seconds": 119.64852046966553, "rgm_stats": {"inductions": 2, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 7, "planner": "rgm_paper", "success": true, "steps_to_success": 272.0, "seconds": 94.78283929824829, "rgm_stats": {"inductions": 1, "kept": 0, "blocked": 0, "relaxed": 0}}
