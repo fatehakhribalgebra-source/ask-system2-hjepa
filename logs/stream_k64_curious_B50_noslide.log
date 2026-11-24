@@ -1,0 +1,14 @@
+{"task": 0, "planner": "rgm_paper", "success": true, "steps_to_success": 292.0, "seconds": 91.75802040100098, "rgm_stats": {"inductions": 1, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 1, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 107.83044600486755, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 2, "planner": "rgm_paper", "success": true, "steps_to_success": 259.0, "seconds": 62.479612827301025, "rgm_stats": {"inductions": 3, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 68.84190535545349, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 4, "planner": "rgm_paper", "success": true, "steps_to_success": 302.0, "seconds": 57.77027463912964, "rgm_stats": {"inductions": 3, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 5, "planner": "rgm_paper", "success": true, "steps_to_success": 260.0, "seconds": 65.27575945854187, "rgm_stats": {"inductions": 2, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 256.0, "seconds": 66.38407373428345, "rgm_stats": {"inductions": 1, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 7, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 75.502934217453, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 8, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 76.16789722442627, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 9, "planner": "rgm_paper", "success": true, "steps_to_success": 347.0, "seconds": 67.0660834312439, "rgm_stats": {"inductions": 1, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 10, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 59.773213386535645, "rgm_stats": {"inductions": 3, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 11, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 78.63332509994507, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 12, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 82.43150448799133, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+rgm_paper: 6/13 tasks solved
