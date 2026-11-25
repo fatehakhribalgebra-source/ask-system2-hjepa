@@ -37,8 +37,9 @@ could not make, not only by a benchmark score.
 
 1. **Restore** the environment and data: [RESTORE.md](RESTORE.md) (verified 20 Nov 2026, about 1 h; ~60 GB of data
    is downloaded or rebuilt, nothing large is in git).
-2. **Read the latest session report and next steps:** [docs/NOTES_2026-11-24.md](docs/NOTES_2026-11-24.md)
-   (branch `rgm-curious`: curious RGM -- map built by play + imagination, Beta hop model and one EFE planner instead
+2. **Read the latest session report and next steps:** [docs/NOTES_2026-11-25.md](docs/NOTES_2026-11-25.md)
+   (branch `rgm-play-map`: play maps, risk planner, Free Lunch explorers, the continuous life run, what ran overnight
+   and what to do next); before that [docs/NOTES_2026-11-24.md](docs/NOTES_2026-11-24.md) (branch `rgm-curious`: curious RGM -- map built by play + imagination, Beta hop model and one EFE planner instead
    of the 1/16 threshold); before that [docs/NOTES_2026-11-23.md](docs/NOTES_2026-11-23.md) (branch `rgm-beat-76`)
    and [docs/NOTES_2026-11-20.md](docs/NOTES_2026-11-20.md).
 3. Earlier context: [docs/NOTES_2026-11-19.md](docs/NOTES_2026-11-19.md), [DESIGN.md](DESIGN.md) (the proposal PDF
@@ -58,9 +59,8 @@ On par. All RGM variants and lessons: `results/l3_planner_pc2/summary_A.md`; per
 
 ## Next
 
-Push-T RGM (code ready); RGM on z2 measured in z3; RGM learning from imagined trajectories; the main direction —
-explore without goals (random / Free Lunch / curiosity) to build RGM's map, then reach goals given on the fly.
-Details in the notes.
+See the roadmap above and "Tomorrow" in [docs/NOTES_2026-11-25.md](docs/NOTES_2026-11-25.md): collect the overnight
+play-map results, run one continuous life (`experiments/life_run.py`), then Push-T and LEXA.
 
 ## Layout
 
