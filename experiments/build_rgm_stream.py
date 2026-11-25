@@ -38,13 +38,41 @@ def load_streams(root, n_eps):
     return out
 
 
+def choose_k(Z, EP, candidates, seed=0):
+    """States decided by the data: a hop the reflex can make is one level-3 step, so neighbouring states should be
+    about one step apart. In PaperRGM's whitened space, delta = median distance between consecutive latents of a
+    sequence (one level-3 step); for each K, the median distance from a centroid to its nearest other centroid. The
+    K whose spacing is closest to delta (in log ratio) is used. Too few states: a hop spans several steps (hops
+    fail); too many: most transitions stay inside a state's neighbourhood and plans get long."""
+    from system2.rgm_paper import kmeans
+    mean = Z.mean(0)                                                # PaperRGM.fit's whitening (32-d PCA)
+    ev, V = np.linalg.eigh(np.cov((Z - mean).T))
+    proj = (V[:, ::-1][:, :32] / np.sqrt(ev[::-1][:32])).T
+    Y = ((Z - mean) @ proj.T).astype(np.float32)
+    same = EP[1:] == EP[:-1]
+    delta = float(np.median(np.linalg.norm(Y[1:][same] - Y[:-1][same], axis=1)))
+    rows = []
+    for k in candidates:
+        C = kmeans(Y, k, iters=30, seed=seed)
+        D = np.linalg.norm(C[:, None] - C[None], axis=-1) + np.eye(k) * 1e9
+        nn = float(np.median(D.min(1)))
+        rows.append((abs(np.log(nn / delta)), k, nn))
+        print(f'  K {k:4d}: median nearest-state distance {nn:.2f} (one level-3 step = {delta:.2f})', flush=True)
+    best = min(rows)[1]
+    print(f'data-decided K = {best}', flush=True)
+    return best
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--streams', required=True, help='explore dir with ep*/stream_task*.npz')
     ap.add_argument('--episodes', type=int, default=50, help='use the first N explore episodes')
     ap.add_argument('--stride', type=int, default=20, help='env steps per level-3 step')
     ap.add_argument('--no-slide', action='store_true', help='only offset 0 (one sequence per episode), for comparison')
-    ap.add_argument('--k', type=int, default=64)
+    ap.add_argument('--k', default='64',
+                    help="number of states, or 'auto': let the data decide -- the K whose neighbouring states lie one "
+                         "reflex step apart (median nearest-centroid distance closest to the median level-3 step)")
+    ap.add_argument('--k-candidates', type=int, nargs='+', default=[16, 24, 32, 48, 64, 96, 128, 192, 256])
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
@@ -57,11 +85,12 @@ def main():
                 continue
             Z.append(z[sel]); EP.append(np.full(len(sel), ei * a.stride + o))
     Z, EP = np.concatenate(Z), np.concatenate(EP)
-    m = PaperRGM.fit(Z, EP, k=a.k, seed=a.seed)
+    k = choose_k(Z, EP, a.k_candidates, a.seed) if a.k == 'auto' else int(a.k)
+    m = PaperRGM.fit(Z, EP, k=k, seed=a.seed)
     print(f'{len(streams)} episodes -> {len(np.unique(EP))} sequences, {len(Z)} latents | ' + ' | '.join(
         f'level {i + 1}: {len(lv.items)} items, {sum(len(c) for c in lv.succ)} transitions'
         for i, lv in enumerate(m.levels)), flush=True)
-    cnt = np.bincount(m.labels, minlength=a.k)
+    cnt = np.bincount(m.labels, minlength=k)
     print(f'state sizes min {cnt.min()} median {int(np.median(cnt))} max {cnt.max()}', flush=True)
     pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     with open(a.out, 'wb') as f:

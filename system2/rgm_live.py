@@ -251,4 +251,5 @@ class LiveRGM(PaperRGM):
 
     def __getstate__(self):
         d = dict(self.__dict__); d['f3_latents'] = None; d['f3_batch'] = None
+        d['f3_dir'] = None; d['pattern'] = None; d.pop('_pat_target', None); d.pop('_pat_lat', None)
         return d

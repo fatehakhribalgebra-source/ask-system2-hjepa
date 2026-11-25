@@ -36,16 +36,23 @@ def main():
     ap.add_argument('--fit-quantile', type=float, default=0.95,
                     help='keep an imagined latent only if its distance to the nearest state is within this quantile '
                          'of real latents\' distances')
+    ap.add_argument('--streams', default='',
+                    help='experience only: imagine from the z3 of these explore episodes (ep*/stream_task*.npz, every '
+                         'env step) with random macro-actions on the LayerNorm manifold (as the live agent), instead '
+                         'of the offline dataset and its true macro-actions')
+    ap.add_argument('--episodes', type=int, default=50)
     a = ap.parse_args()
     dev = 'cuda'
     ck = ROOT / 'data' / 'ckpts' / 'ant' / 'ant_hjepa_l3' / f'seed{a.seed}' / 'ant_hjepa_l3_object.ckpt'
     model = torch.load(ck, map_location='cpu', weights_only=False).to(dev).eval()
     jepa = model.jepas[-1]
     ln = list(jepa.action_encoder.children())[-1]
-    d = np.load(ROOT / 'data' / f'macro_actions_ant_l3_h1_seed{a.seed}.npz')
-    Z, A, ZN = d['z'].astype(np.float32), d['acts'][:, 0].astype(np.float32), d['z_next'][:, 0].astype(np.float32)
     with open(a.model or ROOT / 'data' / f'rgm_paper_z3_k64_seed{a.seed}.pkl', 'rb') as f:
         m = FullRGM.from_paper(pickle.load(f))
+    if a.streams:
+        return from_streams(a, m, jepa, ln, dev)
+    d = np.load(ROOT / 'data' / f'macro_actions_ant_l3_h1_seed{a.seed}.npz')
+    Z, A, ZN = d['z'].astype(np.float32), d['acts'][:, 0].astype(np.float32), d['z_next'][:, 0].astype(np.float32)
 
     def snap(X):
         Y = m.white(X)
@@ -95,6 +102,48 @@ def main():
           f'of imagined mass)')
     out = pathlib.Path(a.out) if a.out else ROOT / 'data' / f'f3_transitions_seed{a.seed}.npz'
     np.savez(out, N_imag=N_imag, protos=P, thr=thr)
+    print('saved', out)
+
+
+def from_streams(a, m, jepa, ln, dev):
+    """Imagined one-step transitions from PLAY experience only: every recorded z3 of the first `episodes` explore
+    episodes, 12 random macro-actions on the action manifold, snapped onto the map's states; imagined latents that fit
+    no state as well as 95% of the real latents do are dropped. Saved as N_imag[next, prev]."""
+    sys.path.insert(0, str(ROOT / 'experiments'))
+    from build_rgm_stream import load_streams
+    Z = np.concatenate([z for _, z in load_streams(a.streams, a.episodes)]).astype(np.float32)
+
+    def snap(X):
+        Y = m.white(X)
+        d2 = np.concatenate([((Y[i:i + 4096, None] - m.C[None]) ** 2).sum(-1) for i in range(0, len(Y), 4096)])
+        return d2.argmin(1), d2.min(1)
+
+    s0, d_real = snap(Z)
+    thr = np.quantile(d_real, a.fit_quantile)
+    g = torch.Generator().manual_seed(a.seed)
+    with torch.no_grad():
+        P = ln(torch.randn(a.k, ln.normalized_shape[0], generator=g).to(dev))
+    N_imag = np.zeros((m.K, m.K))
+    kept = 0
+    for p in P:
+        out = []
+        with torch.no_grad():
+            for i in range(0, len(Z), 2048):
+                z = torch.from_numpy(Z[i:i + 2048]).to(dev)[:, None]
+                act = p.reshape(1, 1, -1).repeat(len(z), 1, 1)
+                out.append(jepa.predict(z, jepa.action_embed(act))[:, -1].float().cpu().numpy())
+        si, di = snap(np.concatenate(out))
+        ok = di <= thr
+        kept += ok.sum()
+        np.add.at(N_imag, (si[ok], s0[ok]), 1)
+    real = m.N_real > 0
+    new = (N_imag > 0) & ~real
+    print(f'{len(Z)} play latents x {a.k} macro-actions: {kept} imagined latents fit a state | edges real '
+          f'{int(real.sum())}, imagined {int((N_imag > 0).sum())}, new {int(new.sum())} '
+          f'({100 * N_imag[new].sum() / max(N_imag.sum(), 1):.1f}% of imagined mass)')
+    out = pathlib.Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(out, N_imag=N_imag, protos=P.cpu().numpy(), thr=thr)
     print('saved', out)
 
 

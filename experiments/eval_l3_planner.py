@@ -415,6 +415,27 @@ def run_task(a, t):
                     zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1).repeat(len(_P), 1, 1)
                     return _top.predict(zz, _top.action_embed(_P[:, None]))[:, -1].float().cpu().numpy()
             prgm.f3_latents = f3_latents
+            prgm.pattern = None
+            if a.rgm_curious and a.rgm_explore and a.rgm_explorer not in ('curious', 'random'):
+                from system2 import patterns as PT
+                i = a.rgm_pattern_seed % 60                 # Free Lunch's 20x20, 4-label pattern set
+                if a.rgm_explorer == 'noise_labels':
+                    lab = np.random.default_rng(1000 + i).integers(0, 4, size=(20, 20))
+                else:
+                    lab = PT.halley_fractal(a=2 + i // 12, b=1 + i % 12, res=20, bounds=((-2, 2), (-2, 2)))
+                    if a.rgm_explorer == 'fractal_shuffled':
+                        lab = PT.shuffled(lab, seed=i + 1)
+                prgm.pattern = PT.PatternStream(a.rgm_explorer, lab.astype(np.int64), n_labels=4)
+                prgm.pattern.reset(int(np.random.default_rng(a.rgm_pattern_seed).integers(prgm.pattern.length)))
+                u = torch.tensor([[1., -1, 0, 0], [-1, 1, 0, 0], [0, 0, 1, -1], [0, 0, -1, 1]], device=dev)
+                with torch.no_grad():
+                    dir_protos = ln(u)                      # two axes x two signs, on level 3's action manifold
+
+                def f3_dir(zn, lab, _top=top, _P=dir_protos):
+                    with torch.no_grad():
+                        zz = torch.as_tensor(zn, dtype=torch.float32, device=dev).reshape(1, 1, -1)
+                        return _top.predict(zz, _top.action_embed(_P[lab % len(_P)].reshape(1, 1, -1)))[0, -1].float().cpu().numpy()
+                prgm.f3_dir = f3_dir
             if a.rgm_calib:                                 # F3 judges each hop, reality calibrates the judge
                 from system2.rgm_calib import CalibRGM
                 gr = torch.Generator().manual_seed(a.seed + 7)
@@ -472,6 +493,13 @@ def run_task(a, t):
             prgm.filtering, prgm.gated = not a.rgm_no_filter, not a.rgm_no_gate
             if a.rgm_f3:
                 prgm.add_transitions(np.load(a.rgm_f3)['N_imag'], a.rgm_f3_weight)
+        elif a.rgm_risk:                                    # same map, hop probabilities + -ln V instead of 1/16
+            from system2.rgm_risk import RiskRGM
+            prgm = RiskRGM.from_state(state)
+            prgm.time_discount, prgm.soft_thresh = a.rgm_risk_lambda, a.rgm_risk_thresh
+            prgm._refresh()
+            if a.rgm_imag_counts:                           # one-step F3 imagination as weighted extra counts
+                prgm.add_counts(np.load(a.rgm_imag_counts)['N_imag'].T, a.rgm_imag_weight)   # file: [next, prev]
         else:
             prgm = PaperRGM.from_state(state)
         prgm.stuck_k, prgm.relax, prgm.lookahead = a.rgm_stuck, a.rgm_relax, a.rgm_lookahead
@@ -571,10 +599,19 @@ def main():
     ap.add_argument('--rgm-dream', action='store_true', help='rgm-live: structure learning on F3 dreams')
     ap.add_argument('--rgm-curious', action='store_true',
                     help='rgm_paper: system2/rgm_curious.CuriousRGM -- live map, Beta hop model, one EFE planner')
+    ap.add_argument('--rgm-risk', action='store_true',
+                    help='rgm_paper: system2/rgm_risk.RiskRGM -- counts -> hop probabilities, risk = -ln V')
+    ap.add_argument('--rgm-risk-lambda', type=float, default=0.8, help='rgm-risk: value of arriving one step later')
+    ap.add_argument('--rgm-risk-thresh', type=float, default=1 / 16, help='rgm-risk: exit share with q = 0.5')
+    ap.add_argument('--rgm-imag-counts', default='', help='rgm-risk: npz with N_imag (K x K) imagined transitions')
+    ap.add_argument('--rgm-imag-weight', type=float, default=0.1, help='rgm-risk: weight of one imagined transition')
     ap.add_argument('--rgm-explore', action='store_true',
                     help='rgm-curious: phase 1, no goal (the goal image is ignored); curiosity builds the map')
-    ap.add_argument('--rgm-explorer', default='curious', choices=['curious', 'random'],
-                    help='rgm-curious explore phase: EFE novelty, or a random F3 step every latent step')
+    ap.add_argument('--rgm-explorer', default='curious',
+                    choices=['curious', 'random', 'fractal', 'fractal_shuffled', 'noise_labels'],
+                    help='rgm-curious explore phase: EFE novelty, a random F3 step every latent step, or a Free Lunch '
+                         'pattern stream (label -> one of 4 fixed macro-actions)')
+    ap.add_argument('--rgm-pattern-seed', type=int, default=0, help='pattern explorer: which pattern (per episode)')
     ap.add_argument('--rgm-eta', type=float, default=1.0, help='rgm-curious: epistemic precision with a goal')
     ap.add_argument('--rgm-rho', type=float, default=0.5, help='rgm-curious: state radius in median F3 steps')
     ap.add_argument('--rgm-stream', action='store_true',
@@ -652,7 +689,11 @@ def main():
                '--rgm-explorer', a.rgm_explorer, '--rgm-eta', str(a.rgm_eta), '--rgm-rho', str(a.rgm_rho),
                *(['--rgm-stream'] if a.rgm_stream else []), *(['--rgm-dump-stream'] if a.rgm_dump_stream else []),
                *(['--rgm-calib'] if a.rgm_calib else []), '--rgm-reach-m', str(a.rgm_reach_m),
-               '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist, '--tag', a.tag, '--out', str(out)]
+               '--rgm-calib-seqs', a.rgm_calib_seqs, '--rgm-persist', a.rgm_persist,
+               *(['--rgm-risk'] if a.rgm_risk else []), '--rgm-risk-lambda', str(a.rgm_risk_lambda),
+               '--rgm-risk-thresh', str(a.rgm_risk_thresh), '--rgm-imag-counts', a.rgm_imag_counts,
+               '--rgm-imag-weight', str(a.rgm_imag_weight), '--rgm-pattern-seed', str(a.rgm_pattern_seed),
+               '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]
         print(line[-1] if line else r.stderr[-2000:], flush=True)

@@ -22,11 +22,13 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 EVAL = ROOT / 'experiments' / 'eval_l3_planner.py'
 
 
-def run(args, tasks, out, persist, explore):
+def run(args, tasks, out, persist, explore, pattern_seed=None):
     cmd = [sys.executable, str(EVAL), '--planner', 'rgm_paper', '--rgm-obs-level', '3', '--rgm-curious',
            '--seed', str(args.seed), '--rgm-persist', str(persist), '--rgm-explorer', args.explorer,
            '--rgm-eta', str(args.eta), '--rgm-rho', str(args.rho), '--out', str(out),
            '--tasks', *map(str, tasks)]
+    if explore and pattern_seed is not None:
+        cmd += ['--rgm-pattern-seed', str(pattern_seed)]
     if args.dream:
         cmd.append('--rgm-dream')
     if args.stream:
@@ -42,7 +44,8 @@ def run(args, tasks, out, persist, explore):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--arm', required=True)
-    ap.add_argument('--explorer', default='curious', choices=['curious', 'random'])
+    ap.add_argument('--explorer', default='curious',
+                    choices=['curious', 'random', 'fractal', 'fractal_shuffled', 'noise_labels'])
     ap.add_argument('--dream', action='store_true')
     ap.add_argument('--stream', action='store_true', help='count a sliding-window transition at every env step')
     ap.add_argument('--dump-stream', action='store_true', help='save each explore episode\'s per-step z3 (stream npz)')
@@ -67,7 +70,8 @@ def main():
                 tasks = [a.explore_tasks[i % len(a.explore_tasks)] for i in range(done, b)]
                 # explore episodes are numbered so a repeated start state still gets its own result file
                 for i, t in zip(range(done, b), tasks):
-                    run(a, [t], base / 'explore' / f'ep{i:03d}', live, explore=True)
+                    run(a, [t], base / 'explore' / f'ep{i:03d}', live, explore=True,
+                        pattern_seed=a.seed * 1000 + i)            # a new pattern per episode (Free Lunch explorer)
                 shutil.copy(live, snap)
             elif not live.exists():
                 shutil.copy(snap, live)

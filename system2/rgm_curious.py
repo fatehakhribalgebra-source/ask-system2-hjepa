@@ -215,6 +215,8 @@ class CuriousRGM(LiveRGM):
         encodings). An imagined state: a FRESH one-step F3 prediction from the live latent, under the macro-action
         whose prediction lands nearest t -- the same kind of subgoal H-JEPA's own level 3 hands level 2 (an F3 latent
         imagined from somewhere else is not reachable: 0/18 hops in the 24 Nov smoke)."""
+        if getattr(self, '_pat_target', None) == t:                      # pattern explorer: its own F3 step
+            return self._pat_lat
         if self.real[t] or self.f3_latents is None or not self.fresh_f3_targets:
             return self.ex[t]
         Zn = self.f3_latents(np.asarray(z, np.float32))
@@ -359,6 +361,21 @@ class CuriousRGM(LiveRGM):
             j = self._new_state(np.asarray(zn, np.float32), real=False)
         return j
 
+    def _pattern_step(self, z):
+        """Free Lunch explorer: the next label of a pattern stream (raster order, 4 labels) picks one of 4 fixed
+        macro-actions (two axes x two signs of level 3's action space, on its LayerNorm manifold); the F3 step under
+        it is handed down. A fractal gives long runs of one label (persistent headings), its pixel shuffle the same
+        label histogram without structure. No learning, no novelty: the map only records what happens."""
+        p = self.pattern
+        lab = int(p.labels[p.pos % p.length]); p.pos = (p.pos + 1) % p.length
+        zn = np.asarray(self.f3_dir(np.asarray(z, np.float32), lab), np.float32)
+        j, d = self.nearest(zn)
+        if j is None or d > self.radius:
+            j = self._new_state(zn, real=False)
+        self._pat_target, self._pat_lat = j, zn
+        self.stats['label_' + str(lab)] = self.stats.get('label_' + str(lab), 0) + 1
+        return j
+
     def step(self, z, zg, observe=True, lr=1.0, tick=True):
         z = np.asarray(z, np.float32)
         self._calibrate(z)
@@ -380,6 +397,13 @@ class CuriousRGM(LiveRGM):
             return None, info | dict(reason='at_goal')
         if self.explore and self.explorer == 'random':
             target, mode = self._random_step(z), 'random_step'
+        elif self.explore and getattr(self, 'pattern', None) is not None:
+            target, mode = self._pattern_step(z), 'pattern_step'
+            self.stats['pattern_step'] = self.stats.get('pattern_step', 0) + 1
+            # the F3 step may land inside the current state: still hand its latent down (a direction, not a place)
+            self.issued = (s, int(target)) if target != s else None
+            self.last_target = int(target)
+            return int(target), info | dict(target=int(target), mode=mode)
         else:
             target, mode = self.decide(s, goal)
             if target is None and self.explore and self.f3_latents is not None:
