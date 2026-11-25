@@ -5,6 +5,34 @@ decides what to aim for. Current best System 2: a paper-style renormalising gene
 2025) that plans by inductive inference over a map counted from real experience and predicts the next latent, with
 H-JEPA's lower levels as its reflex.
 
+## Where this is going: an animal
+
+The end point is not a planner for one benchmark. It is an **animal**: an agent that
+
+- **learns from its own experience**. It plays, and its map of places and moves is counted from what really happened.
+  Nothing is handed to it from an offline dataset.
+- **dreams**. Between bouts it rehearses in its world model and tests what it imagined against reality.
+- **is driven by curiosity**. With no goal, it goes where it has the most to learn.
+- **has preferences**. A goal is a preferred observation, and it weighs reaching it against risk and time.
+- **builds abstractions**. Places, moves and routes are its "letters, words and sentences", each level slower and more
+  general than the one below.
+- **plans** over those abstractions, and acts through a reflex it does not have to think about.
+- **can act anywhere**. Mazes, pushing objects, games, and abstract spaces such as mathematics, where a "place" is a
+  state of a proof and a "move" is a step of reasoning. Nothing in the agent may assume a body, a floor or a fixed
+  action set.
+
+Every experiment is a step toward that agent. Each one is judged by whether it removes an assumption the animal
+could not make, not only by a benchmark score.
+
+**Roadmap** (as of 25 Nov 2026):
+1. AntMaze, the map from play alone: curious / random / Free Lunch explorers, the risk planner, data-decided states
+   (branch `rgm-play-map`, [docs/NOTES_2026-11-25.md](docs/NOTES_2026-11-25.md)).
+2. **One continuous life** (`experiments/life_run.py`). No episodes and no resets: the ant plays, a goal is thrown
+   every 350 steps (about 20 goals), and between goals it plays again. We look at its behaviour over the whole life.
+3. Push-T and the LEXA benchmark. Generalise the agent beyond navigation, improve the world model with the
+   test-time-training / geometry / counterfactual papers, train it, and test it across different games.
+4. Then other worlds, including abstract ones.
+
 ## Start here (new machine or new session)
 
 1. **Restore** the environment and data: [RESTORE.md](RESTORE.md) (verified 20 Nov 2026, about 1 h; ~60 GB of data
