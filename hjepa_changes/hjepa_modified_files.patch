@@ -62,8 +62,89 @@ index 2200e8a..91dacc2 100644
  
  import hydra
  from omegaconf import DictConfig
+diff --git a/h_jepa/hjepa_utils.py b/h_jepa/hjepa_utils.py
+index a9996a6..d3a1899 100644
+--- a/h_jepa/hjepa_utils.py
++++ b/h_jepa/hjepa_utils.py
+@@ -145,6 +145,20 @@ def hjepa_forward(self, batch, stage, cfg, *, normalize_batch):
+                     else component_loss + weighted_sigreg_loss
+                 )
+ 
++            if _loss_term_enabled(component_cfg, "svreg"):              # H-JEPA v2 (C1): Slow SVReg geometry
++                from loss import SVReg
++                svreg_loss = SVReg(int(component_cfg.svreg.get("num_proj", 256)),
++                                   float(component_cfg.svreg.get("floor", 1.0)))(component_emb)
++                output[_component_loss_key("svreg", component, level_suffix)] = svreg_loss
++                weighted = _loss_term_weight(component_cfg, "svreg") * svreg_loss
++                component_loss = weighted if component_loss is None else component_loss + weighted
++            if _loss_term_enabled(component_cfg, "slow") and component_emb.size(1) > 1:
++                from loss import slowness
++                slow_loss = slowness(component_emb, float(component_cfg.slow.get("frac", 0.125)))
++                output[_component_loss_key("slow", component, level_suffix)] = slow_loss
++                weighted = _loss_term_weight(component_cfg, "slow") * slow_loss
++                component_loss = weighted if component_loss is None else component_loss + weighted
++
+             if component_loss is None:
+                 continue
+             output[f"{component}_loss{level_suffix}"] = component_loss
+@@ -270,6 +284,8 @@ def create_world_model(cfg):
+         embed_dims[level] = embed_dim
+ 
+         predictor_cfg = dict(level_cfg.predictor)
++        gated_residual = bool(predictor_cfg.pop("gated_residual", False))   # H-JEPA v2 (C2)
++        gate_init = float(predictor_cfg.pop("gate_init", 1.0))
+         if predictor_cfg.pop("type", None) == "causal_transformer":
+             predictor = CausalTransformerPredictor(input_dim=embed_dim, **predictor_cfg)
+         else:
+@@ -286,6 +302,8 @@ def create_world_model(cfg):
+                     input_dim=hidden_dim,
+                     output_dim=embed_dim,
+                 ),
++                gate_dim=embed_dim if gated_residual else None,
++                gate_init=gate_init,
+             )
+ 
+         action_encoder = None
+diff --git a/h_jepa/loss.py b/h_jepa/loss.py
+index dd00289..c7d9393 100644
+--- a/h_jepa/loss.py
++++ b/h_jepa/loss.py
+@@ -47,6 +47,33 @@ class SIGReg(torch.nn.Module):
+         return statistic.mean()
+ 
+ 
++class SVReg(torch.nn.Module):
++    """Sliced variance regularisation (Ren et al. 2026, Content-Geometry tradeoff): a one-sided floor on the standard
++    deviation of the latent along random unit directions, R = E_u[max(0, floor - std(z . u))^2]. Unlike SIGReg it
++    does not push the latent toward an isotropic Gaussian, so a smooth map of the state can form."""
++
++    def __init__(self, num_proj=256, floor=1.0):
++        super().__init__()
++        self.num_proj, self.floor = int(num_proj), float(floor)
++
++    def forward(self, z):
++        """z: (..., D); statistics over every leading position (batch and time)."""
++        z = z.reshape(-1, z.size(-1)).float()
++        U = torch.randn(z.size(-1), self.num_proj, device=z.device)
++        U = U / U.norm(dim=0, keepdim=True)
++        return F.relu(self.floor - (z @ U).std(0)).square().mean()
++
++
++def slowness(z, frac=0.125):
++    """Variance-normalised slowness on a fixed set of 'slow channels' (the first frac of dims), Slow SVReg eq. (2):
++    E_t ||b_{t+1} - b_t||^2 / tr Var(b). z: (B, T, D) with T >= 2."""
++    k = max(1, int(round(frac * z.size(-1))))
++    b = z[..., :k].float()
++    num = (b[:, 1:] - b[:, :-1]).square().sum(-1).mean()
++    den = b.reshape(-1, k).var(0).sum() + 1e-6
++    return num / den
++
++
+ class InverseDynamicsModel(nn.Module):
+     def __init__(self, state_dim, hidden_dim, action_dim):
+         super().__init__()
 diff --git a/h_jepa/main_hjepa.py b/h_jepa/main_hjepa.py
-index c826b5b..37a60ef 100644
+index c826b5b..b8d9a1e 100644
 --- a/h_jepa/main_hjepa.py
 +++ b/h_jepa/main_hjepa.py
 @@ -1,6 +1,12 @@
@@ -101,7 +182,7 @@ index c826b5b..37a60ef 100644
          if value.ndim < 4 or value.size(-3) != 3:
              raise ValueError(
                  f"Expected uint8 pixel tensor '{key}' to have channel-first RGB "
-@@ -199,6 +213,17 @@ def run(cfg):
+@@ -199,6 +213,23 @@ def run(cfg):
  
      normalizer_artifact = build_normalizer_artifact(cfg, train_dataset)
      world_model, losses = create_world_model(cfg)
@@ -116,9 +197,44 @@ index c826b5b..37a60ef 100644
 +            new_action_dim=int(cfg.level1.wm.action_dim),
 +            frameskip=int(cfg.data.dataset.level1.frameskip),
 +        )
++    for lv in cfg.get("freeze_levels", None) or []:        # H-JEPA v2: fine-tune upper levels only
++        world_model.jepas[int(lv) - 1].requires_grad_(False)
++        for m in world_model.jepas[int(lv) - 1].modules():    # keep BatchNorm running stats as released
++            if isinstance(m, torch.nn.modules.batchnorm._BatchNorm):
++                m.momentum = 0.0
++        logging.info(f"freeze_levels: level {lv} frozen")
      world_model.normalizer_artifact = normalizer_artifact
      models = {
          "model": world_model,
+diff --git a/h_jepa/models/jepa.py b/h_jepa/models/jepa.py
+index c3b039f..affaf65 100644
+--- a/h_jepa/models/jepa.py
++++ b/h_jepa/models/jepa.py
+@@ -105,15 +105,22 @@ class FusionEncoder(nn.Module):
+ class ProjectedPredictor(nn.Module):
+     """Predictor followed by its projection head."""
+ 
+-    def __init__(self, predictor, projector=None):
++    def __init__(self, predictor, projector=None, gate_dim=None, gate_init=1.0):
+         super().__init__()
+         self.predictor = predictor
+         self.projector = projector or nn.Identity()
++        # H-JEPA v2 (C2), gated residual predictor (Slow SVReg): z_next = z + c * (f(z, u) - z), one gate per dim.
++        # gate_init 1.0 reproduces a warm-started model exactly; training moves c toward "copy what does not change".
++        self.gate = nn.Parameter(torch.full((gate_dim,), float(gate_init))) if gate_dim else None
+ 
+     def forward(self, emb, act_emb):
+         preds = self.predictor(emb, act_emb)
+         preds = self.projector(rearrange(preds, "b t d -> (b t) d"))
+-        return rearrange(preds, "(b t) ... -> b t ...", b=emb.size(0))
++        preds = rearrange(preds, "(b t) ... -> b t ...", b=emb.size(0))
++        gate = getattr(self, "gate", None)                  # release checkpoints have no gate
++        if gate is not None and preds.shape == emb.shape:
++            preds = emb + gate * (preds - emb)
++        return preds
+ 
+ 
+ class JEPA(nn.Module):
 diff --git a/h_jepa/planning_eval.py b/h_jepa/planning_eval.py
 index 8f6f264..f7411eb 100644
 --- a/h_jepa/planning_eval.py

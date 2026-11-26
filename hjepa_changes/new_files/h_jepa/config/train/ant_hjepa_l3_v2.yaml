@@ -1,0 +1,50 @@
+# H-JEPA v2 (ASK Animal design, docs/DESIGN_ANIMAL.md section 2b, step T1): the released 3-level AntMaze H-JEPA,
+# warm-started, level 1 frozen, levels 2-3 fine-tuned with Slow SVReg (C1) and a gated residual predictor (C2).
+defaults:
+- ant_hjepa_l3
+- _self_
+output_model_name: ant_hjepa_l3_v2
+init_from:
+  ckpt: ${oc.env:HJEPA_HOME}/ckpts/ant/ant_hjepa_l3/seed${seed}/ant_hjepa_l3_object.ckpt
+  old_action_dim: 8
+freeze_levels: [1]
+trainer:
+  max_epochs: 2
+planning_eval:
+  enabled: false          # evaluated with our own runners (experiments/eval_l3_planner.py, z3_geometry.py)
+final_probing_decoding_eval:
+  enabled: false
+level2:
+  predictor:
+    gated_residual: true
+    gate_init: 1.0
+  loss:
+    embed:
+      sigreg:
+        enabled: false
+      svreg:
+        enabled: true
+        weight: 1.0
+        num_proj: 256
+        floor: 1.0
+      slow:
+        enabled: true
+        weight: 0.1
+        frac: 0.125
+level3:
+  predictor:
+    gated_residual: true
+    gate_init: 1.0
+  loss:
+    embed:
+      sigreg:
+        enabled: false
+      svreg:
+        enabled: true
+        weight: 1.0
+        num_proj: 256
+        floor: 1.0
+      slow:
+        enabled: true
+        weight: 0.1
+        frac: 0.125

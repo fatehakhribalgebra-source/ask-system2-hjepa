@@ -1,0 +1,16 @@
+{
+ "macro": "data/macro_actions_ant_l3_h1_seed43.npz",
+ "n": 23750,
+ "episodes": 1250,
+ "probe_r2": 0.9973,
+ "jag_z": 2.215,
+ "jag_xy": 1.494,
+ "rho_maze": 0.4743,
+ "rho_local": 0.8123,
+ "place_spread": 0.538,
+ "place_cells": 4.0,
+ "place_purity": 0.529,
+ "places_per_cell": 3.0,
+ "maze_cells": 48,
+ "jag_ratio": 1.483
+}

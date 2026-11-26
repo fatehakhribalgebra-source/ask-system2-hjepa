@@ -33,6 +33,7 @@ class RiskRGM(PaperRGM):
     soft_thresh = U_THRESH   # exit at this fraction of the best exit -> q = 0.5
     ticks_left = 17          # set by the runner each call
     long_horizon = 64        # horizon when nothing is reachable in the time left
+    handover_v = 0.0         # hand over to H-JEPA when the best hop's reach probability is below this (0 = never)
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
@@ -110,6 +111,10 @@ class RiskRGM(PaperRGM):
             tag = 'long_route'
         if val.max() <= 0:
             return None, None
+        if tag == 'long_route' or val.max() < self.handover_v:      # the map is unsure: H-JEPA plans instead
+            if self.handover_v > 0:
+                self.stats['unsure'] = self.stats.get('unsure', 0) + 1
+                return None, None
         score = np.log(val + 1e-300)
         if self.last_target is not None:
             score = score + self.habit * (self.dst[here] == self.last_target)

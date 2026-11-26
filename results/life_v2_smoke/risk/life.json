@@ -1,0 +1,251 @@
+{
+ "args": {
+  "seed": 42,
+  "env": "ant",
+  "levels": 3,
+  "birth_task": 0,
+  "goal_tasks": null,
+  "goals": 2,
+  "goal_every": 60,
+  "play_steps": 200,
+  "explorer": "curious",
+  "eta": 1.0,
+  "rho": 0.5,
+  "dream": false,
+  "sleep_k": 64,
+  "planner": "risk",
+  "risk_lambda": 0.8,
+  "handover_v": 0.05,
+  "out": "results/life_v2_smoke/risk"
+ },
+ "goals": [
+  {
+   "goal": 0,
+   "task": 0,
+   "success": false,
+   "steps": null,
+   "start_dist": 6.62306500326366,
+   "t_thrown": 200,
+   "rgm_decides": 0.0,
+   "sleep_latents": 260
+  },
+  {
+   "goal": 1,
+   "task": 1,
+   "success": false,
+   "steps": null,
+   "start_dist": 7.522873287022766,
+   "t_thrown": 260,
+   "rgm_decides": 0.0,
+   "sleep_latents": 320
+  }
+ ],
+ "bouts": [
+  {
+   "phase": "play",
+   "goal": null,
+   "end": 60,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "new_states": 1,
+    "imagined": 15,
+    "refused": 0,
+    "efe_fallback": 0,
+    "moves_ok": 1,
+    "moves_failed": 0,
+    "no_route": 0,
+    "dream_states": 4,
+    "dream_steps": 0,
+    "made_real": 1,
+    "pragmatic": 0,
+    "epistemic": 2,
+    "random_step": 0,
+    "handover": 0,
+    "at_goal": 0,
+    "stream_steps": 60,
+    "stream_edges": 28
+   },
+   "decisions": 4,
+   "handovers": 0,
+   "map": {
+    "states": 5,
+    "real_states": 2,
+    "edges": 9,
+    "tried": 1,
+    "confirmed": 1,
+    "refuted": 0,
+    "mean_ig": 0.17086972968902853
+   }
+  },
+  {
+   "phase": "play",
+   "goal": null,
+   "end": 120,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "new_states": 0,
+    "imagined": 20,
+    "refused": 0,
+    "efe_fallback": 0,
+    "moves_ok": 0,
+    "moves_failed": 1,
+    "no_route": 0,
+    "dream_states": 1,
+    "dream_steps": 0,
+    "made_real": 1,
+    "pragmatic": 0,
+    "epistemic": 2,
+    "random_step": 0,
+    "handover": 0,
+    "at_goal": 0,
+    "stream_steps": 60,
+    "stream_edges": 46
+   },
+   "decisions": 4,
+   "handovers": 0,
+   "map": {
+    "states": 6,
+    "real_states": 3,
+    "edges": 12,
+    "tried": 2,
+    "confirmed": 1,
+    "refuted": 0,
+    "mean_ig": 0.1498291612108676
+   }
+  },
+  {
+   "phase": "play",
+   "goal": null,
+   "end": 180,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "new_states": 0,
+    "imagined": 16,
+    "refused": 0,
+    "efe_fallback": 0,
+    "moves_ok": 0,
+    "moves_failed": 1,
+    "no_route": 0,
+    "dream_states": 1,
+    "dream_steps": 0,
+    "made_real": 1,
+    "pragmatic": 0,
+    "epistemic": 2,
+    "random_step": 0,
+    "handover": 0,
+    "at_goal": 0,
+    "stream_steps": 60,
+    "stream_edges": 28
+   },
+   "decisions": 4,
+   "handovers": 0,
+   "map": {
+    "states": 7,
+    "real_states": 4,
+    "edges": 15,
+    "tried": 3,
+    "confirmed": 1,
+    "refuted": 1,
+    "mean_ig": 0.13387782855445673
+   }
+  },
+  {
+   "phase": "play",
+   "goal": null,
+   "end": 200,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "new_states": 0,
+    "imagined": 9,
+    "refused": 0,
+    "efe_fallback": 0,
+    "moves_ok": 0,
+    "moves_failed": 0,
+    "no_route": 0,
+    "dream_states": 0,
+    "dream_steps": 0,
+    "made_real": 0,
+    "pragmatic": 0,
+    "epistemic": 1,
+    "random_step": 0,
+    "handover": 0,
+    "at_goal": 0,
+    "stream_steps": 20,
+    "stream_edges": 16
+   },
+   "decisions": 2,
+   "handovers": 0,
+   "map": {
+    "states": 7,
+    "real_states": 4,
+    "edges": 18,
+    "tried": 3,
+    "confirmed": 1,
+    "refuted": 1,
+    "mean_ig": 0.1369945656486073
+   }
+  },
+  {
+   "phase": "goal",
+   "goal": 0,
+   "end": 260,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "blocked": 0,
+    "relaxed": 0,
+    "made": 0,
+    "failed": 0,
+    "risk_steps": 0,
+    "long_route": 0,
+    "no_route": 4,
+    "unsure": 3
+   },
+   "decisions": 4,
+   "handovers": 4,
+   "map": {
+    "K": 64
+   }
+  },
+  {
+   "phase": "goal",
+   "goal": 1,
+   "end": 320,
+   "stats": {
+    "inductions": 0,
+    "kept": 0,
+    "blocked": 0,
+    "relaxed": 0,
+    "made": 0,
+    "failed": 0,
+    "risk_steps": 0,
+    "long_route": 0,
+    "no_route": 4
+   },
+   "decisions": 4,
+   "handovers": 4,
+   "map": {
+    "K": 64
+   }
+  }
+ ],
+ "sleeps": [
+  {
+   "goal": 0,
+   "latents": 200,
+   "K": 64,
+   "seconds": 0.1
+  },
+  {
+   "goal": 1,
+   "latents": 260,
+   "K": 64,
+   "seconds": 0.1
+  }
+ ],
+ "seconds": 54.525115728378296
+}
