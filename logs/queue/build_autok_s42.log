@@ -1,0 +1,17 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/build_rgm_stream.py --streams results/curious/seed42/dump_curious/explore --episodes 50 --k auto --out data/rgm_stream_curious_B50_autok_seed42.pkl
+  K   16: median nearest-state distance 5.16 (one level-3 step = 2.42)
+  K   24: median nearest-state distance 5.29 (one level-3 step = 2.42)
+  K   32: median nearest-state distance 5.34 (one level-3 step = 2.42)
+  K   48: median nearest-state distance 4.20 (one level-3 step = 2.42)
+  K   64: median nearest-state distance 3.85 (one level-3 step = 2.42)
+  K   96: median nearest-state distance 2.93 (one level-3 step = 2.42)
+  K  128: median nearest-state distance 2.60 (one level-3 step = 2.42)
+  K  192: median nearest-state distance 1.84 (one level-3 step = 2.42)
+  K  256: median nearest-state distance 1.66 (one level-3 step = 2.42)
+data-decided K = 128
+50 episodes -> 1000 sequences, 17500 latents | level 1: 128 items, 961 transitions | level 2: 961 items, 5017 transitions | level 3: 5017 items, 6887 transitions
+state sizes min 9 median 113 max 432
+saved data/rgm_stream_curious_B50_autok_seed42.pkl
+
+exit code 0
+JOB DONE

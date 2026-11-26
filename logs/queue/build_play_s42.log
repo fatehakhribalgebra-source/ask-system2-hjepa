@@ -1,0 +1,7 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/build_rgm_stream.py --streams results/curious/seed42/dump_curious/explore --episodes 50 --k 64 --out data/rgm_stream_curious_B50_seed42.pkl
+50 episodes -> 1000 sequences, 17500 latents | level 1: 64 items, 293 transitions | level 2: 293 items, 1853 transitions | level 3: 1853 items, 4460 transitions
+state sizes min 16 median 256 max 858
+saved data/rgm_stream_curious_B50_seed42.pkl
+
+exit code 0
+JOB DONE

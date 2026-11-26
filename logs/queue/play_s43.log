@@ -1,0 +1,55 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/eval_l3_planner.py --planner rgm_paper --rgm-obs-level 3 --seed 43 --rgm-paper-path data/rgm_stream_curious_B50_seed43.pkl --tasks 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 --out results/paper_eval_play/play_seed43
+{"task": 0, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 98.63194251060486, "rgm_stats": {"inductions": 5, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 1, "planner": "rgm_paper", "success": true, "steps_to_success": 212.0, "seconds": 107.1203761100769, "rgm_stats": {"inductions": 4, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 2, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 100.41231989860535, "rgm_stats": {"inductions": 6, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 102.45468258857727, "rgm_stats": {"inductions": 4, "kept": 10, "blocked": 0, "relaxed": 0}}
+{"task": 4, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 150.20788764953613, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 5, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 83.78208470344543, "rgm_stats": {"inductions": 6, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 230.0, "seconds": 123.89684176445007, "rgm_stats": {"inductions": 3, "kept": 4, "blocked": 0, "relaxed": 0}}
+{"task": 7, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 95.05437564849854, "rgm_stats": {"inductions": 7, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 8, "planner": "rgm_paper", "success": true, "steps_to_success": 329.0, "seconds": 91.08710145950317, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 9, "planner": "rgm_paper", "success": true, "steps_to_success": 161.0, "seconds": 130.58396244049072, "rgm_stats": {"inductions": 3, "kept": 5, "blocked": 0, "relaxed": 0}}
+{"task": 10, "planner": "rgm_paper", "success": true, "steps_to_success": 173.0, "seconds": 99.32594537734985, "rgm_stats": {"inductions": 3, "kept": 5, "blocked": 0, "relaxed": 0}}
+{"task": 11, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 117.40741777420044, "rgm_stats": {"inductions": 2, "kept": 4, "blocked": 0, "relaxed": 0}}
+{"task": 12, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 116.39949226379395, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 13, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 87.76050448417664, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 14, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 91.62292742729187, "rgm_stats": {"inductions": 6, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 15, "planner": "rgm_paper", "success": true, "steps_to_success": 226.0, "seconds": 97.40360355377197, "rgm_stats": {"inductions": 3, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 16, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 105.91973328590393, "rgm_stats": {"inductions": 6, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 17, "planner": "rgm_paper", "success": true, "steps_to_success": 318.0, "seconds": 149.72502064704895, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 18, "planner": "rgm_paper", "success": true, "steps_to_success": 316.0, "seconds": 132.17308139801025, "rgm_stats": {"inductions": 2, "kept": 4, "blocked": 0, "relaxed": 0}}
+{"task": 19, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 117.58068370819092, "rgm_stats": {"inductions": 5, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 20, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 100.32687067985535, "rgm_stats": {"inductions": 4, "kept": 10, "blocked": 0, "relaxed": 0}}
+{"task": 21, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 85.06149888038635, "rgm_stats": {"inductions": 6, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 22, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 96.64753127098083, "rgm_stats": {"inductions": 4, "kept": 10, "blocked": 0, "relaxed": 0}}
+{"task": 23, "planner": "rgm_paper", "success": true, "steps_to_success": 291.0, "seconds": 104.87946486473083, "rgm_stats": {"inductions": 4, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 24, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 112.46030282974243, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 25, "planner": "rgm_paper", "success": true, "steps_to_success": 195.0, "seconds": 123.54267311096191, "rgm_stats": {"inductions": 3, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 26, "planner": "rgm_paper", "success": true, "steps_to_success": 172.0, "seconds": 120.78039455413818, "rgm_stats": {"inductions": 2, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 27, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 90.86222910881042, "rgm_stats": {"inductions": 4, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 28, "planner": "rgm_paper", "success": true, "steps_to_success": 314.0, "seconds": 142.1602246761322, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 29, "planner": "rgm_paper", "success": true, "steps_to_success": 293.0, "seconds": 139.12659430503845, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 30, "planner": "rgm_paper", "success": true, "steps_to_success": 238.0, "seconds": 137.57461142539978, "rgm_stats": {"inductions": 2, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 31, "planner": "rgm_paper", "success": true, "steps_to_success": 236.0, "seconds": 85.43696308135986, "rgm_stats": {"inductions": 4, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 32, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 122.88563847541809, "rgm_stats": {"inductions": 2, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 33, "planner": "rgm_paper", "success": true, "steps_to_success": 154.0, "seconds": 87.89278316497803, "rgm_stats": {"inductions": 6, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 34, "planner": "rgm_paper", "success": true, "steps_to_success": 211.0, "seconds": 140.89022278785706, "rgm_stats": {"inductions": 2, "kept": 3, "blocked": 0, "relaxed": 0}}
+{"task": 35, "planner": "rgm_paper", "success": true, "steps_to_success": 240.0, "seconds": 141.42840194702148, "rgm_stats": {"inductions": 1, "kept": 1, "blocked": 0, "relaxed": 0}}
+{"task": 36, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 87.73026609420776, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 37, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 122.27763438224792, "rgm_stats": {"inductions": 1, "kept": 1, "blocked": 0, "relaxed": 0}}
+{"task": 38, "planner": "rgm_paper", "success": true, "steps_to_success": 251.0, "seconds": 86.89707636833191, "rgm_stats": {"inductions": 4, "kept": 5, "blocked": 0, "relaxed": 0}}
+{"task": 39, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 73.48303270339966, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 40, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 101.29700756072998, "rgm_stats": {"inductions": 3, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 41, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 105.10168266296387, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 42, "planner": "rgm_paper", "success": true, "steps_to_success": 170.0, "seconds": 61.339757204055786, "rgm_stats": {"inductions": 5, "kept": 9, "blocked": 0, "relaxed": 0}}
+{"task": 43, "planner": "rgm_paper", "success": true, "steps_to_success": 297.0, "seconds": 62.98375582695007, "rgm_stats": {"inductions": 7, "kept": 7, "blocked": 0, "relaxed": 0}}
+{"task": 44, "planner": "rgm_paper", "success": true, "steps_to_success": 296.0, "seconds": 110.31359505653381, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 45, "planner": "rgm_paper", "success": true, "steps_to_success": 249.0, "seconds": 98.9629454612732, "rgm_stats": {"inductions": 2, "kept": 4, "blocked": 0, "relaxed": 0}}
+{"task": 46, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 59.942593812942505, "rgm_stats": {"inductions": 4, "kept": 10, "blocked": 0, "relaxed": 0}}
+{"task": 47, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 111.71222710609436, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 48, "planner": "rgm_paper", "success": true, "steps_to_success": 231.0, "seconds": 112.14705967903137, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 49, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 92.97452783584595, "rgm_stats": {"inductions": 6, "kept": 4, "blocked": 0, "relaxed": 0}}
+rgm_paper: 24/50 tasks solved
+
+exit code 0
+JOB DONE

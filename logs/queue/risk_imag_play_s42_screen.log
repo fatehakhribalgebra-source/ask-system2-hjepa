@@ -1,0 +1,18 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/eval_l3_planner.py --planner rgm_paper --rgm-obs-level 3 --seed 42 --rgm-paper-path data/rgm_stream_curious_B50_seed42.pkl --tasks 0 1 2 3 4 5 6 7 8 9 10 11 12 --out results/risk_screen/play_imag_s42 --rgm-risk --rgm-imag-counts data/f3_play_curious_B50_seed42.npz
+{"task": 0, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 80.98210716247559, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 1, "failed": 12, "risk_steps": 7, "long_route": 7, "no_route": 0}}
+{"task": 1, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 93.84964871406555, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 2, "failed": 11, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 2, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 115.31764030456543, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 1, "failed": 12, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 89.81805872917175, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 4, "failed": 9, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 4, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 95.74605894088745, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 2, "failed": 11, "risk_steps": 8, "long_route": 6, "no_route": 0}}
+{"task": 5, "planner": "rgm_paper", "success": true, "steps_to_success": 316.0, "seconds": 118.77530813217163, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 3, "failed": 3, "risk_steps": 6, "long_route": 0, "no_route": 0}}
+{"task": 6, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 95.54140329360962, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 2, "failed": 11, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 7, "planner": "rgm_paper", "success": true, "steps_to_success": 222.0, "seconds": 93.0445487499237, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 3, "failed": 10, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 8, "planner": "rgm_paper", "success": true, "steps_to_success": 307.0, "seconds": 105.30056142807007, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 3, "failed": 8, "risk_steps": 11, "long_route": 0, "no_route": 0}}
+{"task": 9, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 113.56424498558044, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 1, "failed": 12, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 10, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 113.05042028427124, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 4, "failed": 5, "risk_steps": 10, "long_route": 0, "no_route": 0}}
+{"task": 11, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 87.31587195396423, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 3, "failed": 10, "risk_steps": 14, "long_route": 0, "no_route": 0}}
+{"task": 12, "planner": "rgm_paper", "success": true, "steps_to_success": 218.0, "seconds": 112.36100745201111, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0, "made": 4, "failed": 8, "risk_steps": 12, "long_route": 0, "no_route": 0}}
+rgm_paper: 4/13 tasks solved
+
+exit code 0
+JOB DONE

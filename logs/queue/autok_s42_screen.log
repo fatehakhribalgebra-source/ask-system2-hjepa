@@ -1,0 +1,18 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/eval_l3_planner.py --planner rgm_paper --rgm-obs-level 3 --seed 42 --rgm-paper-path data/rgm_stream_curious_B50_autok_seed42.pkl --tasks 0 1 2 3 4 5 6 7 8 9 10 11 12 --out results/stream_k64/curious_B50_autok
+{"task": 0, "planner": "rgm_paper", "success": true, "steps_to_success": 300.0, "seconds": 136.59336590766907, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 1, "planner": "rgm_paper", "success": true, "steps_to_success": 327.0, "seconds": 169.327054977417, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 2, "planner": "rgm_paper", "success": true, "steps_to_success": 335.0, "seconds": 95.52827572822571, "rgm_stats": {"inductions": 4, "kept": 8, "blocked": 0, "relaxed": 0}}
+{"task": 3, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 128.20964169502258, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 4, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 157.82094025611877, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 5, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 150.5158724784851, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 6, "planner": "rgm_paper", "success": true, "steps_to_success": 250.0, "seconds": 145.3959584236145, "rgm_stats": {"inductions": 2, "kept": 4, "blocked": 0, "relaxed": 0}}
+{"task": 7, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 150.93485379219055, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 8, "planner": "rgm_paper", "success": true, "steps_to_success": 316.0, "seconds": 127.24949526786804, "rgm_stats": {"inductions": 3, "kept": 2, "blocked": 0, "relaxed": 0}}
+{"task": 9, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 120.77616357803345, "rgm_stats": {"inductions": 1, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 10, "planner": "rgm_paper", "success": false, "steps_to_success": NaN, "seconds": 102.99843645095825, "rgm_stats": {"inductions": 7, "kept": 6, "blocked": 0, "relaxed": 0}}
+{"task": 11, "planner": "rgm_paper", "success": true, "steps_to_success": 325.0, "seconds": 126.48965811729431, "rgm_stats": {"inductions": 2, "kept": 0, "blocked": 0, "relaxed": 0}}
+{"task": 12, "planner": "rgm_paper", "success": true, "steps_to_success": 342.0, "seconds": 155.31549835205078, "rgm_stats": {"inductions": 0, "kept": 0, "blocked": 0, "relaxed": 0}}
+rgm_paper: 7/13 tasks solved
+
+exit code 0
+JOB DONE

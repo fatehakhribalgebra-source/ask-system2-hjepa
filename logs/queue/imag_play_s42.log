@@ -1,0 +1,6 @@
+C:\Users\TP130289\AppData\Local\miniconda3\envs\hjepa\python.exe experiments/build_f3_transitions.py --seed 42 --streams results/curious/seed42/dump_curious/explore --model data/rgm_stream_curious_B50_seed42.pkl --out data/f3_play_curious_B50_seed42.npz
+17500 play latents x 12 macro-actions: 185887 imagined latents fit a state | edges real 293, imagined 460, new 181 (10.3% of imagined mass)
+saved data\f3_play_curious_B50_seed42.npz
+
+exit code 0
+JOB DONE
