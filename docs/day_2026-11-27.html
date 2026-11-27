@@ -1,0 +1,322 @@
+<title>Animal v1 · 27 Nov log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~720px) of numbered lab-log sections; figures may run a little wider. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #1b2230; --muted: #5d6676; --line: #d9dde5;
+  --rgm: #2463c9; --gd: #d8622a; --parked: #b04a6a; --ok: #1f8a5b; --bad: #c23b3b; --soft: #eef1f6;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161d; --panel: #1a2029; --fg: #e4e8ef; --muted: #9aa3b2; --line: #2e3643;
+  --rgm: #6b9dff; --gd: #f08a55; --parked: #e07a9b; --ok: #4cc28c; --bad: #ef6b6b; --soft: #202734; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161d; --panel: #1a2029; --fg: #e4e8ef; --muted: #9aa3b2; --line: #2e3643;
+  --rgm: #6b9dff; --gd: #f08a55; --parked: #e07a9b; --ok: #4cc28c; --bad: #ef6b6b; --soft: #202734; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.65 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 760px; margin: 0 auto; padding-block: 2.5rem 4rem; display: flex; flex-direction: column; gap: 3rem; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); }
+h2 { font-size: 1.45rem; display: flex; gap: .6rem; align-items: baseline; }
+h2 .n { font-family: var(--mono); font-size: .85rem; color: var(--muted); font-weight: 500; }
+h3 { font-size: 1.05rem; }
+section { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--muted); font-size: 1.05rem; }
+.eyebrow { font: 500 .75rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code { font-family: var(--mono); font-size: .88em; background: var(--soft); padding: .1em .35em; border-radius: 4px; }
+figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; overflow-x: auto; }
+figure svg { display: block; max-width: 100%; height: auto; margin: 0 auto; color: var(--fg); }
+figcaption { font-size: .86rem; color: var(--muted); margin-top: .6rem; }
+.math { overflow-x: auto; padding: .4rem 0; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: .8rem 1rem; }
+.tile .k { font-size: .8rem; color: var(--muted); }
+.tile .v { font: 600 1.6rem var(--display); font-variant-numeric: tabular-nums; }
+.tile .s { font-size: .78rem; color: var(--muted); }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+.pill { display: inline-block; font: 500 .72rem var(--mono); padding: .1rem .45rem; border-radius: 99px; border: 1px solid currentColor; }
+.done { color: var(--ok); } .parked { color: var(--parked); } .next { color: var(--rgm); } .later { color: var(--muted); }
+.rgm { color: var(--rgm); } .gd { color: var(--gd); }
+.grid { display: grid; grid-template-columns: 3.2rem repeat(3, minmax(0, 1fr)) .6rem repeat(3, minmax(0, 1fr)); gap: 3px; font: 500 .74rem var(--mono); min-width: 420px; }
+.grid div { padding: .3rem 0; text-align: center; border-radius: 3px; }
+.grid .h { color: var(--muted); background: none; }
+.c-ok-r { background: color-mix(in srgb, var(--rgm) 22%, transparent); }
+.c-ok-g { background: color-mix(in srgb, var(--gd) 22%, transparent); }
+.c-x { background: var(--soft); color: var(--muted); }
+.flip { outline: 1.5px solid var(--bad); outline-offset: -1.5px; }
+.note { border-left: 3px solid var(--rgm); padding: .2rem 0 .2rem .9rem; color: var(--fg); }
+.svg-muted { fill: var(--muted); } .svg-line { stroke: var(--line); }
+.f-rgm { fill: var(--rgm); } .f-gd { fill: var(--gd); } .s-rgm { stroke: var(--rgm); } .s-gd { stroke: var(--gd); }
+.f-parked { fill: var(--parked); } .s-parked { stroke: var(--parked); } .s-bad { stroke: var(--bad); } .f-bad { fill: var(--bad); }
+.f-ok { fill: var(--ok); } .s-ok { stroke: var(--ok); } .f-panel { fill: var(--panel); } .f-soft { fill: var(--soft); }
+</style>
+
+<main>
+<header style="display:flex;flex-direction:column;gap:.6rem">
+  <div class="eyebrow">ask-system2-hjepa · branch animal-v1 · 27 Nov 2026</div>
+  <h1>Animal v1 · 27 Nov log</h1>
+  <p class="lede">We rebuilt the setup on this machine and parked a new design for how upper-level actions are built from lower ones. Then we did step 1 of the whiteboard plan: we found why runs of the same AntMaze task disagree, fixed it, and measured what is left. Our System 2 (RGM over H-JEPA's z3) both solves more tasks and reaches goals faster than H-JEPA's own planner.</p>
+</header>
+
+<section>
+  <h2><span class="n">··</span>Our model: System 2 over a frozen H-JEPA</h2>
+  <p>H-JEPA stays frozen. Our System 2 is a renormalising generative model (RGM), built the way the "From pixels to planning" paper builds it, but it sees H-JEPA's level-3 latent \(z_3\) instead of pixels. It replaces only H-JEPA's top-level planner. It decides which <em>place</em> to go to next, and H-JEPA's levels 2 and 1 act as the reflex that gets the ant there.</p>
+  <figure>
+    <svg viewBox="0 0 720 460" role="img" aria-label="Architecture: AntMaze image is encoded to z3 and mapped to one of 64 places; the RGM counts runs of places at levels 2 and 3, plans back from the goal, and sends the next place's real latent z3* to H-JEPA level 2, whose levels 2 and 1 produce the actions.">
+      <defs><marker id="arM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="currentColor"/></marker>
+        <marker id="arR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" class="f-rgm"/></marker></defs>
+      <g font-family="Inter, sans-serif" font-size="13">
+        <rect x="20" y="40" width="280" height="272" rx="12" class="f-soft s-rgm" stroke-width="1.5"/>
+        <text x="36" y="66" class="f-rgm" font-weight="600" font-size="14">System 2 · RGM (ours)</text>
+        <text x="36" y="84" class="svg-muted" font-size="12">counts transitions, no gradients</text>
+        <g text-anchor="middle">
+          <rect x="40" y="100" width="240" height="50" rx="8" class="f-panel s-rgm" stroke-width="1.2"/>
+          <text x="160" y="121" fill="currentColor" font-weight="600">Level 3 items</text><text x="160" y="139" class="svg-muted" font-size="12">runs of 4 places · plan from goal</text>
+          <rect x="40" y="175" width="240" height="50" rx="8" class="f-panel s-rgm" stroke-width="1.2"/>
+          <text x="160" y="196" fill="currentColor" font-weight="600">Level 2 items</text><text x="160" y="214" class="svg-muted" font-size="12">runs of 2 places</text>
+          <rect x="40" y="250" width="240" height="50" rx="8" class="f-panel s-rgm" stroke-width="1.2"/>
+          <text x="160" y="271" fill="currentColor" font-weight="600">Level 1 places</text><text x="160" y="289" class="svg-muted" font-size="12">64 k-means states of z3</text>
+        </g>
+        <line x1="80" y1="249" x2="80" y2="228" class="s-rgm" stroke-width="1.5" marker-end="url(#arR)"/>
+        <line x1="80" y1="174" x2="80" y2="153" class="s-rgm" stroke-width="1.5" marker-end="url(#arR)"/>
+        <text x="90" y="243" class="svg-muted" font-size="11">count up</text>
+        <rect x="440" y="40" width="260" height="272" rx="12" class="f-soft" stroke="currentColor" stroke-width=".8"/>
+        <text x="456" y="66" fill="currentColor" font-weight="600" font-size="14">H-JEPA (frozen)</text>
+        <text x="456" y="84" class="svg-muted" font-size="12">1 z3 step = 20 env steps</text>
+        <g text-anchor="middle">
+          <rect x="460" y="100" width="220" height="50" rx="8" class="f-panel" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity=".6"/>
+          <text x="570" y="121" class="svg-muted" font-weight="600">Level 3 planner</text><text x="570" y="139" class="svg-muted" font-size="12">bypassed until goal place</text>
+          <rect x="460" y="175" width="220" height="50" rx="8" class="f-panel" stroke="currentColor" stroke-width="1"/>
+          <text x="570" y="196" fill="currentColor" font-weight="600">Level 2</text><text x="570" y="214" class="svg-muted" font-size="12">target [now, z3*, z3*]</text>
+          <rect x="460" y="250" width="220" height="50" rx="8" class="f-panel" stroke="currentColor" stroke-width="1"/>
+          <text x="570" y="271" fill="currentColor" font-weight="600">Level 1</text><text x="570" y="289" class="svg-muted" font-size="12">short moves</text>
+        </g>
+        <line x1="570" y1="226" x2="570" y2="247" stroke="currentColor" marker-end="url(#arM)"/>
+        <path d="M281 125 L370 125 L370 200 L457 200" fill="none" class="s-rgm" stroke-width="2.2" marker-end="url(#arR)"/>
+        <text x="414" y="192" text-anchor="middle" class="f-rgm" font-weight="600" font-size="13">z3*</text>
+        <rect x="440" y="352" width="260" height="50" rx="8" class="f-panel" stroke="currentColor"/>
+        <text x="570" y="373" text-anchor="middle" fill="currentColor" font-weight="600">AntMaze</text>
+        <text x="570" y="391" text-anchor="middle" class="svg-muted" font-size="12">image in, joint torques out</text>
+        <line x1="570" y1="301" x2="570" y2="349" stroke="currentColor" marker-end="url(#arM)"/>
+        <text x="580" y="331" fill="currentColor" font-size="12">actions</text>
+        <path d="M439 377 L160 377 L160 303" fill="none" stroke="currentColor" stroke-width="1" marker-end="url(#arM)"/>
+        <text x="300" y="368" text-anchor="middle" fill="currentColor" font-size="12">z3 → PCA-32 → nearest place</text>
+        <text x="20" y="440" class="svg-muted" font-size="12">Loop: keep the plan for one level-3 item (4 z3 steps) while reality matches it; otherwise re-plan from the real place.</text>
+      </g>
+    </svg>
+    <figcaption>Blue is ours. <strong>Up:</strong> the image is encoded to \(z_3\) and snapped to one of 64 places; levels 2 and 3 are counted runs of places, built from 1,250 real episodes in about 4 s. <strong>Plan:</strong> at the top, search back from the goal place for at most 16 steps. <strong>Down:</strong> the next place on the plan is sent as its <em>real</em> example latent \(z_3^*\), never an imagined one. H-JEPA level 2 gets it as <code>[now, z3*, z3*]</code>, so H-JEPA cannot swap it for the goal image. Once the ant reaches the goal place, H-JEPA's own planner finishes the job.</figcaption>
+  </figure>
+  <p>In symbols, with \(c(\cdot)\) mapping a latent to its place and \(N\) the transition counts between items:</p>
+  <div class="math">\[ s_t = c(z_3) = \arg\min_k \big\|W(z_3-\mu) - m_k\big\|, \qquad \pi = \arg\max_{\text{path}\,\to\,\text{goal},\ \le 16} \textstyle\prod P(u'\mid u), \quad P(u'\mid u) \propto N(u\to u')\ \big[\,\ge \tfrac1{16}\max\,\big], \qquad z_3^* = \text{medoid}(s_{t+1}) \]</div>
+  <p>Success on 50 tasks × 3 seeds is 76.0 ± 4.2%, against 73.3 ± 3.5% for H-JEPA's own planner (paper). On today's paired runs it also reaches goals sooner (section 05).</p>
+</section>
+
+<section>
+  <h2><span class="n">00</span>The day</h2>
+  <figure>
+    <svg viewBox="0 0 720 130" role="img" aria-label="Four stages: setup, action design which was parked, restore, then E0 and speed which finished step 1.">
+      <defs><marker id="ar0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="currentColor"/></marker></defs>
+      <g font-family="Inter, sans-serif" font-size="13" text-anchor="middle">
+        <rect x="10" y="20" width="150" height="62" rx="8" class="f-panel" stroke="currentColor" stroke-width="1"/>
+        <text x="85" y="46" fill="currentColor" font-weight="600">Setup</text><text x="85" y="66" class="svg-muted" font-size="12">git, gh, 5 papers</text>
+        <rect x="190" y="20" width="150" height="62" rx="8" class="f-panel s-parked" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="265" y="46" class="f-parked" font-weight="600">Action design</text><text x="265" y="66" class="svg-muted" font-size="12">written, parked</text>
+        <rect x="370" y="20" width="150" height="62" rx="8" class="f-panel" stroke="currentColor" stroke-width="1"/>
+        <text x="445" y="46" fill="currentColor" font-weight="600">Restore</text><text x="445" y="66" class="svg-muted" font-size="12">env, data, smoke</text>
+        <rect x="550" y="20" width="160" height="62" rx="8" class="f-panel s-ok" stroke-width="2"/>
+        <text x="630" y="46" class="f-ok" font-weight="600">E0 + speed</text><text x="630" y="66" class="svg-muted" font-size="12">step 1 done</text>
+        <line x1="162" y1="51" x2="186" y2="51" stroke="currentColor" marker-end="url(#ar0)"/>
+        <line x1="342" y1="51" x2="366" y2="51" stroke="currentColor" marker-end="url(#ar0)"/>
+        <line x1="522" y1="51" x2="546" y2="51" stroke="currentColor" marker-end="url(#ar0)"/>
+        <text x="360" y="115" class="svg-muted" font-size="12">dashed = parked for later · green = finished result</text>
+      </g>
+    </svg>
+    <figcaption>Most of the day went to the last box. The design work is written up but on hold.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="n">01</span>Actions built from the level below <span class="pill parked">parked</span></h2>
+  <p>In H-JEPA each level-ℓ+1 action is encoded from a run of level-ℓ action embeddings, and the encoder ends in <code>LayerNorm(4)</code>. LayerNorm removes the mean and the scale, so every upper action lands on a 2-dimensional shell:</p>
+  <div class="math">\[ a^{\ell+1} = \mathrm{LN}\!\big(E_\ell(a^\ell_1, a^\ell_2)\big) \;\in\; \Big\{x\in\mathbb R^4 : \textstyle\sum_i x_i = 0,\ \|x\| \approx 2.03\Big\} \cong S^2 \]</div>
+  <p>The sphere forgets how the action was made: two different pairs of lower moves can give the same point, and nothing records which pairs. The idea is to make the upper action <em>the product</em> of the lower ones. Truncated path signatures do this exactly, because composing two paths multiplies their signatures (Chen's identity), and in log coordinates the product is the Baker–Campbell–Hausdorff series:</p>
+  <div class="math">\[ S_N(\gamma_1 \ast \gamma_2) = S_N(\gamma_1)\otimes S_N(\gamma_2), \qquad \log\!\big(e^{a_1}e^{a_2}\big) = a_1 + a_2 + \tfrac12[a_1,a_2] + \cdots \]</div>
+  <p>Then each upper action \(A\) owns a <strong>fibre</strong>: all the ways of making it from below.</p>
+  <div class="math">\[ F(A) = \{(a_1,a_2) : a_1 \star a_2 = A\} \]</div>
+  <figure>
+    <svg viewBox="0 0 720 250" role="img" aria-label="A fibre of lower-level action pairs maps by composition to one upper action point.">
+      <defs><marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="currentColor"/></marker></defs>
+      <g font-family="Inter, sans-serif" font-size="13">
+        <path d="M60 40 L640 40 L680 90 L100 90 Z" class="f-soft" stroke="currentColor" stroke-width=".8"/>
+        <text x="70" y="30" class="svg-muted" font-size="12">level ℓ+1 actions</text>
+        <circle cx="370" cy="65" r="7" class="f-parked"/>
+        <text x="385" y="70" class="f-parked" font-weight="600">A</text>
+        <path d="M60 160 L640 160 L680 230 L100 230 Z" class="f-soft" stroke="currentColor" stroke-width=".8"/>
+        <text x="70" y="150" class="svg-muted" font-size="12">level ℓ pairs (a₁, a₂)</text>
+        <path d="M200 205 C 280 170, 420 230, 540 185" fill="none" class="s-parked" stroke-width="3"/>
+        <circle cx="240" cy="193" r="5" class="f-parked"/><circle cx="370" cy="200" r="5" class="f-parked"/><circle cx="500" cy="193" r="5" class="f-parked"/>
+        <text x="548" y="182" class="f-parked" font-size="12">fibre F(A)</text>
+        <line x1="242" y1="186" x2="362" y2="74" stroke="currentColor" stroke-width=".9" marker-end="url(#ar1)"/>
+        <line x1="370" y1="193" x2="370" y2="76" stroke="currentColor" stroke-width=".9" marker-end="url(#ar1)"/>
+        <line x1="498" y1="186" x2="378" y2="74" stroke="currentColor" stroke-width=".9" marker-end="url(#ar1)"/>
+        <text x="430" y="130" fill="currentColor" font-size="12">compose  a₁ ⋆ a₂</text>
+      </g>
+    </svg>
+    <figcaption>Moving along the fibre changes how a route is done, not where it goes (a vertical move). Moving A changes the destination (a horizontal move). Full write-up: <code>docs/DESIGN_ACTION_BUNDLE.md</code>.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2><span class="n">02</span>Restore on this machine <span class="pill done">done</span></h2>
+  <div class="tbl"><table>
+    <tr><th>Piece</th><th>State</th></tr>
+    <tr><td>Env <code>hjepa</code></td><td>torch 2.7.1 + CUDA 12.8 on the RTX 5070 Ti</td></tr>
+    <tr><td>H-JEPA</td><td>commit 97054ec plus our patch, editable install</td></tr>
+    <tr><td>AntMaze checkpoints</td><td>seeds 42, 43, 44, plus the medium-stitch val set and the eval trajectories</td></tr>
+    <tr><td>Built assets</td><td><code>macro_actions_ant_l3_h5.npz</code> (18,750 transitions), <code>z3_game_assets.pt</code> (xy probe R² 0.997)</td></tr>
+    <tr><td>Skipped</td><td>20.5 GB train set, Push-T (not needed until step 4)</td></tr>
+    <tr><td>Smoke test</td><td>RGM solves task 10</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>E0: where the noise comes from <span class="pill done">done</span></h2>
+  <p>The same task, run three times as it was, took 109, 310 and 116 steps. The planner was not the cause. Before an episode starts, the env drops the ant at its start and goal positions and lets it <em>settle</em> by taking random actions (<code>locomaze_env.settled_info_from_xy</code>). Nothing seeds that random source, so each run starts from a different pose \(\xi\).</p>
+  <figure>
+    <svg viewBox="0 0 720 230" role="img" aria-label="Before: unseeded random settle actions give a new start pose each run and different step counts. After: a seed from task and repeat fixes the pose and the run reproduces exactly.">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="currentColor"/></marker></defs>
+      <g font-family="Inter, sans-serif" font-size="13" text-anchor="middle">
+        <text x="12" y="22" text-anchor="start" class="f-bad" font-weight="600" font-size="12">BEFORE</text>
+        <rect x="10" y="32" width="160" height="56" rx="8" class="f-panel s-bad" stroke-width="1.2"/>
+        <text x="90" y="56" fill="currentColor" font-weight="600">action_space</text><text x="90" y="75" class="svg-muted" font-size="12">no seed</text>
+        <rect x="280" y="32" width="160" height="56" rx="8" class="f-panel" stroke="currentColor"/>
+        <text x="360" y="56" fill="currentColor" font-weight="600">start pose ξ</text><text x="360" y="75" class="svg-muted" font-size="12">new every run</text>
+        <rect x="550" y="32" width="160" height="56" rx="8" class="f-panel" stroke="currentColor"/>
+        <text x="630" y="56" fill="currentColor" font-weight="600">task 10</text><text x="630" y="75" class="f-bad" font-size="12">109 / 310 / 116</text>
+        <line x1="172" y1="60" x2="276" y2="60" stroke="currentColor" marker-end="url(#ar2)"/><text x="224" y="52" class="svg-muted" font-size="11">random settle</text>
+        <line x1="442" y1="60" x2="546" y2="60" stroke="currentColor" marker-end="url(#ar2)"/><text x="494" y="52" class="svg-muted" font-size="11">plan + act</text>
+        <text x="12" y="132" text-anchor="start" class="f-ok" font-weight="600" font-size="12">AFTER  --deterministic --repeat r</text>
+        <rect x="10" y="142" width="160" height="56" rx="8" class="f-panel s-ok" stroke-width="1.2"/>
+        <text x="90" y="166" fill="currentColor" font-weight="600">seed s(t, r)</text><text x="90" y="185" class="svg-muted" font-size="12">+ torch, cudnn</text>
+        <rect x="280" y="142" width="160" height="56" rx="8" class="f-panel" stroke="currentColor"/>
+        <text x="360" y="166" fill="currentColor" font-weight="600">start pose ξ(t, r)</text><text x="360" y="185" class="svg-muted" font-size="12">fixed per repeat</text>
+        <rect x="550" y="142" width="160" height="56" rx="8" class="f-panel" stroke="currentColor"/>
+        <text x="630" y="166" fill="currentColor" font-weight="600">task 10</text><text x="630" y="185" class="f-ok" font-size="12">277 / 277 / 277</text>
+        <line x1="172" y1="170" x2="276" y2="170" stroke="currentColor" marker-end="url(#ar2)"/><text x="224" y="162" class="svg-muted" font-size="11">seeded settle</text>
+        <line x1="442" y1="170" x2="546" y2="170" stroke="currentColor" marker-end="url(#ar2)"/><text x="494" y="162" class="svg-muted" font-size="11">plan + act</text>
+      </g>
+    </svg>
+    <figcaption>The fix seeds every action space in the env wrapper chain. A different repeat number <code>r</code> gives a different but fixed pose (task 10, r = 1 → 195 steps).</figcaption>
+  </figure>
+  <p>So the start pose becomes an explicit axis we control. For task \(t\) and repeat \(r\):</p>
+  <div class="math">\[ s_{t,r} = 1000\cdot\text{seed} + t + 100\,000\cdot r, \qquad \xi_{t,r} = \mathrm{settle}(s_{t,r}), \qquad y_{t,r} = \mathbb 1\big[\text{goal reached within } 350 \text{ steps from } \xi_{t,r}\big] \]</div>
+  <p>Running the same \((t, r)\) twice now gives the same run: H-JEPA's planner on repeat 0 matched itself on <strong>13 of 13</strong> tasks, step for step. The GPU adds no noise.</p>
+</section>
+
+<section>
+  <h2><span class="n">04</span>E0: how much the start pose matters</h2>
+  <p>Seed-42 checkpoint, tasks 0–12, repeats \(r = 0, 1, 2\), two planners on the same poses: <span class="rgm">RGM (ours)</span> and <span class="gd">gd, H-JEPA's gradient planner</span>. A task <em>flips</em> if its outcome depends on the repeat:</p>
+  <div class="math">\[ \phi_t = \mathbb 1\big[\exists\, r, r' : y_{t,r} \neq y_{t,r'}\big], \qquad \text{board test: } \textstyle\sum_t \phi_t < 2 \]</div>
+  <figure>
+    <div class="grid" id="grid" role="img" aria-label="Per task and repeat outcome grid for RGM and gd; flipping tasks are outlined."></div>
+    <figcaption>Each cell is one run: the number is steps to the goal, × is a failure. A red outline marks a task whose outcome changes between repeats. RGM flips on 4 of 13 tasks, gd on 10 of 13. Both fail the board's test.</figcaption>
+  </figure>
+  <p>Success per repeat is \(\hat p_r = \tfrac1{13}\sum_t y_{t,r}\). We report the mean over repeats with its standard error:</p>
+  <div class="math">\[ \bar p = \frac1R\sum_{r} \hat p_r, \qquad \mathrm{SE} = \frac{\operatorname{sd}(\hat p_0,\hat p_1,\hat p_2)}{\sqrt R} \]</div>
+  <div class="tiles">
+    <div class="tile"><div class="k">RGM (ours)</div><div class="v rgm">82.1 ± 2.6%</div><div class="s">10, 11, 11 of 13</div></div>
+    <div class="tile"><div class="k">gd on these poses</div><div class="v gd">56.4 ± 5.1%</div><div class="s">8, 6, 8 of 13</div></div>
+    <div class="tile"><div class="k">gd baseline we cite</div><div class="v">73.3 ± 3.5%</div><div class="s">paper, 50 tasks × 3 seeds</div></div>
+  </div>
+  <p>How small a gap can 13 tasks × 3 repeats detect? Treat each run as a coin with \(p \approx 0.6\):</p>
+  <div class="math">\[ \sqrt{\frac{p(1-p)}{13\cdot 3}} = \sqrt{\frac{0.24}{39}} \approx 0.078 \;\Rightarrow\; \text{gaps under about 8 points are noise} \]</div>
+  <p class="note">Rules from now on: report means over repeats, never per-task wins; compare planners on the same repeats; for success, cite the paper's 73.3% for gd.</p>
+</section>
+
+<section>
+  <h2><span class="n">05</span>Speed: ours gets there sooner</h2>
+  <p>The paper reports only success, so speed is measured on our own paired runs. A pair is the same task and the same repeat (the same start pose) run by both planners. For the 21 pairs where both reach the goal, the difference in steps is</p>
+  <div class="math">\[ d_i = T^{\text{gd}}_i - T^{\text{RGM}}_i, \qquad \operatorname{median}(d) = +46 \text{ steps} \approx 2\text{–}3 \text{ level-3 moves (20 steps each)} \]</div>
+  <figure>
+    <svg id="dumb" viewBox="0 0 720 560" role="img" aria-label="Paired steps for 21 runs both planners solved; RGM is faster in 15, gd in 5, one tie."></svg>
+    <figcaption>Each row is one pair: <span class="gd">◆ gd</span>, <span class="rgm">● RGM</span>. The line points from the slower planner to the faster one. RGM is faster in 15 pairs, gd in 5, with 1 tie. The dashed line is the 350-step limit: many gd arrivals sit just under it, so a slightly worse start pose turns them into failures.</figcaption>
+  </figure>
+  <p>Is 15 vs 5 more than luck? Under a fair coin (sign test, the tie dropped):</p>
+  <div class="math">\[ p = 2\sum_{k=0}^{5}\binom{20}{k}2^{-20} = \frac{2\cdot 21\,700}{1\,048\,576} \approx 0.041 \]</div>
+  <p>To count failures as well, use a capped time to goal over all 39 pairs, where a failure counts as the full budget:</p>
+  <div class="math">\[ \tilde T = \begin{cases} T & \text{solved} \\ 350 & \text{failed} \end{cases} \qquad \overline{\tilde T}^{\,\text{gd}} = 312,\quad \overline{\tilde T}^{\,\text{RGM}} = 251,\quad \Delta = 60 \pm 12 \text{ (SE)} \]</div>
+  <p class="note">This covers 13 tasks and one model seed. Claiming it in the thesis needs a paired run of both planners on all 50 tasks × 3 seeds (about 7–8 h). That is on hold.</p>
+</section>
+
+<section>
+  <h2><span class="n">06</span>Decisions and what's next</h2>
+  <div class="tbl"><table>
+    <tr><th>Topic</th><th>Decision</th></tr>
+    <tr><td>How actions are embedded</td><td>Signature / Lie-group design written up, <span class="pill parked">parked</span></td></tr>
+    <tr><td>Success baseline for gd</td><td>Always the paper's 73.3 ± 3.5%</td></tr>
+    <tr><td>Second headline measure</td><td>Speed: paired steps to goal on the same start poses</td></tr>
+    <tr><td>Reporting</td><td>Means over repeats; gaps under about 8 points are noise</td></tr>
+    <tr><td>Full 50-task speed run</td><td>Not now</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>Step</th><th>Status</th></tr>
+    <tr><td>0 · Restore</td><td><span class="pill done">done</span></td></tr>
+    <tr><td>1 · E0 reproducibility, speed</td><td><span class="pill done">done</span></td></tr>
+    <tr><td>2 · Reflex test-time adaptation (AdaJEPA, JEPA-TTT, OpTTA)</td><td><span class="pill next">next</span></td></tr>
+    <tr><td>3–7 · Counterfactual moves, H-JEPA v2, Life v2, stuck reflex, dreams that only propose</td><td><span class="pill later">later</span></td></tr>
+  </table></div>
+</section>
+</main>
+
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js"></script>
+<script>
+const R = [[261,293,142],[0,172,208],[321,321,217],[0,0,0],[218,207,306],[0,174,170],[247,309,196],[222,256,253],[284,170,139],[209,295,309],[277,195,158],[227,193,0],[142,0,263]];
+const G = [[0,297,314],[0,323,308],[321,0,251],[348,0,0],[179,0,263],[0,304,0],[350,0,340],[268,326,0],[0,0,250],[297,302,298],[151,221,296],[197,0,0],[0,0,0]];
+(function grid() {
+  const g = document.getElementById('grid');
+  const add = (t, c) => { const d = document.createElement('div'); d.textContent = t; d.className = c || ''; g.appendChild(d); };
+  add('', 'h'); ['RGM r0','r1','r2'].forEach(x => add(x, 'h')); add('', 'h'); ['gd r0','r1','r2'].forEach(x => add(x, 'h'));
+  for (let t = 0; t < 13; t++) {
+    add('task ' + t, 'h');
+    const fr = new Set(R[t].map(v => v > 0)).size > 1, fg = new Set(G[t].map(v => v > 0)).size > 1;
+    R[t].forEach(v => add(v ? v : '×', (v ? 'c-ok-r' : 'c-x') + (fr ? ' flip' : '')));
+    add('', 'h');
+    G[t].forEach(v => add(v ? v : '×', (v ? 'c-ok-g' : 'c-x') + (fg ? ' flip' : '')));
+  }
+})();
+(function dumbbell() {
+  const svg = document.getElementById('dumb'), NS = 'http://www.w3.org/2000/svg';
+  const pairs = [];
+  for (let t = 0; t < 13; t++) for (let r = 0; r < 3; r++) if (R[t][r] && G[t][r]) pairs.push({ t, r, g: G[t][r], m: R[t][r] });
+  pairs.sort((a, b) => (b.g - b.m) - (a.g - a.m));
+  const x0 = 110, x1 = 690, lo = 100, hi = 360, X = v => x0 + (v - lo) / (hi - lo) * (x1 - x0);
+  const top = 30, rowH = 23;
+  const el = (n, a, txt) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; };
+  for (let v = 100; v <= 350; v += 50) {
+    el('line', { x1: X(v), x2: X(v), y1: top - 10, y2: top + pairs.length * rowH, class: 'svg-line', 'stroke-width': 1 });
+    el('text', { x: X(v), y: top + pairs.length * rowH + 18, 'text-anchor': 'middle', class: 'svg-muted', 'font-size': 12, 'font-family': 'Inter, sans-serif' }, v);
+  }
+  el('line', { x1: X(350), x2: X(350), y1: top - 14, y2: top + pairs.length * rowH, class: 's-bad', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' });
+  el('text', { x: X(350) - 4, y: top - 18, 'text-anchor': 'end', class: 'f-bad', 'font-size': 11, 'font-family': 'Inter, sans-serif' }, 'budget 350');
+  el('text', { x: (x0 + x1) / 2, y: top + pairs.length * rowH + 38, 'text-anchor': 'middle', class: 'svg-muted', 'font-size': 12, 'font-family': 'Inter, sans-serif' }, 'steps to reach the goal');
+  pairs.forEach((p, i) => {
+    const y = top + i * rowH + 8;
+    el('text', { x: x0 - 12, y: y + 4, 'text-anchor': 'end', class: 'svg-muted', 'font-size': 11, 'font-family': 'JetBrains Mono, monospace' }, `t${p.t} r${p.r}`);
+    el('line', { x1: X(p.g), x2: X(p.m), y1: y, y2: y, class: p.m < p.g ? 's-rgm' : (p.m > p.g ? 's-gd' : 'svg-line'), 'stroke-width': 2, 'stroke-opacity': .55 });
+    const gx = X(p.g); el('path', { d: `M${gx} ${y - 6}L${gx + 6} ${y}L${gx} ${y + 6}L${gx - 6} ${y}Z`, class: 'f-gd' });
+    el('circle', { cx: X(p.m), cy: y, r: 5.5, class: 'f-rgm' });
+  });
+  svg.setAttribute('viewBox', `0 0 720 ${top + pairs.length * rowH + 50}`);
+})();
+</script>

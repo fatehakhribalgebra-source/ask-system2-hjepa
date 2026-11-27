@@ -117,9 +117,20 @@ class PaperLevel:
 def run_task(a, t):
     os.environ.setdefault('HJEPA_HOME', str(ROOT / 'data'))
     os.environ['MUJOCO_GL'] = 'glfw' if os.name == 'nt' else 'egl'
+    if a.deterministic:                                     # must be set before CUDA initialises
+        os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
     sys.path.insert(0, str(HJ)); sys.path.insert(0, str(ROOT))
     import numpy as np
     import torch
+    if a.deterministic:                                     # E0: same seed + task -> same run
+        import random
+        s = a.seed * 1000 + t
+        random.seed(s); np.random.seed(s); torch.manual_seed(s)
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(True, warn_only=True)
     from omegaconf import OmegaConf
     from torch.nn.attention import SDPBackend, sdpa_kernel
     import planning_eval as pe
@@ -537,12 +548,29 @@ def run_task(a, t):
         stream_buf = []
         policy._prepare_info = _prep
 
+    ttt = None
+    if a.ttt:                                               # step 2: adapt the reflex (levels 1-2) while acting
+        from system2.reflex_ttt import ReflexTTT
+        ttt = ReflexTTT(solver, levels=a.ttt_levels, lr=a.ttt_lr, window=a.ttt_window, steps=a.ttt_steps).attach(policy)
+        if a.ttt_persist and pathlib.Path(a.ttt_persist).exists():
+            ttt.load(torch.load(a.ttt_persist, map_location='cpu', weights_only=False))
+
     payload = torch.load(str(HJ / cfg.load_eval_trajs_path), map_location='cpu', weights_only=False)
     callables = OmegaConf.to_container(cfg.eval.callables, resolve=True)
     chunk = {**payload, 'data': [dict(payload['data'][t])], 'episodes_idx': [t]}
     img = int(cfg.eval.img_size)
     world = swm.World(**{**world_cfg, 'num_envs': 1}, image_shape=(img, img))
     world.set_policy(policy)
+    if a.deterministic:
+        # The xy_neutral start and goal poses are settled with random actions (locomaze_env.settled_info_from_xy:
+        # action_space.sample()), and nothing seeds that action space: every run starts from a different pose and
+        # sees a different goal image. Seed every action space in the wrapper chain; --repeat picks another settle.
+        settle_seed = a.seed * 1000 + t + 100_000 * a.repeat
+        for e in world.envs.unwrapped.envs:
+            while e is not None:
+                if getattr(e, 'action_space', None) is not None:
+                    e.action_space.seed(settle_seed)
+                e = getattr(e, 'env', None)
     t0 = time.time()
     try:
         with torch.enable_grad(), sdpa_kernel(SDPBackend.MATH):
@@ -555,7 +583,13 @@ def run_task(a, t):
     l3 = solver.level_solvers[a.rgm_obs_level if a.planner == 'rgm_paper' else 3]
     r = dict(task=t, planner=a.planner, success=bool(m['episode_successes'][0]),
              steps_to_success=float(m['steps_to_success'][0]), seconds=time.time() - t0,
-             decisions=getattr(l3, 'decisions', None))
+             deterministic=bool(a.deterministic), repeat=int(a.repeat), decisions=getattr(l3, 'decisions', None))
+    if ttt is not None:
+        r['ttt'] = dict(levels=list(a.ttt_levels), lr=a.ttt_lr, window=a.ttt_window, steps=a.ttt_steps,
+                        **ttt.summary())
+        r['ttt_log'] = ttt.log
+        if a.ttt_persist:
+            torch.save(ttt.state_dict(), a.ttt_persist)
     if a.planner == 'rgm_paper':
         r['rgm_stats'] = {k: int(v) for k, v in prgm.stats.items()}
         if hasattr(prgm, 'map_summary'):
@@ -656,6 +690,19 @@ def main():
     ap.add_argument('--drift', type=float, default=6.0, help='route: re-play when the ant is this far from the route')
     ap.add_argument('--max-route', type=int, default=40, help='route: max imagined level-3 steps')
     ap.add_argument('--tag', default='')
+    ap.add_argument('--deterministic', action='store_true',
+                    help='E0: seed all RNGs per task (incl. the start/goal settling actions), no TF32, deterministic '
+                         'CUDA/cuDNN kernels')
+    ap.add_argument('--repeat', type=int, default=0,
+                    help='deterministic: repeat index; changes the start/goal settling seed only')
+    ap.add_argument('--ttt', action='store_true',
+                    help='step 2: test-time adaptation of the reflex (system2/reflex_ttt.py), one gradient step on the '
+                         'first predictor block of levels 1-2 before every replan')
+    ap.add_argument('--ttt-levels', type=int, nargs='+', default=[1, 2])
+    ap.add_argument('--ttt-lr', type=float, default=1e-5)
+    ap.add_argument('--ttt-window', type=int, default=10, help='ttt: recent level-1 transitions per update')
+    ap.add_argument('--ttt-steps', type=int, default=1, help='ttt: gradient steps per replan')
+    ap.add_argument('--ttt-persist', default='', help='ttt: load/save the adapted blocks here (JEPA-TTT across tasks)')
     ap.add_argument('--single', action='store_true', help=argparse.SUPPRESS)
     ap.add_argument('--out', default=str(ROOT / 'results' / 'l3_planner'))
     a = ap.parse_args()
@@ -664,7 +711,7 @@ def main():
     if a.single:
         r = run_task(a, a.tasks[0])
         (out / f'{name}_task{a.tasks[0]:02d}.json').write_text(json.dumps(r, default=float))
-        print(json.dumps({k: v for k, v in r.items() if k != 'decisions'}), flush=True)
+        print(json.dumps({k: v for k, v in r.items() if k not in ('decisions', 'ttt_log')}), flush=True)
         return
     env = dict(os.environ, PYTHONUTF8='1', HJEPA_HOME=os.environ.get('HJEPA_HOME', str(ROOT / 'data')),
                HOME=os.environ.get('HOME', os.environ.get('USERPROFILE', '')))
@@ -693,6 +740,9 @@ def main():
                *(['--rgm-risk'] if a.rgm_risk else []), '--rgm-risk-lambda', str(a.rgm_risk_lambda),
                '--rgm-risk-thresh', str(a.rgm_risk_thresh), '--rgm-imag-counts', a.rgm_imag_counts,
                '--rgm-imag-weight', str(a.rgm_imag_weight), '--rgm-pattern-seed', str(a.rgm_pattern_seed),
+               *(['--deterministic'] if a.deterministic else []), '--repeat', str(a.repeat),
+               *(['--ttt'] if a.ttt else []), '--ttt-levels', *map(str, a.ttt_levels), '--ttt-lr', str(a.ttt_lr),
+               '--ttt-window', str(a.ttt_window), '--ttt-steps', str(a.ttt_steps), '--ttt-persist', a.ttt_persist,
                '--tag', a.tag, '--out', str(out)]
         r = subprocess.run(cmd, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
         line = [l for l in r.stdout.splitlines() if l.startswith('{')]

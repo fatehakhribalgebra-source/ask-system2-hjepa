@@ -255,7 +255,9 @@ Free Lunch as action embedding is first tested in **E3**. That fits the plan to 
 
 ## 8. Open questions for the user
 
-1. **Free Lunch as action embedding.** This design reads it as "a fixed structured code on the action manifold that
+1. **Free Lunch as action embedding.** *Answered 27 Nov: the free lunch is composition. An upper action is a point of a
+   manifold made of fibres of lower-level chunks, so each level gets its actions from the level below. See
+   [DESIGN_ACTION_BUNDLE.md](DESIGN_ACTION_BUNDLE.md); it replaces C3 and L1.1.* The earlier reading was "a fixed structured code on the action manifold that
    gives the newborn persistent, diverse movement." If your idea is different (for example, the embedding *itself* is
    built from the pattern, or patterns map to outcome displacements), L1.1 changes, but the rest stays.
 2. **LEXA:** it needs a JEPA trained on its environments (none exists in the H-JEPA release). Train one, or use the
