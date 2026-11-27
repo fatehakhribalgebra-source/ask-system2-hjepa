@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Active Inference on a JEPA Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~68ch) with figures and tables allowed to run wider; a technical design note, not a landing page. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#152030; --muted:#566476; --line:#d3dbe5;
+  --accent:#2346b8; --prior:#a3621a; --risk:#b8452f; --amb:#7a63a8; --nov:#1d8574; --mig:#2346b8;
+  --code-bg:#e9eef4;
+  --f-display:"Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono:"JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e131a; --surface:#151c26; --ink:#e3e8ef; --muted:#9aa8b8; --line:#2a3443;
+  --accent:#88a2ff; --prior:#e2a65c; --risk:#ef7d66; --amb:#b7a5e0; --nov:#4cc3ad; --mig:#88a2ff;
+  --code-bg:#1b2431; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --surface:#151c26; --ink:#e3e8ef; --muted:#9aa8b8; --line:#2a3443;
+  --accent:#88a2ff; --prior:#e2a65c; --risk:#ef7d66; --amb:#b7a5e0; --nov:#4cc3ad; --mig:#88a2ff;
+  --code-bg:#1b2431; color-scheme:dark }
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 4rem}
+main{max-width:860px;margin:0 auto}
+.col{max-width:68ch}
+header{padding-block:3rem 1.5rem;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.eyebrow{font-family:var(--f-display);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 .6rem}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.7rem,3.6vw,2.3rem);line-height:1.15;margin:0 0 1rem;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-weight:600;font-size:1.35rem;line-height:1.25;margin:3rem 0 .8rem;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.12rem;margin:2rem 0 .5rem}
+h2 .n{color:var(--accent);margin-right:.4em;font-variant-numeric:tabular-nums}
+p{margin:0 0 1rem}
+.lede{font-size:1.06rem;color:var(--ink)}
+a{color:var(--accent)}
+strong{font-weight:600}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+pre{font-family:var(--f-mono);font-size:.84rem;line-height:1.55;background:var(--code-bg);padding:1rem 1.1rem;border-radius:6px;overflow-x:auto;margin:0 0 1.2rem}
+pre code{background:none;padding:0}
+.eq{overflow-x:auto;overflow-y:hidden;margin:.4rem 0 1.2rem;padding:.2rem 0}
+.answer{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1.2rem 1.4rem;margin:1.5rem 0}
+.answer h2{margin:0 0 .6rem;font-size:1.15rem}
+.answer ol{margin:0;padding-left:1.3rem;display:grid;gap:.55rem}
+.tbl{overflow-x:auto;margin:0 0 1.4rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.45;min-width:620px}
+th,td{text-align:left;vertical-align:top;padding:.55rem .7rem;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display);font-weight:600;font-size:.8rem;letter-spacing:.03em;color:var(--muted);text-transform:uppercase;border-bottom:1.5px solid var(--ink)}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.84rem;white-space:nowrap}
+tr.bad td{color:var(--risk)}
+figure{margin:1.6rem 0 2rem}
+figure .frame{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.8rem;overflow-x:auto}
+figure .frame > svg{display:block;width:100%;height:auto;min-width:600px;color:var(--ink)}
+figure .frame > svg text{font-family:var(--f-display);font-size:12.5px;fill:currentColor}
+figure .frame > svg .sub{font-size:11px;fill:var(--muted)}
+figure .frame > svg .lab{font-size:11px}
+figure .frame > svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+figure .frame > svg .box2{fill:var(--bg);stroke:currentColor;stroke-width:1.3}
+figure .frame > svg .ln{stroke:currentColor;stroke-width:1.3;fill:none}
+figure .frame > svg .ln-acc{stroke:var(--accent);stroke-width:1.6;fill:none}
+figure .frame > svg .ln-pri{stroke:var(--prior);stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+figure .frame > svg .t-acc{fill:var(--accent)}
+figure .frame > svg .t-pri{fill:var(--prior)}
+figure .frame > svg .t-risk{fill:var(--risk)}
+figure .frame > svg .b-risk{fill:var(--risk)} figure .frame > svg .b-amb{fill:var(--amb)} figure .frame > svg .b-nov{fill:var(--nov)} figure .frame > svg .b-mig{fill:var(--mig)}
+figure .frame > svg .place{fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-width:1.2}
+figure .frame > svg .place-bad{fill:var(--risk);fill-opacity:.12;stroke:var(--risk);stroke-width:1.4}
+figure .frame > svg .dot{fill:currentColor}
+figure .frame > svg .arrowhead{fill:currentColor}
+figure .frame > svg .arrowhead-acc{fill:var(--accent)}
+figcaption{font-size:.9rem;color:var(--muted);margin-top:.6rem;max-width:72ch}
+.key{display:inline-block;width:.8em;height:.8em;border-radius:2px;vertical-align:-.05em;margin-right:.3em}
+.tag{font-family:var(--f-display);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;padding:.1em .45em;border-radius:3px;border:1px solid currentColor}
+.tag.seen{color:var(--accent)} .tag.dream{color:var(--prior)}
+.tag.ok{color:var(--nov)} .tag.fix{color:var(--risk)} .tag.word{color:var(--prior)}
+.check td:first-child{white-space:nowrap}
+ul.tight{padding-left:1.2rem;margin:0 0 1rem;display:grid;gap:.35rem}
+.refs{font-size:.88rem;color:var(--muted)}
+.refs li{margin-bottom:.4rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:560px){ body{font-size:16px} .answer{padding:1rem} }
+</style>
+
+<script>
+window.MathJax = { tex:{ inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']] }, svg:{ fontCache:'global', scale:0.94 }, options:{ enableMenu:false } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
+
+<main>
+<header>
+  <p class="eyebrow">ASK Animal · System 2 over H‑JEPA · design note, 27 Nov 2026</p>
+  <h1>Active Inference on a JEPA Map</h1>
+  <p class="lede col">H‑JEPA gives System 2 a latent space. The RGM gives it a generative model. Full active inference means every decision the agent makes comes out of that one model through two quantities: variational free energy \(F\) for perception, learning and structure, and expected free energy \(G\) for choice. A JEPA trained without stop‑gradient (Slow SVReg) has the geometry that makes the model valid and keeps both free energies in closed form. Its places are Gaussian, its moves act like translations, and distance to a goal measures progress.</p>
+  <p class="col" style="color:var(--muted);font-size:.95rem;margin:0">Built from: Ren et al. 2026 (Content–Geometry tradeoff), Friston et al. 2024 (Renormalising generative models), Friston et al. 2025 (Active inference and artificial reasoning), and your repo: <code>DESIGN_ANIMAL.md</code>, <code>DESIGN_ACTION_BUNDLE.md</code>, the 26 Nov notes, <code>system2/rgm_curious.py</code>.</p>
+  <p class="col" style="font-size:.95rem;margin:.6rem 0 0"><strong>Version 2.</strong> Checked claim by claim against the papers, the repo, recomputation and 15 further papers. Eight errors are fixed, eight claims are reworded and eleven hold unchanged. See <a href="#check">section 10</a>.</p>
+</header>
+
+<section class="answer col">
+  <h2>The short answer</h2>
+  <ol>
+    <li><strong>Treat the whitened \(z_3\) as the observation</strong> and put discrete places above it with a Gaussian likelihood \(P(z\mid s)=\mathcal N(\mu_s,\Sigma_s)\). Smooth geometry is what makes that likelihood valid.</li>
+    <li><strong>Turn every hand-set rule in <code>decide()</code> into a term of one \(G\):</strong> risk, ambiguity, novelty, model information gain, and a reachability cost at the planning horizon. The modes and thresholds go away.</li>
+    <li><strong>Dreams become Dirichlet prior mass, never counts.</strong> Your rule R1 ("plan only on seen evidence") is then just Bayes' rule. An unconfirmed edge looks informative (high novelty) and unreliable (low expected‑log reach) at the same time.</li>
+    <li><strong>Sleep is Bayesian model reduction.</strong> "Is this a wall?", "are these one place?", "is this a new world?" become hypotheses. Awake, the agent picks the moves that best tell them apart (active reasoning).</li>
+    <li><strong>Action is control as inference.</strong> The reflex minimises a precision-weighted error to the predicted place, using that place's own covariance as the precision.</li>
+  </ol>
+</section>
+
+<!-- ============================================================ 1 -->
+<h2><span class="n">1</span>Why JEPA geometry matters to active inference</h2>
+<div class="col">
+<p>Ren et al. eliminate the optimal linear predictor from a linear JEPA (their Theorem 2.1, stated without the action term; Section A.3 of their paper adds the action). In their notation the loss is \(\operatorname{tr}S_{11}-\operatorname{tr}(C^{\top}S^{-1}C)\). Below, \(\hat{\mathbb E}\) stands for that best <em>linear</em> prediction. Without stop‑gradient, the encoder is penalised for the target variance the predictor cannot explain. SVReg adds a floor on the spread of every random slice, so the encoder cannot cheat by shrinking:</p>
+</div>
+<div class="eq">\[
+\mathcal L_{\text{no-sg}}=\underbrace{\operatorname{tr}\operatorname{Var}[z_{t+1}]}_{\text{target variance}}-\underbrace{\operatorname{tr}\operatorname{Var}\!\big[\hat{\mathbb E}(z_{t+1}\mid z_t,a_t)\big]}_{\text{explained by the predictor}},
+\qquad
+\mathcal R_{\text{SVReg}}=\mathbb E_{v\sim\mathcal U(S^{d-1})}\Big[\max\!\big(0,\,1-\operatorname{std}(v^{\top}z)\big)^2\Big]
+\]</div>
+<div class="col">
+<p>With the scale fixed by the floor, minimising unexplained variance means keeping the directions that can be predicted from the past and the action, and dropping the rest (noise). For linear‑Gaussian dynamics that is the same as keeping the directions with the most predictive information. On a whitened direction with lag correlation \(\rho\), the unexplained variance is \(1-\rho^2\) and the predictive information is \(-\tfrac12\ln(1-\rho^2)\). Both depend only on \(\rho\), so both pick the same subspace, the top canonical directions. Creutzig &amp; Sprekeler (2008) show the same link between slowness and predictive information. Littwin et al. (2024) find a related bias in deep linear JEPAs <em>with</em> stop‑gradient: they favour features with high predictive influence. The RGM paper's first renormalisation step does the same job in space. It takes the SVD of pixel blocks because, for a linear map, the leading singular vectors maximise mutual information (their Eq. 10). So H‑JEPA can serve as the <em>bottom of the RGM</em>, a learned coarse-graining over time that keeps the slow, relevant variables. The discrete RGM is built on top of it.</p>
+<p>Each active‑inference ingredient then asks something specific of the latent:</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>AIF ingredient</th><th>What it needs from \(z\)</th><th>Stop‑gradient</th><th>Slow SVReg</th><th>Your release \(z_3\) (E0b, 26 Nov)</th></tr></thead>
+<tbody>
+<tr><td>Gaussian places (the likelihood \(\mathbf A\))</td><td>Compact, convex clusters; a route stays in one place for about one reflex step</td><td>Jagged routes (jag 5.31, first-person Medium): one "place" holds far‑apart positions</td><td>Smooth (jag 1.20)</td><td>Path jag 2.2 vs 1.5 for the real path; places about 0.5 units wide. <strong>Usable, with a covariance per place.</strong></td></tr>
+<tr><td>Well‑conditioned \(\Sigma_s\) (entropy, Mahalanobis)</td><td>No collapsed direction</td><td>Can read noise while its variance looks healthy ("signal collapse", §2.2)</td><td>Floor on every slice</td><td>SIGReg‑BN, fine</td></tr>
+<tr><td>Moves act like translations (a shared \(\Delta_k\) across places)</td><td>Local flatness</td><td>No</td><td>Yes</td><td>Local Spearman 0.82: <strong>yes, locally</strong></td></tr>
+<tr><td>Gaussian preference over \(z\) (the prior \(\mathbf C\))</td><td>Global latent distance tracks progress</td><td>No</td><td>Yes in mazes</td><td>Global Spearman 0.48: <strong>not yet.</strong> Set preferences at the place level, through the map.</td></tr>
+<tr><td>Object content for object goals (Push‑T)</td><td>Slow, contact‑driven factors kept</td><td>Kept</td><td>Kept (slow channels + gated residual)</td><td>Not measured</td></tr>
+</tbody></table></div>
+
+<figure>
+<div class="frame">
+<svg viewBox="0 0 760 300" role="img" aria-label="Left: in a jagged stop-gradient latent, a Gaussian place covers two moments of a route that are far apart in time. Right: in a smooth Slow SVReg latent, Gaussian places tile the route one reflex step apart.">
+  <text x="190" y="24" text-anchor="middle">Jagged latent (stop‑gradient)</text>
+  <text x="570" y="24" text-anchor="middle">Smooth latent (Slow SVReg)</text>
+  <line x1="380" y1="40" x2="380" y2="260" class="ln" stroke-dasharray="2 4" opacity=".4"/>
+  <!-- left: jagged route -->
+  <ellipse cx="148" cy="166" rx="48" ry="34" class="place-bad"/>
+  <polyline class="ln" points="40,240 90,175 66,118 130,80 182,128 150,184 212,236 262,172 142,152 300,112 340,60"/>
+  <g class="dot">
+    <circle cx="40" cy="240" r="3"/><circle cx="90" cy="175" r="3"/><circle cx="66" cy="118" r="3"/><circle cx="130" cy="80" r="3"/>
+    <circle cx="182" cy="128" r="3"/><circle cx="150" cy="184" r="3.5"/><circle cx="212" cy="236" r="3"/><circle cx="262" cy="172" r="3"/>
+    <circle cx="142" cy="152" r="3.5"/><circle cx="300" cy="112" r="3"/><circle cx="340" cy="60" r="3"/>
+  </g>
+  <text x="34" y="258" class="lab">t=0</text>
+  <text x="160" y="199" class="lab">t=5</text>
+  <text x="118" y="146" class="lab">t=8</text>
+  <text x="346" y="56" class="lab">t=10</text>
+  <text x="200" y="272" text-anchor="middle" class="lab t-risk">one "place" holds t=5 and t=8</text>
+  <!-- right: smooth route -->
+  <g>
+    <circle cx="430" cy="238" r="19" class="place"/><circle cx="472" cy="222" r="19" class="place"/>
+    <circle cx="502" cy="186" r="19" class="place"/><circle cx="522" cy="142" r="19" class="place"/>
+    <circle cx="556" cy="106" r="19" class="place"/><circle cx="600" cy="98" r="19" class="place"/>
+    <circle cx="642" cy="118" r="19" class="place"/><circle cx="684" cy="112" r="19" class="place"/>
+    <circle cx="712" cy="76" r="19" class="place"/>
+  </g>
+  <path class="ln" d="M420,242 C470,236 494,206 506,176 C518,140 532,110 566,100 C600,92 624,124 652,120 C680,116 700,100 716,68"/>
+  <text x="430" y="272" class="lab t-acc" style="fill:var(--accent)">each place ≈ one reflex step; a Gaussian fits it</text>
+  <text x="190" y="290" text-anchor="middle" class="sub">route jaggedness 5.31 · 21.2% hard goals</text>
+  <text x="570" y="290" text-anchor="middle" class="sub">route jaggedness 1.20 · 92.9% hard goals</text>
+</svg>
+</div>
+<figcaption>Schematic. Gaussian places are valid only when consecutive latents lie on a smooth path. In a jagged latent, a cluster that looks compact mixes moments of the route that are far apart, so \(P(z\mid s)\) is wrong and every free energy built on it is wrong too. The numbers are Ren et al.'s first-person Medium maze (Fig. 1, Table 2).</figcaption>
+</figure>
+
+<!-- ============================================================ 2 -->
+<h2><span class="n">2</span>The generative model, all of it</h2>
+<figure>
+<div class="frame">
+<svg viewBox="0 0 760 500" role="img" aria-label="Architecture: world pixels go through frozen H-JEPA encoders to the whitened level-3 latent, which is the observation for a discrete hierarchy of places and routes. Expected free energy chooses a move, the reflex realises the predicted place, and sleep reduces the model.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+    <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--prior)"/></marker>
+    <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead-acc"/></marker>
+  </defs>
+  <!-- left stack -->
+  <rect x="40" y="20" width="300" height="58" rx="6" class="box"/>
+  <text x="56" y="44">Routes r</text>
+  <text x="56" y="63" class="sub">level R · one step = several hops</text>
+
+  <rect x="40" y="130" width="300" height="80" rx="6" class="box"/>
+  <text x="56" y="154">Places s · moves k</text>
+  <text x="56" y="174" class="sub">A: 𝒩(μₛ, Σₛ)   B: Dir(b) per (s, k)</text>
+  <text x="56" y="194" class="sub">level P · one step = 20 env steps</text>
+
+  <rect x="40" y="262" width="300" height="54" rx="6" class="box2"/>
+  <text x="56" y="285">z₃: whitened JEPA latent</text>
+  <text x="56" y="304" class="sub">the observation o for System 2</text>
+
+  <rect x="40" y="362" width="300" height="54" rx="6" class="box2"/>
+  <text x="56" y="385">H‑JEPA encoders E₁ → E₃</text>
+  <text x="56" y="404" class="sub">frozen now; Slow SVReg in v2 (T1)</text>
+
+  <rect x="40" y="446" width="300" height="40" rx="6" class="box2"/>
+  <text x="56" y="471">World (AntMaze, Push‑T, …)</text>
+
+  <!-- bottom-up arrows -->
+  <line x1="150" y1="446" x2="150" y2="418" class="ln" marker-end="url(#ah)"/><text x="158" y="436" class="lab">pixels</text>
+  <line x1="150" y1="362" x2="150" y2="318" class="ln" marker-end="url(#ah)"/><text x="158" y="344" class="lab">encode</text>
+  <line x1="150" y1="262" x2="150" y2="212" class="ln-acc" marker-end="url(#aha)"/><text x="158" y="242" class="lab t-acc">Q(s | z): evidence</text>
+  <line x1="70" y1="130" x2="70" y2="80" class="ln-acc" marker-end="url(#aha)"/><text x="78" y="110" class="lab t-acc">place sequence</text>
+  <!-- top-down -->
+  <line x1="290" y1="80" x2="290" y2="128" class="ln" marker-end="url(#ah)"/><text x="282" y="100" class="lab" text-anchor="end">D, E:</text><text x="282" y="115" class="lab" text-anchor="end">first place, plan</text>
+
+  <!-- right column -->
+  <rect x="430" y="20" width="300" height="58" rx="6" class="box"/>
+  <text x="446" y="44">Sleep: Bayesian model reduction</text>
+  <text x="446" y="63" class="sub">prune walls · merge clones · refit Σₛ</text>
+  <line x1="430" y1="66" x2="344" y2="134" class="ln" marker-end="url(#ah)"/><text x="398" y="112" class="lab" text-anchor="middle">reduced b</text>
+
+  <rect x="430" y="118" width="300" height="104" rx="6" class="box"/>
+  <text x="446" y="142">Expected free energy G(s, k)</text>
+  <text x="446" y="164" class="sub">risk + ambiguity − novelty − model IG</text>
+  <text x="446" y="184" class="sub">+ reach cost at the horizon</text>
+  <text x="446" y="204" class="sub">Q(k) = σ(ln E − γG), γ inferred</text>
+  <line x1="340" y1="160" x2="428" y2="160" class="ln" marker-end="url(#ah)"/><text x="384" y="152" class="lab" text-anchor="middle">b, Σₛ, Q(s)</text>
+  <line x1="430" y1="196" x2="342" y2="196" class="ln" marker-end="url(#ah)"/><text x="386" y="214" class="lab" text-anchor="middle">move k</text>
+
+  <rect x="430" y="300" width="300" height="64" rx="6" class="box"/>
+  <text x="446" y="324">Reflex: H‑JEPA levels 1–2</text>
+  <text x="446" y="346" class="sub">min (ẑ₃ − μₛ′)ᵀ Σₛ′⁻¹ (ẑ₃ − μₛ′)</text>
+  <line x1="580" y1="222" x2="580" y2="298" class="ln" marker-end="url(#ah)"/><text x="588" y="266" class="lab">target place s′: (μ, Σ)</text>
+  <line x1="340" y1="290" x2="428" y2="322" class="ln" marker-end="url(#ah)"/><text x="384" y="296" class="lab" text-anchor="middle">live z₃</text>
+  <polyline points="580,364 580,466 344,466" class="ln" marker-end="url(#ah)"/><text x="590" y="420" class="lab">torques</text>
+
+  <!-- dreams -->
+  <rect x="430" y="236" width="140" height="50" rx="6" class="box" style="stroke:var(--prior);stroke-dasharray:5 4"/>
+  <text x="442" y="256" class="t-pri">Dreams</text>
+  <text x="442" y="275" class="sub">F3 · counterfactual · BCH</text>
+  <line x1="430" y1="250" x2="344" y2="208" class="ln-pri" marker-end="url(#ahp)"/>
+  <text x="384" y="254" class="lab t-pri" text-anchor="middle">prior only</text>
+</svg>
+</div>
+<figcaption>Blue: evidence flows up. Black: predictions and choices flow down and out to the body. Amber (dashed): imagination enters only as prior concentration on \(\mathbf B\), never as counts. Each level is slower than the one below it: env step, place hop, route step.</figcaption>
+</figure>
+
+<div class="col">
+<p>Every tensor in the RGM paper's Figure 1 has a concrete meaning here:</p>
+</div>
+<div class="eq">\[
+\begin{aligned}
+\textbf{A}:\quad &P(z_t\mid s_t{=}i)=\mathcal N(z_t;\,\mu_i,\Sigma_i), &&(\mu_i,\Sigma_i)\sim\mathrm{NIW}(m_0,\kappa_0,\Psi_0,\nu_0)\\
+\textbf{B}:\quad &P(s_{t+1}{=}i\mid s_t{=}j,k_t{=}k)=\theta_{ijk}, &&\theta_{\cdot jk}\sim\mathrm{Dir}(\mathbf b_{\cdot jk}),\ \ \mathbf b=\mathbf b^{\text{prior}}+\mathbf n\\
+\textbf{D, E}:\quad &P(s_0,\,k_{1:L}\mid r)=\mathbf D_{r}\otimes\mathbf E_{r} &&\text{a route sets the first place and the move plan}\\
+\textbf{C}:\quad &\ln P(z\mid \mathbf C)=\ln\mathcal N(z;\,z_g,\Sigma_g) &&\text{goal preference over the latent}\\
+&\ln\tilde C_i=\ln\!\textstyle\int\!\mathcal N(z;\mu_i,\Sigma_i)\,\mathcal N(z;z_g,\Sigma_g)\,dz &&\text{chosen place prior}\\
+&\phantom{\ln\tilde C_i}=\ln\mathcal N(\mu_i;\,z_g,\Sigma_i{+}\Sigma_g)+\text{const}\\
+\textbf{E},\gamma:\quad &P(\pi)=\sigma\big(\ln\mathbf E_\pi-\gamma\,\mathbf G_\pi\big), &&\gamma=1/\beta,\ \ \beta\sim\Gamma(1,\beta_0)
+\end{aligned}
+\]</div>
+<div class="col">
+<ul class="tight">
+<li>\(o_t=z_t\): the whitened level‑3 latent at each level‑3 tick (PaperRGM's whitening).</li>
+<li>\(k\): a <em>move</em>, a cluster of executed upper actions in the log‑signature group from <code>DESIGN_ACTION_BUNDLE.md</code>. Moves are what \(\mathbf B\) is indexed by, which a Beta "edge made / failed" model cannot express.</li>
+<li>\(\mathbf b^{\text{prior}}\) comes from geometry and dreams (section 5). \(\mathbf n\) is experience. The two memories of DESIGN_ANIMAL ("seen" and "dreamed") are exactly these two terms.</li>
+<li>A second outcome modality fits naturally: \(o^{\text{body}}\in\{\text{moving},\text{stuck},\text{flipped}\}\) from torso height and orientation (R7), with \(\mathbf C\) strongly averse to the last two. The stuck reflex then follows from preferences.</li>
+<li>\(\tilde C\) is a <em>choice</em>, not a consequence. It reads the preference as "the chance that place \(i\) emits a goal‑like \(z\)", the optimality-variable view of control as inference (Levine 2018). The other choice, \(\mathbb E\ln\mathcal N\), adds a penalty \(-\tfrac12\operatorname{tr}(\Sigma_g^{-1}\Sigma_i)\) on broad places: −1.82 nats against −1.44 in a 1‑D check. Pick one and keep it.</li>
+<li>Nothing here is a policy network. The whole of System 2 is counts, Gaussians and two free energies.</li>
+</ul>
+</div>
+
+<!-- ============================================================ 3 -->
+<h2><span class="n">3</span>Perception and learning: minimise \(F\)</h2>
+<div class="col">
+<p><strong>State inference.</strong> Replace the nearest‑place assignment with a Bayesian filter over places. It combines three messages, as in Eq. 4 of both Friston papers. It is a forward filter: the backward (smoothing) message is dropped, which the RGM paper allows for online use.</p>
+</div>
+<div class="eq">\[
+\begin{aligned}
+\ln Q(s_t{=}i)&=\underbrace{\ln\mathcal N(z_t;\mu_i,\Sigma_i)}_{\text{bottom-up }(\mathbf A)}+\underbrace{\textstyle\sum_j Q(s_{t-1}{=}j)\,\overline{\ln\theta}_{ij k_{t-1}}}_{\text{from the last hop }(\mathbf B)}+\underbrace{\ln P(s_t{=}i\mid r)}_{\text{top-down }(\mathbf D,\mathbf E)}-\ln Z_t\\[4pt]
+\overline{\ln\theta}_{ijk}&=\psi(b_{ijk})-\psi\Big(\textstyle\sum_{i'}b_{i'jk}\Big)
+\end{aligned}
+\]</div>
+<div class="col">
+<p>The free energy of each tick is the agent's running surprise:</p>
+</div>
+<div class="eq">\[
+F_t=\underbrace{\mathrm{KL}\big[Q(s_t)\,\big\|\,P(s_t\mid s_{t-1},k_{t-1},r)\big]}_{\text{complexity}}-\underbrace{\mathbb E_{Q(s_t)}\ln\mathcal N(z_t;\mu_{s},\Sigma_{s})}_{\text{accuracy}}
+\]</div>
+<div class="col">
+<p>A sustained rise in \(F_t\) means the current map no longer explains the stream. Compare \(F\) under each map in the library and switch to the best (section 6). That replaces the hand-built "surprise spike" rule for new‑world detection.</p>
+<p><strong>Learning (soft counts).</strong></p>
+</div>
+<div class="eq">\[
+n_{ijk}\leftarrow n_{ijk}+w\;Q(s_{t+1}{=}i)\,Q(s_t{=}j),\qquad w=\tfrac{1}{\text{stride}}\ \text{ for sliding-window pairs}
+\]</div>
+<div class="col">
+<p>The sliding window (R4) yields 20 overlapping pairs for each real hop. Counting each pair as 1 makes the agent 20× too sure of its edges. That is the same disease as imagined counts, only milder. Weighting by \(1/20\) keeps the coverage and the mean transition while the concentration stays honest. Whether it keeps the 13/13‑vs‑6/13 benefit is an open question. If that benefit came from coverage, it stays. If it came partly from overconfidence, it shrinks, and lower counts also cut the expected‑log reach mass, so deadlines look harder. Rerun the risk screen with \(w=1\) and \(w=1/20\) before choosing. The outer product of marginals is the mean‑field count update used in SPM and pymdp.</p>
+<p>The place parameters \((\mu_i,\Sigma_i)\) get the conjugate NIW update, weighted by \(Q(s_t{=}i)\).</p>
+<p><strong>Growing a place.</strong> Use the Chinese‑restaurant rule of a Dirichlet‑process mixture (Neal 2000), taken greedily. A latent opens a candidate place when the prior predictive of a new cluster beats every existing place's posterior predictive:</p>
+</div>
+<div class="eq">\[
+\ln\alpha+\ln t\big(z_t;\,\text{NIW prior predictive}\big)\;>\;\max_i\Big[\ln n_i+\ln t\big(z_t;\,\text{place }i\text{'s NIW posterior predictive}\big)\Big]
+\]</div>
+<div class="col"><p>Both sides are Student‑t densities. Swapping the right side for \(\mathcal N(z;\mu_i,\Sigma_i)\) is a cheaper approximation that overstates how sure young places are. The candidate waits in the new‑place buffer until sleep accepts it with the RGM's model‑growth test (its Eq. 9: log odds \(=\Delta F+\Delta G>0\)). Places are never grown on the spot, which keeps rule R3.</p></div>
+
+<!-- ============================================================ 4 -->
+<h2><span class="n">4</span>Choice: one expected free energy</h2>
+<div class="col">
+<p>Today's <code>decide()</code> picks a mode. If a goal is reachable, it scores \(\ln q+\eta\,\mathrm{IG}\). Otherwise it uses discounted information gain. A habit bonus, an <code>ig_eps</code> cutoff and a "still go" fallback sit on top. In full active inference there is a single \(G\). It is evaluated by a recursion in the style of <em>sophisticated inference</em> (Friston et al. 2021), approximated at the level of places, with counterfactual count updates as in <em>sophisticated learning</em> (Hodson et al. 2023):</p>
+</div>
+<div class="eq">\[
+\begin{aligned}
+G_d(s,k;\mathbf b)=\;&\underbrace{\mathrm{KL}\big[\bar\theta_{\cdot sk}\,\big\|\,\tilde C\big]}_{\text{risk}}
++\underbrace{\textstyle\sum_{s'}\bar\theta_{s'sk}\,\alpha_{s'}}_{\text{ambiguity}}
+-\underbrace{I_{\mathrm{Dir}}(\mathbf b_{\cdot sk})}_{\text{novelty}}
+-\underbrace{[d{=}1]\,I_{sk}(m)}_{\text{model IG, next move only}}\\
+&+\underbrace{\textstyle\sum_{s'}\bar\theta_{s'sk}\sum_{k'}Q(k'\mid s')\,G_{d+1}\big(s',k';\,\mathbf b+\mathbf e_{s'sk}\big)}_{\text{the future, counts updated along the branch}}\\[8pt]
+Q(k'\mid s')=\;&\sigma\big(\ln E_{k'}-\gamma\,G_{d+1}(s',\cdot)\big)_{k'},\qquad \bar\theta=\mathbf b/b_0\\[2pt]
+\alpha_{s}=\;&\mathbb E_{z\sim\mathcal N(\mu_s,\Sigma_s)}\,H\big[Q(\tilde s\mid z)\big]\in[0,\ln K],\qquad G_{H+1}(s)=-\ln V_{T-H}(s)
+\end{aligned}
+\]</div>
+<div class="col">
+<p><strong>Three corrections from the second check.</strong></p>
+<ul class="tight">
+<li><strong>Ambiguity is measured in the same units as risk.</strong> Version 1 used the Gaussian entropy \(h_s=\tfrac12\ln\lvert2\pi e\Sigma_s\rvert\). That is the textbook term, but it is measured in latent units and grows with dimension. In 32 dimensions, a place 2× wider per axis costs 22 more nats, while risk over 64 places tops out near \(\ln 64=4.2\). So ambiguity would decide everything. \(\alpha_s\) asks instead how confusable place \(s\) is with its neighbours. It is 0 for a well‑separated place and about \(\ln 2\) for a clone pair. It is unit‑free and estimated by Monte Carlo after each refit. It is still the "expected entropy given the state" term of \(G\), with the observation taken as the filtered place label rather than raw \(z\). That is an approximation.</li>
+<li><strong>Novelty updates along the branch.</strong> Version 1 reused the same \(\mathbf b\) at every depth, so a plan that crosses an untested edge four times got four times its novelty: 1.59 nats against 0.89 nats once the counts are updated. Passing \(\mathbf b+\mathbf e_{s'sk}\) down each branch is exact, because the recursion already branches on the landing place.</li>
+<li><strong>Model information gain counts at the first move only.</strong> Friston et al. 2025 say it "does not lend itself to evaluation over sequences of actions" unless the parameters are updated in the imagined future. They restrict it to the next action, and so does the recursion now.</li>
+</ul>
+</div>
+<div class="col">
+<p>The novelty term is closed form; I checked it against Monte Carlo to within 0.001 nats. Your <code>beta_bernoulli_ig</code> is the two‑outcome case of:</p>
+</div>
+<div class="eq">\[
+I_{\mathrm{Dir}}(\mathbf b)=H[\bar\theta]-\mathbb E_{\theta\sim\mathrm{Dir}(\mathbf b)}H[\theta]
+=-\sum_i\bar\theta_i\ln\bar\theta_i-\psi(b_0+1)+\sum_i\bar\theta_i\,\psi(b_i+1)
+\]</div>
+<div class="col">
+<p><strong>The leaf cost</strong> \(-\ln V_{T-H}\) is your <code>reach_prob</code> recursion, with two changes. It runs on the expected‑log transitions \(\exp\overline{\ln\theta}\), left unnormalised, and on the time actually left, \(T\), instead of a discount \(\lambda\). The missing mass \(1-\sum_i\exp\overline{\ln\theta}_{ijk}\) counts as no progress. <em>This leaf is a design choice of mine, not something taken from the papers.</em> Friston's inductive inference (RGM Figs. 26–27; Friston et al. 2025, <em>Neural Computation</em> 37(4)) works backwards from the goal under <em>precise</em> transitions. It gives a high cost to places that cannot reach the goal in time. The geometric mean \(\exp\overline{\ln\theta}\) is what the papers use in state‑inference messages. Reusing it as a reach probability penalises unconfirmed edges for a deadline, which is what R1 wants, but it is a heuristic. A posterior lower quantile of \(\theta\) would do the same job. Test both.</p>
+<p><strong>Why this is affordable, and what it costs.</strong> True sophisticated inference searches over sequences of <em>belief states</em> (Friston et al. 2021). Here the recursion branches over places, which is accurate only when a precise \(\mathbf A\) collapses \(Q(s)\) after every hop. With \(K=64\), about 16 moves and \(H=4\), the tree has about \((64\cdot16)^4\) leaves before pruning. It is affordable because \(\bar\theta_{\cdot sk}\) is sparse: about 2–3 landing places matter per move. Prune branches below 1% probability and the tree stays small. Updating counts along a branch rules out plain memoisation over \((s,d)\). A practical hybrid: update counts for the first two levels, then switch to the memoised version (counts frozen), which is a \(K\times16\times H\) table. That is the second dividend of good geometry: low ambiguity makes the search cheap.</p>
+<p><strong>Precision.</strong> \(\gamma\) is inferred. Under the process theory (Friston et al. 2017; Hesp et al. 2021 call this update "affective charge"), the fixed point is \(\beta=\beta_0+(\boldsymbol\pi_{\text{post}}-\boldsymbol\pi_{\text{prior}})^{\top}\mathbf G\). Sign check: if evidence shifts belief toward low‑\(G\) policies, the product is negative, \(\beta\) falls and \(\gamma\) rises. So confidence grows when outcomes agree with the plan and falls when hops fail. Low \(\gamma\) flattens \(Q(k)\), and the agent hedges and explores. Friston 2025's Fig. 4 "confidence" panel plots a related but different quantity: the negative entropy of the policy posterior. Log both.</p>
+<p><strong>Handing over is a policy.</strong> Add an option \(h\), "let H‑JEPA's gradient planner go for \(z_g\)". Give its success a Beta per bin of predicted time‑to‑goal (head C4). Its \(G\) is risk plus negative novelty, and it competes in the same softmax. The threshold \(\theta\) of <code>handover_v</code> disappears, and the agent learns where H‑JEPA beats the map.</p>
+<p><strong>Travelling to the frontier</strong> (R5, E2) also comes out of \(G\). At the route level, a policy "go to place \(f\) on seen edges, then try its exits" has low travel risk and high novelty at \(f\). Depth in the hierarchy does what a separate "explore there" mode would have done.</p>
+</div>
+
+<figure>
+<div class="frame">
+<svg viewBox="0 0 760 330" role="img" aria-label="Stacked bars of the expected free energy terms for three moves, with and without a goal. With a goal the confirmed edge has the lowest G. Without a goal the dream-only edge has the lowest G because novelty and model information gain dominate.">
+  <text x="20" y="26">Goal thrown (𝐂 peaked at z_g)</text>
+  <text x="20" y="162">No goal (𝐂 flat)</text>
+  <line x1="330" y1="36" x2="330" y2="122" class="ln" opacity=".5"/>
+  <line x1="330" y1="172" x2="330" y2="258" class="ln" opacity=".5"/>
+  <!-- group 1 -->
+  <text x="262" y="61" text-anchor="end" class="lab">A · confirmed edge</text>
+  <rect x="330" y="48" width="108" height="18" class="b-risk"/><rect x="438" y="48" width="27" height="18" class="b-amb"/>
+  <rect x="325.5" y="48" width="4.5" height="18" class="b-nov"/>
+  <line x1="460.5" y1="43" x2="460.5" y2="71" stroke="currentColor" stroke-width="2"/>
+  <text x="475" y="61" class="lab">G 1.45 · chosen</text>
+
+  <text x="262" y="91" text-anchor="end" class="lab">B · dream‑only edge</text>
+  <rect x="330" y="78" width="207" height="18" class="b-risk"/><rect x="537" y="78" width="27" height="18" class="b-amb"/>
+  <rect x="294" y="78" width="36" height="18" class="b-nov"/><rect x="271.5" y="78" width="22.5" height="18" class="b-mig"/>
+  <line x1="505.5" y1="73" x2="505.5" y2="101" stroke="currentColor" stroke-width="2"/>
+  <text x="574" y="91" class="lab">G 1.95</text>
+
+  <text x="262" y="121" text-anchor="end" class="lab">C · aliased place</text>
+  <rect x="330" y="108" width="144" height="18" class="b-risk"/><rect x="474" y="108" width="99" height="18" class="b-amb"/>
+  <rect x="312" y="108" width="18" height="18" class="b-nov"/>
+  <line x1="555" y1="103" x2="555" y2="131" stroke="currentColor" stroke-width="2"/>
+  <text x="583" y="121" class="lab">G 2.50</text>
+  <!-- group 2 -->
+  <text x="262" y="197" text-anchor="end" class="lab">A · confirmed edge</text>
+  <rect x="330" y="184" width="81" height="18" class="b-risk"/><rect x="411" y="184" width="27" height="18" class="b-amb"/>
+  <rect x="325.5" y="184" width="4.5" height="18" class="b-nov"/>
+  <line x1="433.5" y1="179" x2="433.5" y2="207" stroke="currentColor" stroke-width="2"/>
+  <text x="448" y="197" class="lab">G 1.15</text>
+
+  <text x="262" y="227" text-anchor="end" class="lab">B · dream‑only edge</text>
+  <rect x="330" y="214" width="81" height="18" class="b-risk"/><rect x="411" y="214" width="27" height="18" class="b-amb"/>
+  <rect x="294" y="214" width="36" height="18" class="b-nov"/><rect x="271.5" y="214" width="22.5" height="18" class="b-mig"/>
+  <line x1="379.5" y1="209" x2="379.5" y2="237" stroke="currentColor" stroke-width="2"/>
+  <text x="448" y="227" class="lab">G 0.55 · chosen</text>
+
+  <text x="262" y="257" text-anchor="end" class="lab">C · aliased place</text>
+  <rect x="330" y="244" width="81" height="18" class="b-risk"/><rect x="411" y="244" width="99" height="18" class="b-amb"/>
+  <rect x="312" y="244" width="18" height="18" class="b-nov"/>
+  <line x1="492" y1="239" x2="492" y2="267" stroke="currentColor" stroke-width="2"/>
+  <text x="520" y="257" class="lab">G 1.80</text>
+  <!-- axis note -->
+  <text x="330" y="282" text-anchor="middle" class="sub">0</text>
+  <text x="420" y="282" text-anchor="middle" class="sub">1 nat</text>
+  <line x1="420" y1="268" x2="420" y2="274" class="ln"/>
+  <!-- legend -->
+  <rect x="20" y="300" width="12" height="12" class="b-risk"/><text x="38" y="311" class="lab">risk</text>
+  <rect x="90" y="300" width="12" height="12" class="b-amb"/><text x="108" y="311" class="lab">ambiguity</text>
+  <rect x="190" y="300" width="12" height="12" class="b-nov"/><text x="208" y="311" class="lab">novelty (subtracted)</text>
+  <rect x="340" y="300" width="12" height="12" class="b-mig"/><text x="358" y="311" class="lab">model IG (subtracted)</text>
+  <line x1="510" y1="298" x2="510" y2="314" stroke="currentColor" stroke-width="2"/><text x="518" y="311" class="lab">net G (lower wins)</text>
+</svg>
+</div>
+<figcaption>Illustrative values in nats. One equation does what the two modes did. With a goal, risk dominates and the confirmed edge wins. Without a goal, the risk term is the same for every move, so novelty and model information gain pick the untested dream edge. The aliased place loses in both cases because it is ambiguous, however novel it is. The bars are sized for the corrected, unit‑free ambiguity \(\alpha_s\), which lies between 0 and \(\ln K\), and is about 0.7 for a clone pair. With the raw Gaussian entropy of version 1, the ambiguity bars could be tens of nats.</figcaption>
+</figure>
+
+<h3>What in today's code looks like active inference, and what replaces it</h3>
+<div class="tbl"><table>
+<thead><tr><th>Now (<code>rgm_curious.py</code>, <code>rgm_risk.py</code>)</th><th>Full active inference</th></tr></thead>
+<tbody>
+<tr><td><code>infer_state</code>: nearest place, a hard assignment</td><td>\(Q(s)\) filter using \(\mathbf A\), \(\mathbf B\), \(\mathbf D/\mathbf E\); the free energy \(F_t\) is logged</td></tr>
+<tr><td>Beta "hop made / failed" per edge</td><td>Dirichlet over <em>where you landed</em>, per (place, move). A failure is a landing distribution: you stayed, or slid somewhere else.</td></tr>
+<tr><td>Epistemic / pragmatic mode switch</td><td>One \(G\). A flat \(\mathbf C\) when there is no goal.</td></tr>
+<tr><td><code>eta</code>, <code>habit</code>, <code>ig_eps</code></td><td>Inferred precision \(\gamma\); learned habit counts \(\mathbf E\); nothing (zero novelty simply leaves the choice to \(G\))</td></tr>
+<tr><td><code>reach_prob</code> with discount \(\lambda\); "still go" if there is no route in time</td><td>Leaf cost \(-\ln V_{T-H}\) on \(\exp\overline{\ln\theta}\); the hand-over policy competes with it</td></tr>
+<tr><td>Imagined counts; the <code>dream_prior</code> kernel</td><td>\(\mathbf b^{\text{prior}}\) with mass \(\omega_0\) fitted by empirical Bayes (section 5)</td></tr>
+<tr><td><code>handover_v</code> threshold \(\theta\)</td><td>Hand-over as a policy with its own outcome model</td></tr>
+<tr><td><code>frontier_score</code>; learning‑progress curiosity</td><td>Route‑level novelty. Dirichlet novelty falls with counts however noisy the outcome is, so irreducible noise stops attracting the agent without an extra rule.</td></tr>
+</tbody></table></div>
+
+<!-- ============================================================ 5 -->
+<h2><span class="n">5</span>Dreams are priors: rule R1 is Bayes' rule</h2>
+<div class="col">
+<p>Three results point the same way: sleep‑dreaming (24 Nov), F3 imagined counts (11/13 → 4/13) and the life run. Imagination added to the map as if it were experience makes planning worse. The principled fix is to put imagination into the <em>prior</em> of \(\mathbf B\), with a small total mass. The geometry supplies that prior:</p>
+</div>
+<div class="eq">\[
+b^{\text{prior}}_{s'sk}=\omega_0(\text{region})\cdot\operatorname{softmax}_{s'}\Big[\ln\mathcal N\big(\mu_{s'};\ \hat z_{sk},\ \Sigma_{s'}{+}\Sigma_{F}\big)\Big]
+\]
+\[
+\hat z_{sk}=\begin{cases}F_3\big(\mu_s,\,h(g_k)\big) & \text{free dream}\\[2pt] z'+F_3\big(z,h(g_k)\big)-F_3\big(z,h(g_{k_0})\big) & \text{counterfactual, from a tried move }k_0\\[2pt] (\bar{\mathbf B}_{k_2}\bar{\mathbf B}_{k_1})_{\cdot s}\ \text{(two-hop product)} & \text{composed move }g_k=g_{k_1}g_{k_2}\ (\text{BCH})\end{cases}
+\]</div>
+<div class="col">
+<p>Fit \(\omega_0\) by empirical Bayes rather than by hand. Maximise the Dirichlet–multinomial evidence of the edges actually tested in each region, over a grid of \(\omega_0\). This replaces the trust kernel, and it is the same "trust learned per region from tests" idea (R9), made exact. Here is what an edge with dream confidence 0.8 looks like at \(\omega_0=0.25\):</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Edge state</th><th>Beta (a, b)</th><th>mean \(\bar\theta\)</th><th>reach mass \(e^{\overline{\ln\theta}}\)</th><th>novelty (nats)</th><th>What \(G\) does</th></tr></thead>
+<tbody>
+<tr><td><span class="tag dream">dream</span> only</td><td class="num">0.20, 0.05</td><td class="num">0.800</td><td class="num">0.346</td><td class="num">0.397</td><td>Highest novelty: worth testing; weak support for a tight deadline</td></tr>
+<tr><td>+ 1 real success</td><td class="num">1.20, 0.05</td><td class="num">0.960</td><td class="num">0.940</td><td class="num">0.098</td><td>Now a usable route edge</td></tr>
+<tr><td>+ 1 real failure</td><td class="num">0.20, 1.05</td><td class="num">0.160</td><td class="num">0.006</td><td class="num">0.203</td><td>Effectively gone after one try</td></tr>
+<tr><td>+ 5 real successes</td><td class="num">5.20, 0.05</td><td class="num">0.990</td><td class="num">0.990</td><td class="num">0.024</td><td>Confirmed; nothing left to learn</td></tr>
+<tr class="bad"><td>4 imagined counts <em>as evidence</em> (today)</td><td class="num">3.40, 0.85</td><td class="num">0.800</td><td class="num">0.775</td><td class="num">0.096</td><td>Looks confirmed and uninteresting, so the planner routes through it and never tests it. This is R1.</td></tr>
+</tbody></table></div>
+<div class="col"><p>The same mean, 0.8, gives opposite behaviour depending on whether the mass is prior or evidence. That is the whole of design rule R1, and it now needs no special case.</p></div>
+
+<!-- ============================================================ 6 -->
+<h2><span class="n">6</span>Sleep is model reduction, waking is active reasoning</h2>
+<div class="col">
+<p>Bayesian model reduction scores any reduced prior \(\boldsymbol\beta'_m\) from the full prior \(\boldsymbol\beta\) and the posterior \(\mathbf b\) alone, with no refitting (Friston et al. 2018; RGM Eq. 8). Here \(\mathrm B(\cdot)\) is the multivariate beta function:</p>
+</div>
+<div class="eq">\[
+\Delta F_m=\ln P(o\mid m)-\ln P(o\mid m_{\text{full}})=\ln\mathrm B(\mathbf b'_m)-\ln\mathrm B(\boldsymbol\beta'_m)-\ln\mathrm B(\mathbf b)+\ln\mathrm B(\boldsymbol\beta),
+\qquad \mathbf b'_m=\mathbf b+\boldsymbol\beta'_m-\boldsymbol\beta
+\]</div>
+<div class="col"><p>Sign convention: positive \(\Delta F_m\) favours the reduced model. RGM Eq. 8 writes the same quantity with the opposite sign. I checked the formula numerically against the Dirichlet–multinomial evidence computed directly; the two agree to four decimals. It is exact for <em>any</em> alternative Dirichlet prior, not only sparser ones. Only the first two of your questions are reductions of a single Dirichlet. The other two need their own exact scores, which are just as cheap:</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Hypothesis \(m\)</th><th>How it is scored</th><th>What it settles</th></tr></thead>
+<tbody>
+<tr><td>Wall: move \(k\) from \(s\) cannot reach \(t\)</td><td>BMR with \(\beta'_{tsk}\to\varepsilon\)</td><td>Edge pruning; the contact gate for counterfactual moves</td></tr>
+<tr><td>Composition: \(g_{k_1}g_{k_2}\) acts as two hops</td><td>BMR with \(\boldsymbol\beta'_{\cdot sk}\propto(\bar{\mathbf B}_{k_2}\bar{\mathbf B}_{k_1})_{\cdot s}\)</td><td>Whether the Lie-group free lunch holds in this world (checks B2/B4)</td></tr>
+<tr><td>Clone: \(s\) and \(s'\) are one place</td><td>Merge evidence, summed over moves \(k\): \(\ln\mathrm B(\boldsymbol\beta{+}\mathbf n_{\cdot sk}{+}\mathbf n_{\cdot s'k})-\ln\mathrm B(\boldsymbol\beta{+}\mathbf n_{\cdot sk})-\ln\mathrm B(\boldsymbol\beta{+}\mathbf n_{\cdot s'k})+\ln\mathrm B(\boldsymbol\beta)\), plus the same for incoming rows and the Gaussian (NIW) evidence for the merged \(\mathbf A\). This is a merge, not a reduction. Check: same outgoing pattern +1.5 nats; mirror pattern −6.2 nats.</td><td>Aliasing, CSCG‑style clones (George et al. 2021), choosing \(K\)</td></tr>
+<tr><td>Context \(c\): this map, or another</td><td>The maps have different state spaces, so BMR does not apply. Compare the summed \(-F_t\) over a recent window under each library map (section 3).</td><td>New‑world detection and map switching</td></tr>
+</tbody></table></div>
+<div class="col">
+<p>Sleep applies the razor. Awake, the agent goes looking for the evidence that discriminates. Following Friston et al. 2025 (Eqs. 10–12), the posterior over hypotheses and the expected information gain of trying move \(k\) at \(s\) are:</p>
+</div>
+<div class="eq">\[
+Q(m\mid o)=\sigma\big(\ln P(m)+\Delta F_m\big)_m,
+\qquad
+I_{sk}(m)=\sum_{s'}\underbrace{\textstyle\sum_{m}Q(m)\,\bar\theta^{(m)}_{s'sk}}_{\text{model-averaged prediction}}\;\mathrm{KL}\Big[Q\big(m\mid \mathbf b+\mathbf e_{s'sk}\big)\,\Big\|\,Q\big(m\mid\mathbf b\big)\Big]
+\]</div>
+<div class="col">
+<p>The predictive weight is averaged over models, as the paper specifies for its Eq. 11. Version 1 used the full model's \(\bar\theta\), which is slightly off. Each updated \(Q(m\mid\mathbf b+\mathbf e)\) costs one ratio per model: adding one count changes \(\Delta F_m\) by \(\ln(b'_{s'}/b'_0)-\ln(b_{s'}/b_0)\).</p>
+<p>Commit (the "Occam's razor" step) when \(\ln\frac{Q(m^*)}{1-Q(m^*)}\) passes a high threshold. The paper uses 16 nats, at which point the winner is at least \(e^{16}\) times more likely. Then replace \(\mathbf b\) by the selected model's posterior. The paper multiplies those counts by a large number, such as 512, to switch off novelty about a settled question (its Eq. 13). In the three‑ball task, dropping the model and parameter information-gain terms raised the mean time to discover the rule from 19.4 to 28.5 trials and cut the score from 150 to 89.2. Dropping all information gain left the rule undiscovered after 64 trials in about half the games, and the score fell to 51. The paper also reports one premature commitment to the wrong model, so 16 nats is not a guarantee.</p>
+<p><strong>Growing structure</strong> is the mirror image (RGM Eq. 9). Accept an augmented model when \(\ln\frac{P(m'\mid o)}{P(m\mid o)}=\Delta F+\Delta G>0\), where \(\Delta G\) is the change in the expected free energy of the parameters. New places, new moves and new routes all enter this way. One more RGM idea fits here: <em>active learning</em> (its Eqs. 5–7), where each count update is itself accepted only if it lowers the expected free energy of the parameters. It is optional. Try it if window noise keeps blurring edges.</p>
+</div>
+
+<!-- ============================================================ 7 -->
+<h2><span class="n">7</span>Action is control as inference</h2>
+<div class="col">
+<p>The RGM agent "predicts its own future and the reflex fulfils it" (RGM paper, Planning as inference). The reflex should minimise the free energy of the <em>predicted outcome</em>, a Gaussian place, not a point:</p>
+</div>
+<div class="eq">\[
+a^{*}_{1:T}=\arg\min_{a_{1:T}}\ \tfrac12\big(\hat z_3(a)-\mu_{s'}\big)^{\top}\big(\gamma_{\text{ref}}\Sigma_{s'}\big)^{-1}\big(\hat z_3(a)-\mu_{s'}\big)
+\]</div>
+<div class="col">
+<ul class="tight">
+<li>An elongated corridor place tolerates error along the corridor and punishes error across it. Plain L2 to an exemplar treats both directions the same.</li>
+<li>Smooth geometry is what keeps this cost well behaved along gradient descent.</li>
+<li>The reflex's fast learning (AdaJEPA, JEPA‑TTT) is parameter learning at the fastest timescale. OpTTA's optimism term enters the reflex objective only when \(\mathbf C\) is informative (goal mode). In AIF terms, the preference reaches the body, so optimism stays anchored to what was observed.</li>
+</ul>
+</div>
+
+<!-- ============================================================ 8 -->
+<h2><span class="n">8</span>One level‑3 tick</h2>
+<pre><code>z  = E3(...E1(o))                       # whitened, Slow SVReg in v2
+Q_s = filter(N(z; mu, Sigma), Elog(B)[:, :, k_prev] @ Q_s_prev, prior_from_route)
+F_t = KL(Q_s || pred) - E_Q[log N]       # surprise trace -> map-library check
+n  += w * outer(Q_s, Q_s_prev)[..., k_prev]   # w = 1/stride for window pairs
+update NIW(mu, Sigma) with responsibilities Q_s
+if new-place rule fires: push z to buffer
+
+alpha = confusability(mu, Sigma)        # E_z H[Q(s|z)] per place, refreshed after refits
+G   = sophisticated_G(b_prior + n, alpha, C_tilde, models, depth=H,
+                      leaf=-log V_{T-H}, update_counts_to=2, model_ig_depth=1)
+G_h = handover_G(time_to_goal(z, z_g))   # hand-over competes in the same softmax
+Q_k = softmax(log E - gamma * [G[s_map, :], G_h])
+k   = sample(Q_k);  s' = argmax(theta_bar[:, s_map, k])
+reflex.minimise(mahalanobis(z3_hat(a), mu[s'], gamma_ref * Sigma[s']))
+gamma = 1 / (beta0 + (Q_k_post - Q_k_prior) @ G)
+
+sleep (when due): BMR over {walls, compositions}; merge evidence for clones;
+                  map switch by summed F_t (awake, continuous);
+                  refit places; fit omega0 by evidence; dreams -> b_prior only</code></pre>
+
+<!-- ============================================================ 9 -->
+<h2><span class="n">9</span>Build order, each step with a pass test</h2>
+<div class="col"><p>Every step should run on one machine with at least three repeats (R8), and E0 reproducibility comes first.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>Change</th><th>Pass if</th></tr></thead>
+<tbody>
+<tr><td class="num">A1</td><td>Gaussian places with per‑place \(\Sigma\); a \(Q(s)\) filter; window counts weighted \(1/\)stride</td><td>Held‑out hop log‑likelihood ≥ nearest‑place; risk screen ≥ 11/13</td></tr>
+<tr><td class="num">A2</td><td>Dirichlet landing model per move; one \(G\) (risk, ambiguity, novelty, leaf) replaces <code>decide()</code></td><td>≥ RiskRGM on the same goals, with no mode switch and no thresholds</td></tr>
+<tr><td class="num">A3</td><td>Dreams as \(\mathbf b^{\text{prior}}\) with \(\omega_0\) fitted by evidence</td><td>The R1 drop is gone: with dreams ≥ without, on screens and in a life</td></tr>
+<tr><td class="num">A4</td><td>Hand-over as a policy with a Beta per time‑to‑goal bin</td><td>The hand-over rate tracks where H‑JEPA actually wins</td></tr>
+<tr><td class="num">A5</td><td>Model reduction in sleep, plus model information gain for walls and clones</td><td>Fewer failed hops; a larger strongly connected set on the play map</td></tr>
+<tr><td class="num">A6</td><td>Mahalanobis target in the reflex; precision \(\gamma\) inferred</td><td>Hop success rises at the same \(K\)</td></tr>
+<tr><td class="num">A7</td><td>After T1 (Slow SVReg), measure jaggedness \(J\) and the global Spearman again</td><td>If global distance tracks progress, switch \(\mathbf C\) to a Gaussian over \(z\)</td></tr>
+<tr><td class="num">A8</td><td>Route‑level policies (frontier travel); composition hypotheses</td><td>E2 coverage, and composition confirmed or rejected by BMR</td></tr>
+</tbody></table></div>
+
+<h3>What could make this wrong</h3>
+<div class="col">
+<ul class="tight">
+<li><strong>Places are not Gaussian in the release \(z_3\).</strong> A jaggedness of 2.2 suggests folds. Check the held-out log-likelihood of per-place Gaussians against a mixture with more components per place. If it fails, T1 comes before A1.</li>
+<li><strong>Novelty overwhelms risk in a large map.</strong> Many unvisited edges can add up. Updating counts along each branch removes the double counting, and \(\gamma\) and the finite horizon \(T\) bound the rest. Watch the goal success rate while the map grows.</li>
+<li><strong>\(G\) itself is a modelling commitment.</strong> Millidge, Tschantz &amp; Buckley (2021) show that the expected free energy is not simply variational free energy carried into the future, and that the exploration it produces comes from how it is defined. "Full active inference" here means using the standard \(G\) consistently, with every term derived from one model. It does not mean \(G\) is the only principled objective. Sophisticated inference reduces to Bayes‑adaptive RL in the zero‑temperature limit (Friston et al. 2021). That gives a non‑AIF baseline to compare against.</li>
+<li><strong>Collapsing the belief after each hop is wrong in aliased places.</strong> When \(H[Q(s)]\) is high, branch on the top two places instead of one.</li>
+<li><strong>Empirical Bayes for \(\omega_0\) needs tested dream edges.</strong> Early in a life there are none, so start \(\omega_0\) low (0.1–0.25 of a real try).</li>
+</ul>
+</div>
+
+<!-- ============================================================ 10 -->
+<h2 id="check"><span class="n">10</span>Second check, claim by claim</h2>
+<div class="col">
+<p>Method. Each claim was checked in one of four ways: against the PDF text (equation numbers and figures quoted); against your repo; by recomputing it (a Python script with a hand‑written digamma, Monte Carlo where there is no closed form); or against the wider literature (sources 5–16). <span class="tag ok">holds</span> means it survived unchanged. <span class="tag word">reworded</span> means it was right in substance but overstated or loosely cited. <span class="tag fix">fixed</span> means version 1 was wrong; the fixes are now in the sections above.</p>
+</div>
+<div class="tbl"><table class="check">
+<thead><tr><th>#</th><th>Claim (section)</th><th>How it was checked</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Theorem 2.1: no‑SG loss = target variance − variance explained (§1)</td><td>Ren et al. p. 3: \(\operatorname{tr}S_{11}-\operatorname{tr}(C^{\top}S^{-1}C)\), linear predictor without the action term (action in §A.3)</td><td><span class="tag word">reworded</span> to "best linear predictor"</td></tr>
+<tr><td>2</td><td>SVReg form; "signal collapse" in §2.2; Eqs. 1–4; \(c_0=0.1\)</td><td>Ren et al. Eq. 1, §2.2, Eqs. 2–4, gate init 0.1</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>3</td><td>Jaggedness 5.31 / 1.20; 21.2% / 92.9% hard first‑person Medium goals</td><td>Ren et al. Fig. 1(a) and Table 2</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>4</td><td>Smallest unexplained variance = most predictive information (§1)</td><td>Derivation: both depend only on \(\rho\); Creutzig &amp; Sprekeler 2008; Littwin et al. 2024</td><td><span class="tag word">reworded</span>: holds for linear‑Gaussian dynamics</td></tr>
+<tr><td>5</td><td>RGM's first step: SVD maximises mutual information (Eq. 10)</td><td>RGM pp. 16–17: "guaranteed to maximise the mutual information", under Gaussian assumptions</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>6</td><td>E0b numbers: R² 0.997, jag 2.2 vs 1.5, Spearman 0.48 / 0.82</td><td><code>NOTES_2026-11-26.md</code> lines 92–93</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>7</td><td>Place preference \(\ln\tilde C_i=\ln\mathcal N(\mu_i;z_g,\Sigma_i{+}\Sigma_g)\) (§2)</td><td>Gaussian product identity: correct. "⇒" overstated: \(\mathbb E\ln\mathcal N\) is an equally valid choice (−1.82 vs −1.44 nats in 1‑D)</td><td><span class="tag word">reworded</span> as an explicit choice</td></tr>
+<tr><td>8</td><td>Filter messages "as in Eq. 4 of both papers" (§3)</td><td>RGM Eq. 4 and 2512 Eq. 4; RGM allows dropping backward messages online</td><td><span class="tag ok">holds</span>; noted it is a forward filter</td></tr>
+<tr><td>9</td><td>Window weight \(1/\)stride "keeps the 13/13 benefit" (§3)</td><td>Repo R4 and <code>stride=20</code> confirmed. The benefit could come from coverage <em>or</em> confidence; not established</td><td><span class="tag word">reworded</span> as an open test</td></tr>
+<tr><td>10</td><td>Place growth "is RGM Eq. 9 in online form" (§3)</td><td>RGM Eq. 9 is the model‑growth log odds \(\Delta F+\Delta G\); fast structure learning appends unique columns. The CRP rule comes from DP mixtures (Neal 2000), and existing places need a Student‑t</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>11</td><td>Ambiguity \(=\tfrac12\ln\lvert2\pi e\Sigma_s\rvert\) inside \(G\) (§4)</td><td>Correct definition, but in latent units and growing with dimension: 22 nats for 2× width in 32‑D against risk ≤ 4.2 nats. It would swamp \(G\)</td><td><span class="tag fix">fixed</span>: unit‑free confusability \(\alpha_s\)</td></tr>
+<tr><td>12</td><td>Novelty \(I_{\mathrm{Dir}}\) closed form (§4)</td><td>Monte Carlo, 200k draws, 3 cases: agree within 0.0004 nats. Large‑count limit \((K{-}1)/(2b_0)\) confirmed, which is why noise stops attracting the agent</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>13</td><td>Same \(\mathbf b\) at every depth of the recursion (§4)</td><td>A repeated edge gets its novelty again at every visit: 1.59 vs 0.89 nats over 4 visits. Hodson et al. 2023 update parameters along each branch</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>14</td><td>Model information gain at every depth (§4)</td><td>2512 p. 13: model IG "does not lend itself to evaluation over sequences of actions"; restricted to the next action</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>15</td><td>"Sophisticated inference" over places (§4)</td><td>Friston et al. 2021: the search is over <em>belief states</em>. Branching on places is an approximation, valid when \(\mathbf A\) is precise</td><td><span class="tag word">reworded</span></td></tr>
+<tr><td>16</td><td>Leaf on \(\exp\overline{\ln\theta}\) "is Friston's inductive inference with uncertainty" (§4)</td><td>RGM pp. 52–53 and Friston et al. 2025 (<em>Neural Computation</em>): inductive planning assumes <em>precise</em> transitions. The geometric mean belongs to state‑inference messages</td><td><span class="tag word">reworded</span> as my heuristic</td></tr>
+<tr><td>17</td><td>"Small dynamic program" (§4)</td><td>True only with frozen counts (memoised). With branch updates the tree grows quickly, so prune and use the hybrid</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>18</td><td>Precision fixed point and its sign (§4)</td><td>Sign checked by reasoning; matches the process‑theory and affective‑charge accounts (Friston et al. 2017; Hesp et al. 2021). I did not match it to a numbered equation</td><td><span class="tag word">reworded</span></td></tr>
+<tr><td>19</td><td>"This is the confidence panel of Fig. 4" (§4)</td><td>2512, Fig. 4 text and legend: confidence is the negative entropy of the policy posterior, not \(\gamma\)</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>20</td><td>Dream‑prior table (§5): all 15 numbers</td><td>Recomputed: every mean, \(e^{\mathbb E\ln\theta}\) and novelty matches to 3 decimals</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>21</td><td>BMR formula (§6)</td><td>Agrees with directly computed Dirichlet–multinomial evidence to 4 decimals in 2 cases. Sign is opposite to RGM Eq. 8; now stated</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>22</td><td>Clone and context are BMR hypotheses (§6)</td><td>Tying columns is a merge, not a reduced Dirichlet prior. Maps have different state spaces</td><td><span class="tag fix">fixed</span>: merge evidence; summed \(F\)</td></tr>
+<tr><td>23</td><td>Model IG weighted by the full model's \(\bar\theta\) (§6)</td><td>2512 Eq. 11: predictive posterior under the model average</td><td><span class="tag fix">fixed</span></td></tr>
+<tr><td>24</td><td>16 nats; 19.4 vs 28.5 trials; 150 vs 89; "about half" undiscovered</td><td>2512 Eqs. 12–13 and the Fig. 4–7 text: all confirmed (89.2 exactly; all‑IG‑off score 51; one premature commitment)</td><td><span class="tag ok">holds</span>, with details added</td></tr>
+<tr><td>25</td><td>Model growth: log odds \(=\Delta F+\Delta G>0\)</td><td>RGM Eq. 9</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>26</td><td>Reflex as precision‑weighted error; RGM "predict and the reflex fulfils"</td><td>RGM, "planning as inference" section: predictions are realised by reflexes</td><td><span class="tag ok">holds</span></td></tr>
+<tr><td>27</td><td>"Full active inference" = one \(G\) for everything</td><td>Millidge et al. 2021: \(G\) is a choice of objective, not a theorem. Added as a risk</td><td><span class="tag word">reworded</span></td></tr>
+</tbody></table></div>
+<div class="col">
+<p><strong>Net result.</strong> The architecture survives: Gaussian places on the JEPA latent, Dirichlet landing counts, dreams as prior mass, one \(G\), BMR in sleep. Every number quoted from the papers and the repo is correct. The errors were in the choice machinery: the ambiguity units, novelty and model IG counted at every depth, and two hypotheses filed under BMR. These would have shown up as an agent dominated by place size, or one that over‑explores, rather than as crashes. Not checked: whether places are Gaussian in your release \(z_3\). That is an experiment, the first item under "What could make this wrong". I also did not check the AdaJEPA, JEPA‑TTT and OpTTA references in §7, which come from your notes.</p>
+</div>
+
+<h2>Sources</h2>
+<ol class="refs col">
+<li>M. Ren, Y. Wang, C. Hoang, Y. Kuang, Y. LeCun. <em>The Content–Geometry Tradeoff in World Models: When JEPA Learns Latent Maps.</em> AGL‑TR‑2026‑04. Theorem 2.1, SVReg (Eq. 1), slowness (Eq. 2), gated residual predictor (Eq. 3), jaggedness (Eq. 4), Tables 1–2.</li>
+<li>K. Friston et al. <em>From pixels to planning: scale‑free active inference</em> (Renormalising generative models). arXiv:2407.20292. Generative model (Fig. 1), EFE (Eq. 2), active learning (Eqs. 5–7), BMR (Eq. 8), model growth (Eq. 9), inductive planning (Figs. 26–27).</li>
+<li>K. Friston, L. Da Costa, A. Tschantz, C. Heins, C. Buckley, T. Verbelen, T. Parr. <em>Active inference and artificial reasoning.</em> arXiv:2512.21129. Expected information gain over models (Eqs. 10–11), Occam's razor (Eqs. 12–13), contribution analyses (Figs. 6–7).</li>
+<li>Your repo: <code>docs/DESIGN_ANIMAL.md</code> (R1–R9, C1–C7), <code>docs/DESIGN_ACTION_BUNDLE.md</code> (log‑signature moves, BCH), <code>docs/NOTES_2026-11-26.md</code> (E0b geometry numbers), <code>system2/rgm_curious.py</code> (<code>decide</code>, <code>reach_prob</code>, <code>info_value</code>).</li>
+<li>K. Friston, L. Da Costa, D. Hafner, C. Hesp, T. Parr. <em>Sophisticated inference.</em> Neural Computation 33(3):713–763, 2021. Recursive \(G\) over belief states; Bayes‑adaptive RL as a limit.</li>
+<li>R. Hodson, B. Bassett, C. van Hoof, B. Rosman, M. Solms, J. Shock, R. Smith. <em>Planning to learn / Sophisticated learning.</em> arXiv:2308.08029, 2023 (v2 2025). Parameter updates inside each simulated branch.</li>
+<li>K. Friston et al. <em>Active inference and intentional behaviour.</em> Neural Computation 37(4):666–700, 2025 (arXiv:2312.07547). Inductive planning by backward induction.</li>
+<li>L. Da Costa, T. Parr, N. Sajid, S. Veselic, V. Neacsu, K. Friston. <em>Active inference on discrete state‑spaces: a synthesis.</em> J. Math. Psychol. 99:102447, 2020. The decompositions of \(G\).</li>
+<li>K. Friston, T. FitzGerald, F. Rigoli, P. Schwartenbeck, G. Pezzulo. <em>Active inference: a process theory.</em> Neural Computation 29(1), 2017. Precision updates; mean‑field count updates.</li>
+<li>C. Hesp, R. Smith, T. Parr, M. Allen, K. Friston, M. Ramstead. <em>Deeply felt affect.</em> Neural Computation 33(2):398–446, 2021. The update of \(\gamma\) as affective charge.</li>
+<li>P. Schwartenbeck et al. <em>Computational mechanisms of curiosity and goal‑directed exploration.</em> eLife 8:e41703, 2019. State exploration vs parameter exploration.</li>
+<li>B. Millidge, A. Tschantz, C. Buckley. <em>Whence the expected free energy?</em> Neural Computation 33(2):447–482, 2021. Where \(G\) comes from, and its limits.</li>
+<li>F. Creutzig, H. Sprekeler. <em>Predictive coding and the slowness principle.</em> Neural Computation 20(4):1026–1041, 2008. Slowness and predictive information for linear‑Gaussian inputs.</li>
+<li>E. Littwin et al. <em>How JEPA avoids noisy features.</em> NeurIPS 2024 (arXiv:2407.03475). Deep linear JEPAs prefer high‑influence features.</li>
+<li>R. Balestriero, Y. LeCun. <em>LeJEPA.</em> arXiv:2511.08544, 2025. SIGReg, the sliced Gaussian regulariser behind your SIGReg‑BN.</li>
+<li>R. Neal. <em>Markov chain sampling methods for Dirichlet process mixture models.</em> JCGS 9(2), 2000. The CRP rule for new places. Also: D. George et al., <em>Clone‑structured cognitive graphs</em>, Nature Communications 2021; D. de Tinguy, T. Verbelen, B. Dhoedt, <em>Learning dynamic cognitive map with autonomous navigation</em>, Frontiers in Computational Neuroscience 2024 (an active‑inference map that grows online); S. Levine, <em>RL and control as probabilistic inference</em>, arXiv:1805.00909, 2018.</li>
+</ol>
+</main>
